@@ -5,22 +5,12 @@ Keypad::Keypad(const char * name, int taskCore) : Module(name, taskCore) {
 }
 
 void Keypad::connect(void * data) {
-    Serial.println("try Begin Keypad.");
-    Wire.begin();
-    Serial.println("tried Begin Keypad.");
-    if (!pcf8574.begin(PCF8574_ADDR, &Wire)) {
-        Serial.println("Error: No se encontró el PCF8574.");
-    }
-
-    // Configurar filas como salidas y ponerlas en HIGH
+    pcf = new PCF8574(0x27,static_cast<TwoWire*>(data));
+    pcf->begin();
+    // Configurar pines del PCF8574
     for (uint8_t i = 0; i < 4; i++) {
-        pcf8574.pinMode(rowPins[i], OUTPUT);
-        pcf8574.digitalWrite(rowPins[i], HIGH);
-    }
-
-    // Configurar columnas como entradas con pull-up
-    for (uint8_t i = 0; i < 4; i++) {
-        pcf8574.pinMode(colPins[i], INPUT_PULLUP);
+        pcf->write(rowPins[i], OUTPUT);
+        pcf->write(colPins[i], INPUT_PULLUP);
     }
 }
 
@@ -35,7 +25,7 @@ void Keypad::run(void* data) {
         if (currentMillis - lastScanTime >= SCAN_INTERVAL) {
             lastScanTime = currentMillis;  // Actualizar tiempo
 
-            char key = this->scanKeypad();  // Escanear el teclado
+            char key = this->getKey();  // Escanear el teclado
 
             if (key != 0) {
                 Serial.println("key pressed");
@@ -46,20 +36,21 @@ void Keypad::run(void* data) {
 }
 
 
-// Función para escanear el teclado 4x4
-char Keypad::scanKeypad() {
+char Keypad::getKey() {
     for (uint8_t row = 0; row < 4; row++) {
-        this->pcf8574.digitalWrite(this->rowPins[row], LOW);  // Activar fila
+        // Activar una fila en LOW
+        for (uint8_t i = 0; i < 4; i++) {
+            pcf->write(rowPins[i], HIGH);
+        }
+        pcf->write(rowPins[row], LOW);
 
+        // Leer columnas
         for (uint8_t col = 0; col < 4; col++) {
-            if (this->pcf8574.digitalRead(this->colPins[col]) == LOW) {  // Si se detecta una tecla presionada
-                while (pcf8574.digitalRead(this->colPins[col]) == LOW);  // Esperar a que se suelte la tecla
-                pcf8574.digitalWrite(this->rowPins[row], HIGH);  // Restaurar la fila a HIGH
-                return keymap[row][col];  // Retornar la tecla detectada
+            if (pcf->read(colPins[col]) == LOW) {
+                while (pcf->read(colPins[col]) == LOW); // Esperar soltar tecla
+                return keys[row][col]; // Retornar tecla presionada
             }
         }
-
-        this->pcf8574.digitalWrite(this->rowPins[row], HIGH);  // Restaurar la fila
     }
-    return 0;  // No se presionó ninguna tecla
+    return '\0'; // No hay tecla presionada
 }
