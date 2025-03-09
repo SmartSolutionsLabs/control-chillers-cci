@@ -15,8 +15,9 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 	this->modulesPointer[0]->connect(nullptr);
 	this->modulesPointer[0]->start();
 
+	Serial.println("before keypad");
 	this->modulesPointer[1] = new Keypad("keypad");
-	this->modulesPointer[1]->connect(nullptr);
+	this->modulesPointer[1]->connect(&Wire);
 	static_cast<Keypad*>(this->modulesPointer[1])->setControl(static_cast<Control*>(this->modulesPointer[0])); //cochina zoo
 	this->modulesPointer[1]->start();
 
@@ -42,6 +43,7 @@ SmartBoard * smartboard;
 
 void setup() {
 	Serial.begin(115200);
+	Wire.begin();
 	smartboard = new SmartBoard();
 	//smartboard->beginSerialPort(Serial2);
 	smartboard->initializeModulesPointerArray(6);
