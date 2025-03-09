@@ -16,5 +16,7 @@ void Control::run(void* data) {
 }
 
 void Control::handleKey(char key) {
-	Serial.printf("key pressed: %c \n",key);
+	char msg[32];  // Buffer donde sprintf almacenará la cadena
+    sprintf(msg, "key pressed: %c", key);
+	this->lcd->print(40,40,msg);
 }

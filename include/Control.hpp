@@ -25,6 +25,10 @@ class Control : public Module {
 
 		void handleKey(char key);
 
+		void setGraphicLCD(GraphicLCD * newlcd){
+			lcd = newlcd;
+		};
+
 };
 
 #endif

@@ -15,27 +15,31 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 	this->modulesPointer[0]->connect(nullptr);
 	this->modulesPointer[0]->start();
 
-	Serial.println("before keypad");
 	this->modulesPointer[1] = new Keypad("keypad");
 	this->modulesPointer[1]->connect(&Wire);
 	static_cast<Keypad*>(this->modulesPointer[1])->setControl(static_cast<Control*>(this->modulesPointer[0])); //cochina zoo
 	this->modulesPointer[1]->start();
 
-	this->modulesPointer[2] = new Chiller("chiller1");
+	this->modulesPointer[2] = new GraphicLCD("lcd");
+	static_cast<Control*>(this->modulesPointer[0])->setGraphicLCD(static_cast<GraphicLCD*>(this->modulesPointer[2])); //cochina zoo
 	this->modulesPointer[2]->connect(nullptr);
 	this->modulesPointer[2]->start();
 
-	this->modulesPointer[3] = new Chiller("chiller2");
+	this->modulesPointer[3] = new Chiller("chiller1");
 	this->modulesPointer[3]->connect(nullptr);
 	this->modulesPointer[3]->start();
 
-	this->modulesPointer[4] = new Pump("pump1");
+	this->modulesPointer[4] = new Chiller("chiller2");
 	this->modulesPointer[4]->connect(nullptr);
 	this->modulesPointer[4]->start();
 
-	this->modulesPointer[5] = new Pump("pump2");
+	this->modulesPointer[5] = new Pump("pump1");
 	this->modulesPointer[5]->connect(nullptr);
 	this->modulesPointer[5]->start();
+
+	this->modulesPointer[6] = new Pump("pump2");
+	this->modulesPointer[6]->connect(nullptr);
+	this->modulesPointer[6]->start();
 
 }
 
@@ -46,7 +50,7 @@ void setup() {
 	Wire.begin();
 	smartboard = new SmartBoard();
 	//smartboard->beginSerialPort(Serial2);
-	smartboard->initializeModulesPointerArray(6);
+	smartboard->initializeModulesPointerArray(7);
 }
 
 void loop() {

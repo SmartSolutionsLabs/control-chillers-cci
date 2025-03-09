@@ -28,7 +28,6 @@ void Keypad::run(void* data) {
             char key = this->getKey();  // Escanear el teclado
 
             if (key != 0) {
-                Serial.println("key pressed");
                 control->handleKey(key);
             }
         }
