@@ -24,7 +24,16 @@ void Control::handleKey(char key) {
 			this->lcd->splashScreen();
 			break;
 		case 'A':
-			this->lcd->print(20,40,msg);
+			this->lcd->drawPage(0);
+			break;
+		case 'B':
+			this->lcd->drawPage(1);
+			break;
+		case 'C':
+			this->lcd->drawPage(2);
+			break;
+		case 'D':
+			this->lcd->drawPage(3);
 			break;
 		}
 }
