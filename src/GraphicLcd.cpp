@@ -19,7 +19,6 @@ void GraphicLCD::run(void* data) {
 
 	while (1) {
 		vTaskDelay(this->iterationDelay);
-        Serial.println(this->name);
         //this->testprint();
 	}
 }
@@ -30,3 +29,26 @@ void GraphicLCD::print(int x, int y, char *text){
     this->u8g2->print(text);
     this->u8g2->sendBuffer();
 }
+
+void GraphicLCD::splashScreen(){
+    this->u8g2->clearBuffer();
+    this->drawImage(17,5, IMAGE_SSL_LOGO_DATA);
+    this->u8g2->sendBuffer();
+}
+
+
+void GraphicLCD::drawImage(int xPos, int yPos, const Bitmap &image) {
+    uint8_t bytesPerRow = (image.width + 7) / 8; // Bytes por fila
+
+    for (uint8_t y = 0; y < image.height; y++) {
+        for (uint8_t x = 0; x < image.width; x++) {
+            uint16_t byteIndex = y * bytesPerRow + (x / 8);
+            uint8_t bitMask = 1 << (7 - (x % 8));
+
+            if (image.data[byteIndex] & bitMask) {
+                this->u8g2->drawPixel(xPos + x, yPos + y);
+            }
+        }
+    }
+}
+
