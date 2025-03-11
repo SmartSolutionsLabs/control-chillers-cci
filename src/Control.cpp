@@ -18,22 +18,59 @@ void Control::run(void* data) {
 void Control::handleKey(char key) {
 	char msg[32];  // Buffer donde sprintf almacenará la cadena
     sprintf(msg, "key pressed: %c", key);
-	
+	this->lcd->setProgressBarPercentage(0,0);
+	this->lcd->setProgressBarPercentage(1,0);
 	switch (key){
 		case '*':
-			this->lcd->splashScreen();
+			//this->lcd->splashScreen();
 			break;
 		case 'A':
-			this->lcd->drawPage(0);
+			this->lcd->nextScreen();
+			newScreen = this->lcd->getScreen();
 			break;
 		case 'B':
-			this->lcd->drawPage(1);
+			this->lcd->previousScreen();
+			newScreen = this->lcd->getScreen();
 			break;
 		case 'C':
-			this->lcd->drawPage(2);
 			break;
 		case 'D':
-			this->lcd->drawPage(3);
+			if(newScreen == CONFIG){
+
+			}
+			else if(newScreen == MANUAL){
+
+			}
+			break;
+		case '1':
+			this->lcd->setProgressBarValue(0,1);
+			break;
+		case '2':
+			this->lcd->setProgressBarValue(0,2);
+			break;
+		case '3':
+			this->lcd->setProgressBarValue(0,3);
+			break;
+		case '4':
+			this->lcd->setProgressBarValue(0,4);
+			break;
+		case '5':
+			this->lcd->setProgressBarValue(0,5);
+			break;
+		case '6':
+			this->lcd->setProgressBarValue(0,6);
+			break;
+		case '7':
+			this->lcd->setProgressBarValue(0,7);
+			break;
+		case '8':
+			this->lcd->setProgressBarValue(0,8);
+			break;
+		case '9':
+			this->lcd->setProgressBarValue(0,9);
+			break;
+		case '0':
+			this->lcd->setProgressBarValue(0,0);
 			break;
 		}
 }

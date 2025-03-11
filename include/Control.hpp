@@ -16,6 +16,7 @@ class Control : public Module {
 
 		GraphicLCD *lcd;
 
+		Screen newScreen = HOME;
 	public:
 		Control(const char * name, int taskCore = 1);
 

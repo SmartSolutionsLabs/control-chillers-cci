@@ -18,6 +18,14 @@ extern const Bitmap ICON_LOG_SELECT_DATA;
 // ICON MOTOR
 extern const Bitmap ICON_MOTOR_RUN_DATA;
 extern const Bitmap ICON_MOTOR_STOP_DATA;
+extern const Bitmap ICON_MOTOR_FAN_0_DATA;
+extern const Bitmap ICON_MOTOR_FAN_1_DATA;
 
+extern const Bitmap ICON_CHILLER_0_DATA;
+extern const Bitmap ICON_FAN_11_11_DATA;
 
+extern const Bitmap ICON_MOTOR_DATA;
+
+extern const Bitmap ICON_PROGRESS_BAR_DATA;
+extern const Bitmap ICON_CHILLER_DATA;
 #endif // SCREENS_HPP
