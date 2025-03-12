@@ -5,16 +5,29 @@ GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore)
 
 void GraphicLCD::connect(void * data) {
     this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 27, 26, 25, 14);
-    motorIcon[0].number = 1;
-    motorIcon[0].run = true;
-    motorIcon[0].state = false;
-    motorIcon[0].updateTimer = 250;
-    motorIcon[0].timer = millis();
-    motorIcon[1].number = 2;
-    motorIcon[1].run = true;
-    motorIcon[1].state = true;
-    motorIcon[1].updateTimer = 250;
-    motorIcon[1].timer = millis();
+    this->motorIcon = new MotorGraphicLCD[2];
+    this->progressBar = new progressBarLCD[2];
+
+    for (int i = 0; i < 2; i++) {
+        motorIcon[i]   = MotorGraphicLCD(u8g2);
+        progressBar[i] = progressBarLCD(u8g2);
+    }
+
+    for(int i=0 ;i<2;i++){
+        motorIcon[i].setID(i+1);
+        motorIcon[i].setRun(true) ;
+        motorIcon[i].setState(false);
+        motorIcon[i].setUpdateTimer(250);
+        motorIcon[i].setTimer(millis());
+
+        progressBar[i].setID(i+1);
+        progressBar[i].setRun(false) ;
+        progressBar[i].setState(false);
+        progressBar[i].setUpdateTimer(250);
+        progressBar[i].setTimer(millis());
+        progressBar[i].setValue(0);
+        progressBar[i].setPercentage(0);
+    }
     chillerIcon[0].number = 1;
     chillerIcon[0].run = true;
     chillerIcon[0].state = 1;
@@ -26,10 +39,6 @@ void GraphicLCD::connect(void * data) {
     chillerIcon[1].updateTimer = 1;
     chillerIcon[1].timer = millis();
 
-    progressBar[0].value = 0;
-    progressBar[0].percentage = 0;
-    progressBar[1].value = 0;
-    progressBar[1].percentage = 0;
 
     if (!this->u8g2->begin()) {
         Serial.println("Display initialization failed!");
@@ -45,18 +54,21 @@ void GraphicLCD::run(void* data) {
     this->screenTimer = millis();
     this->splashScreen();
     vTaskDelay(splashScreenTimer/portTICK_PERIOD_MS);
+    this->u8g2->clearBuffer();
 	while (1) {
 		vTaskDelay(this->iterationDelay);
-        this->updateIcons();
-        //this->testprint();
+        if(newScreen){
+            newScreen = false;
+        }//this->testprint();
+        else{
+            this->update();
+        }
 	}
 }
 
 void GraphicLCD::print(int x, int y, char *text){
-    this->u8g2->clearBuffer();
     this->u8g2->setCursor(x,y); 
     this->u8g2->print(text);
-    this->u8g2->sendBuffer();
 }
 
 void GraphicLCD::splashScreen(){
@@ -66,7 +78,6 @@ void GraphicLCD::splashScreen(){
 }
 
 void GraphicLCD::drawPage(uint8_t page){
-    this->u8g2->clearBuffer();
     this->u8g2->drawLine(16, 0, 16, 64);
     this->u8g2->drawLine(0, 16, 16, 16);
     this->u8g2->drawLine(0, 32, 16, 32);
@@ -107,72 +118,28 @@ void GraphicLCD::drawPage(uint8_t page){
 void GraphicLCD::drawHomePage(){
     this->drawPage(0);
     this->drawBoxes();
-    if(this->screenTimer - this->motorIcon[0].timer > this->motorIcon[0].updateTimer) {
-        this->motorIcon[0].timer = this->screenTimer;
-        if(this->motorIcon[0].run == true){
-            motorIcon[0].state = !motorIcon[0].state;
-            Serial.printf("Motor running state : %d \n" ,motorIcon[0].state);
-        }
-        //MOTOR 1
-        if(motorIcon[0].state == false){
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawBox(36,4,21,21);
-            this->u8g2->setDrawColor(1);
-            this->drawImage(36,4,ICON_MOTOR_DATA);
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawDisc(44, 13, 6);
-            this->u8g2->setDrawColor(1);
-            this->drawRotatedImage(36,5,ICON_FAN_11_11_DATA,0);
-        }
-        else{
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawBox(36,4,21,21);
-            this->u8g2->setDrawColor(1);
-            this->drawImage(36,4,ICON_MOTOR_DATA);
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawDisc(44, 13, 6);
-            this->u8g2->setDrawColor(1);
-            this->drawRotatedImage(36,5,ICON_FAN_11_11_DATA,45);
-        }
-        this->drawProgressBar(0,64,5,ICON_PROGRESS_BAR_DATA);
-        this->drawImage(90,5,ICON_CHILLER_DATA);
-    }
-    
-    if(this->screenTimer - this->motorIcon[1].timer > this->motorIcon[1].updateTimer) {
-        this->motorIcon[1].timer = this->screenTimer;
-        if(this->motorIcon[1].run == true){
-            motorIcon[1].state = !motorIcon[1].state;
-            Serial.printf("Motor running state : %d \n" ,motorIcon[1].state);
-        }
+    motorIcon[0].setPosition(33,5);
+    motorIcon[0].showIcon();
+    motorIcon[0].hideLabelState();
+    motorIcon[0].animate(millis());
 
-        else{
-            motorIcon[1].state = false;
-        }
-        //MOTOR 2
-        if(motorIcon[1].state == false){
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawBox(36,38,21,21);
-            this->u8g2->setDrawColor(1);
-            this->drawImage(36,38,ICON_MOTOR_DATA);
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawDisc(44, 47, 6);
-            this->u8g2->setDrawColor(1);
-            this->drawRotatedImage(36,39,ICON_FAN_11_11_DATA,0);
-        }
-        else{
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawBox(36,38,21,21);
-            this->u8g2->setDrawColor(1);
-            this->drawImage(36,38,ICON_MOTOR_DATA);
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawDisc(44, 47, 6);
-            this->u8g2->setDrawColor(1);
-            this->drawRotatedImage(36,39,ICON_FAN_11_11_DATA,45);
-        }
-        this->drawProgressBar(1,64,38,ICON_PROGRESS_BAR_DATA);
-        this->drawImage(90,38,ICON_CHILLER_DATA);
-        this->u8g2->sendBuffer();
-    }
+    progressBar[0].setPosition(62,5);
+    progressBar[0].showIcon();
+    progressBar[0].showLabelState();
+    progressBar[0].animate(millis());
+    this->drawImage(90,5,ICON_CHILLER_DATA);
+    
+    
+    motorIcon[1].setPosition(33,37);
+    motorIcon[1].showIcon();
+    motorIcon[1].hideLabelState();
+    motorIcon[1].animate(millis());
+
+    progressBar[1].setPosition(62,37);
+    progressBar[1].showIcon();
+    progressBar[1].showLabelState();
+    progressBar[1].animate(millis());
+    this->drawImage(90,37,ICON_CHILLER_DATA);
     // CHILLER 1
     this->u8g2->sendBuffer();
     //motorIcon 1
@@ -184,42 +151,33 @@ void GraphicLCD::drawConfigPage(){
     strcpy(text, "12345"); 
     
     this->u8g2->setFont(u8g2_font_6x10_tf);
-    this->u8g2->drawStr(40,12, "CHILLER 1");
+    this->u8g2->drawStr(42,12, "CHILLER 1");
     this->u8g2->drawStr(30,25, "DELAY=");
     this->textInput(70,15,35,text);
 
     this->u8g2->setFont(u8g2_font_6x10_tf);
-    this->u8g2->drawStr(40,44, "CHILLER 2");
+    this->u8g2->drawStr(42,44, "CHILLER 2");
     this->u8g2->drawStr(30,57, "DELAY=");
     this->textInput(70,47,35,text);
 
-    uint8_t dy = 32;
-    this->u8g2->drawLine(18, 2, 126, 2);
-    this->u8g2->drawLine(18, 30, 126, 30);
-    this->u8g2->drawLine(18, 2, 18, 30);
-    this->u8g2->drawLine(126, 2, 126, 30);
-
-    this->u8g2->drawLine(18, 2+dy , 126, 2 +dy);
-    this->u8g2->drawLine(18, 30+dy, 126, 30+dy);
-    this->u8g2->drawLine(18, 2+dy , 18 , 30+dy);
-    this->u8g2->drawLine(126,2+dy , 126, 30+dy);
-
+    this->drawBoxes();
     this->u8g2->sendBuffer();
 }
 
 void GraphicLCD::drawManualPage(){
     this->drawPage(2);
-    uint8_t dy = 32;
-    this->u8g2->drawLine(18, 2, 126, 2);
-    this->u8g2->drawLine(18, 30, 126, 30);
-    this->u8g2->drawLine(18, 2, 18, 30);
-    this->u8g2->drawLine(126, 2, 126, 30);
+    this->drawBoxes();
 
-    this->u8g2->drawLine(18, 2+dy , 126, 2 +dy);
-    this->u8g2->drawLine(18, 30+dy, 126, 30+dy);
-    this->u8g2->drawLine(18, 2+dy , 18 , 30+dy);
-    this->u8g2->drawLine(126,2+dy , 126, 30+dy);
-    
+    motorIcon[0].setPosition(33,5);
+    motorIcon[0].showIcon();
+    motorIcon[0].showLabelState();
+    motorIcon[0].animate(millis());
+
+    motorIcon[1].setPosition(33,37);
+    motorIcon[1].showIcon();
+    motorIcon[1].showLabelState();
+    motorIcon[1].animate(millis());
+
     this->u8g2->sendBuffer();
 }
 void GraphicLCD::drawLogPage(){
@@ -228,14 +186,15 @@ void GraphicLCD::drawLogPage(){
 }
 
 void GraphicLCD::setMotorState(uint8_t motorNumber , bool state){
-    this->motorIcon[motorNumber].state = state;
+    this->motorIcon[motorNumber].setState(state);
 }
 
 void GraphicLCD::setChillerState(uint8_t chillerNumber , bool state){
     this->chillerIcon[chillerNumber].state = state;
 }
-void GraphicLCD::updateIcons(){
+void GraphicLCD::update(){
     this->screenTimer = millis();
+    this->u8g2->clearBuffer();
     switch(currentScreen){
         case HOME:
             this->drawHomePage();
@@ -250,22 +209,10 @@ void GraphicLCD::updateIcons(){
             this->drawLogPage();
             break;
     }
+    this->u8g2->sendBuffer();
 }
 
-void GraphicLCD::drawProgressBar(uint8_t number , uint8_t posX , uint8_t posY, const Bitmap &image){
-    this->drawImage(posX,posY,image);
-    uint16_t cicles = this->progressBar[number].percentage / 5 ;
-    for(int i= 0; i< cicles ;i++){
-        this->u8g2->drawLine(posX + i, posY +1 , posX + i , posY + 3);
-    }
-    this->u8g2->setFont(u8g2_font_ncenB08_tr);  // Selecciona una fuente
 
-    char buffer[10];  
-    itoa(this->progressBar[number].value, buffer, 10);  // Convierte el número a cadena en base 10
-    this->u8g2->drawStr(posX + 8 , posY + 17 , buffer );  // Dibuja texto en (10,20)
-
-    //this->u8g2->drawSTR;
-}
 void GraphicLCD::drawRotatedImage(int xPos, int yPos, const Bitmap &image, float angle) {
     float radians = angle * M_PI / 180.0;
     float cosA = cos(radians);
@@ -320,14 +267,15 @@ void GraphicLCD::drawImage(int xPos, int yPos, const Bitmap &image) {
 
 void GraphicLCD::setScreen(Screen newScreen){
     this->currentScreen = newScreen;
+    this->setNewScreen();
 }
 
 void GraphicLCD::setProgressBarValue(uint8_t index ,uint16_t newValue){
-    this->progressBar[index].value = newValue;
+    this->progressBar[index].setValue(newValue);
 }
 
 void GraphicLCD::setProgressBarPercentage(uint8_t index ,uint8_t newPercentage){
-    this->progressBar[index].percentage = newPercentage;
+    this->progressBar[index].setPercentage(newPercentage);
 }
 
 void GraphicLCD::nextScreen(){
@@ -381,12 +329,15 @@ void GraphicLCD::drawBoxes(){
     this->u8g2->drawLine(18, 2+dy , 18 , 30+dy);
     this->u8g2->drawLine(126,2+dy , 126, 30+dy);
 
-    this->u8g2->drawStr(20,21,"1");
-    this->u8g2->drawStr(20,53,"2");
+    this->u8g2->drawStr(19,22   , "1");
+    this->u8g2->drawStr(19,22+dy, "2");
+
+    this->u8g2->drawLine(29,  2    , 29 ,29);
+    this->u8g2->drawLine(29,  2+dy , 29, 29 +dy);
+
 }
 
 void GraphicLCD::textInput(uint8_t posX , uint8_t posY, uint8_t size, char *text){
-    
     char buffer[20];
     strncpy(buffer, text, sizeof(buffer) - 1);
     buffer[sizeof(buffer) - 1] = '\0';
@@ -396,6 +347,17 @@ void GraphicLCD::textInput(uint8_t posX , uint8_t posY, uint8_t size, char *text
     this->u8g2->drawBox(posX+1,posY+1,size - 2, 11  );
     this->u8g2->setDrawColor(1);
     this->u8g2->setFont(u8g2_font_6x10_tf);
-    this->u8g2->drawStr(posX + 2 ,posY + 10 , buffer);
-    
+    this->u8g2->drawStr(posX + 2 ,posY + 10 , buffer);   
+}
+
+void GraphicLCD::drawCenteredText(int xCenter, int yCenter, const char *text) {
+    int textWidth = this->u8g2->getStrWidth(text);
+    int textHeight = this->u8g2->getMaxCharHeight();
+    int xPos = xCenter - (textWidth  / 2);  // Centra el texto
+    int yPos = yCenter + (textHeight / 2) -1;  // Centra el texto
+    this->u8g2->drawStr(xPos, yPos, text);
+}
+
+void GraphicLCD::setNewScreen(){
+    this->newScreen = true;
 }

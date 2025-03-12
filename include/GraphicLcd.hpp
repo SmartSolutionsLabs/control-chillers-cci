@@ -4,14 +4,8 @@
 #include <Module.hpp>
 #include <U8g2lib.h>
 #include "Screens.hpp"
-
-struct MotorIcon {
-    uint8_t number;
-    bool state;
-	bool run;
-	uint32_t updateTimer;
-	uint32_t timer;
-};
+#include "MotorGraphicLcd.hpp"
+#include "progressBarLCD.hpp"
 
 struct ChillerIcon {
     uint8_t number;
@@ -38,7 +32,9 @@ class GraphicLCD : public Module {
 	private:
         U8G2_ST7920_128X64_F_SW_SPI *u8g2; //(U8G2_R0, 27, 26, 25, 14);
 
-		MotorIcon motorIcon[2];
+		MotorGraphicLCD *motorIcon;
+
+		progressBarLCD *progressBar;
 
 		ChillerIcon chillerIcon[2];
 
@@ -48,7 +44,7 @@ class GraphicLCD : public Module {
 		
 		Screen currentScreen = HOME;
 
-		ProgressBarIcon progressBar[2];
+		bool newScreen;
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
 
@@ -78,7 +74,7 @@ class GraphicLCD : public Module {
 
 		void drawLogPage();
 
-		void updateIcons();
+		void update();
 
 		void drawRotatedImage(int xPos, int yPos, const Bitmap &image, float angle);
 
@@ -99,6 +95,10 @@ class GraphicLCD : public Module {
 		void drawBoxes();
 
 		void textInput(uint8_t posX , uint8_t posY, uint8_t size, char *text);
+
+		void drawCenteredText(int xCenter, int y, const char *text);
+
+		void setNewScreen();
 	};
 
 #endif
