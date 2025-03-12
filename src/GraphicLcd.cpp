@@ -20,13 +20,13 @@ void GraphicLCD::connect(void * data) {
         motorIcon[i].setID(i+1);
         motorIcon[i].setRun(true) ;
         motorIcon[i].setState(false);
-        motorIcon[i].setUpdateTimer(250);
+        motorIcon[i].setUpdateTimer(200);
         motorIcon[i].setTimer(millis());
 
         progressBar[i].setID(i+1);
         progressBar[i].setRun(false) ;
         progressBar[i].setState(false);
-        progressBar[i].setUpdateTimer(250);
+        progressBar[i].setUpdateTimer(200);
         progressBar[i].setTimer(millis());
         progressBar[i].setValue(0);
         progressBar[i].setPercentage(0);

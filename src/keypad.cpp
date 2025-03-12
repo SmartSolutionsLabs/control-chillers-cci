@@ -59,6 +59,9 @@ void Keypad::run(void* data) {
                     else if (i == 9) {
                         this->control->handleKey('B');
                     }
+                    else if (i == 10) {
+                        this->control->handleKey('*');
+                    }
                     Serial.printf("| IO%d FALLING EDGE DETECTED!\n", i);
                 }
 

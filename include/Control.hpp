@@ -17,6 +17,13 @@ class Control : public Module {
 		GraphicLCD *lcd;
 
 		Screen newScreen = HOME;
+
+		bool enter;
+
+		uint8_t option;
+
+		bool ScreenSelected;
+		bool optionSelected;
 	public:
 		Control(const char * name, int taskCore = 1);
 
