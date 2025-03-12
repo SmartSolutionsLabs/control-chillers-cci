@@ -4,7 +4,10 @@ GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore)
 }
 
 void GraphicLCD::connect(void * data) {
-    this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 27, 26, 25, 14);
+    //this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 27, 26, 25, 14); // esp32 
+    this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 47, 21, 14, 38); // smart board R8-AI8-DI8
+    pinMode(48,OUTPUT);
+    digitalWrite(48,LOW);
     this->motorIcon = new MotorGraphicLCD[2];
     this->progressBar = new progressBarLCD[2];
 

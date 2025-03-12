@@ -47,7 +47,7 @@ SmartBoard * smartboard;
 
 void setup() {
 	Serial.begin(115200);
-	Wire.begin();
+	Wire.begin(5,4);
 	smartboard = new SmartBoard();
 	//smartboard->beginSerialPort(Serial2);
 	smartboard->initializeModulesPointerArray(7);

@@ -22,6 +22,9 @@ private:
     };
     unsigned long lastScanTime = 0;  // Variable para el control de tiempo
 
+    bool enter;
+    uint8_t option;
+    
 public:
     Keypad(const char * name, int taskCore = 1);
     void connect(void* data);
@@ -30,6 +33,13 @@ public:
     void setControl(Control * newControl){
         control = newControl;
     };
+
+    void writeRegister(uint8_t reg, uint8_t value);
+    
+    // Función para leer un registro del MCP23017
+    uint8_t readRegister(uint8_t reg);
+    
+    bool leerPin(uint8_t pin);
 };
 
 #endif
