@@ -2,10 +2,13 @@
 #define _INC_PROGRESSBAR_
 #include <U8g2lib.h>
 #include "Screens.hpp"
+#include "textInputLCD.hpp"
 
 class progressBarLCD {
     private:
         U8G2_ST7920_128X64_F_SW_SPI *u8g2;
+
+        textInputLCD *textInputDelay;
 
         uint8_t ID;
         
@@ -22,6 +25,8 @@ class progressBarLCD {
         uint8_t xPosition,yPosition;
 
         uint16_t value,percentage;
+
+        uint8_t counter;
 
     public:
 
@@ -47,6 +52,9 @@ class progressBarLCD {
         void setValue(uint8_t newValue);
         uint8_t getValue();
 
+        void setCounter(uint8_t newCounter);
+        uint8_t getCounter();
+
         void setPercentage(uint8_t newPercentage);
         uint8_t getPercentage();
 
@@ -70,6 +78,13 @@ class progressBarLCD {
 
         void setPosition(uint8_t xpos , uint8_t ypos);
         void show();
+
+        void drawTextInput(bool show);
+        void showTextInput();
+        void hideTextInput();
+        void showLabelInput();
+        void hideLabelInput();
+    
 };
 
 #endif

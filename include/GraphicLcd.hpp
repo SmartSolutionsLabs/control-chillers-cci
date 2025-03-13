@@ -6,6 +6,7 @@
 #include "Screens.hpp"
 #include "MotorGraphicLcd.hpp"
 #include "progressBarLCD.hpp"
+#include "textInputLCD.hpp"
 
 struct ChillerIcon {
     uint8_t number;
@@ -42,7 +43,7 @@ class GraphicLCD : public Module {
 
 		uint32_t screenTimer;
 		
-		Screen currentScreen = HOME;
+		Screen currentScreen = HOME; // memoria cache
 
 		bool newScreen;
 	public:
@@ -60,7 +61,7 @@ class GraphicLCD : public Module {
 
 		void drawImage(int xPos, int yPos, const Bitmap &image);
 
-		void drawPage(uint8_t page);
+		void drawMenu();
 
 		void setMotorState(uint8_t motorNumber , bool state);
 
@@ -86,12 +87,6 @@ class GraphicLCD : public Module {
 
 		void drawProgressBar(uint8_t number , uint8_t posX , uint8_t posY, const Bitmap &image);
 
-		void nextScreen();
-
-		void previousScreen();
-
-		Screen getScreen();
-
 		void drawBoxes();
 
 		void textInput(uint8_t posX , uint8_t posY, uint8_t size, char *text);
@@ -99,6 +94,11 @@ class GraphicLCD : public Module {
 		void drawCenteredText(int xCenter, int y, const char *text);
 
 		void setNewScreen();
+
+		void setProgressBarDelay(uint8_t index , uint8_t newDelay);
+		
+		uint8_t getProgressBarDelay(uint8_t index);
+
 	};
 
 #endif

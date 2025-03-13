@@ -62,7 +62,10 @@ void Keypad::run(void* data) {
                     else if (i == 10) {
                         this->control->handleKey('*');
                     }
-                    Serial.printf("| IO%d FALLING EDGE DETECTED!\n", i);
+                    else if (i == 11) {
+                        this->control->handleKey('#');
+                    }
+                    Serial.printf("| IO%d FALLING EDGE DETECTED!\t", i);
                 }
 
                 lastState[i] = currentState; // Actualizar estado anterior
