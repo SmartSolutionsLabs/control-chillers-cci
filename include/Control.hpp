@@ -15,7 +15,8 @@ private:
 
     Screen newScreen = HOME;  // Pantalla actual
     bool enter;               // Indica si se ha presionado "Enter"
-    uint8_t option;           // Opción seleccionada en el menú
+    uint8_t currentOption;           // Opción seleccionada en el menú
+    uint8_t *maxOptions;
     bool ScreenSelected;      // Indica si se ha seleccionado una pantalla
     bool optionSelected;      // Indica si se ha seleccionado una opción
 

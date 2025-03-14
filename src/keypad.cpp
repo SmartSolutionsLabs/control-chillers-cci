@@ -44,13 +44,18 @@ void Keypad::run(void* data) {
 
     while (1) {
         vTaskDelay(this->iterationDelay);
-        unsigned long currentMillis = millis();  
+        vTaskDelay(this->iterationDelay);
+        unsigned long currentMillis = millis();
 
         if (currentMillis - lastScanTime >= SCAN_INTERVAL) {
-            lastScanTime = currentMillis;  
+            lastScanTime = currentMillis;
+
+            // Leer ambos bancos de una vez
+            uint8_t estadoA = this->readRegister(GPIOA);
+            uint8_t estadoB = this->readRegister(GPIOB);
 
             for (int i = 0; i < 16; i++) {
-                bool currentState = leerPin(i); // Leer el estado actual del pin
+                bool currentState = (i < 8) ? (estadoA & (1 << i)) : (estadoB & (1 << (i % 8)));
 
                 if (lastState[i] == HIGH && currentState == LOW) { // Detectar cambio de ALTO a BAJO
                     if (i == 8) {

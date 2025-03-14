@@ -4,17 +4,22 @@ Control::Control(const char *name, int taskCore) : Module(name, taskCore) {
     this->currentMode = AUTOMATIC_MODE;  // Por defecto, el modo es manual
     this->delay1 = 0;                 // Inicializar delay1
     this->delay2 = 0;                 // Inicializar delay2
+    this->iterationDelay = 1;
 }
 
 
 void Control::connect(void *data) {
     this->ScreenSelected = false;
     this->optionSelected = false;
-    this->option = 0;
+    this->currentOption = 0;
+    this->maxOptions = new uint8_t[4]; // delay 1, delay 2, 
     this->lcd = (GraphicLCD *)data;  // Asignar el puntero a la pantalla LCD
     this->chillers = new Chiller*[2];
     this->pumps = new Pump*[2];
-
+    this->maxOptions[0] = 0;
+    this->maxOptions[1] = 2;
+    this->maxOptions[2] = 4;
+    this->maxOptions[3] = 0;
 }
 
 void Control::run(void *data) {
@@ -50,7 +55,7 @@ void Control::run(void *data) {
             }
         }
         else if(this->currentMode == MANUAL_MODE){
-            vTaskDelay(this->iterationDelay); // NO HACE NADA AUTOMATICO
+           
         }
     }
 }
@@ -75,147 +80,156 @@ void Control::handleKey(char key) {
             proccessDownKey();
             break;
     }
-    Serial.printf("| ScreenSelected : %d - optionSelected : %d - option : %d \n", this->ScreenSelected, this->optionSelected, this->option);
+    Serial.printf("|ScreenSelected : %d - optionSelected : %d - option : %d \n", this->ScreenSelected, this->optionSelected, this->currentOption);
 }
 
 void Control::proccessEnterKey() {
-    if (currentScreen == CONFIG || currentScreen == MANUAL) {
-        if (!this->ScreenSelected) {
-            this->ScreenSelected = true;
-            this->optionSelected = false;
-            this->option = 0;
-        } else if (this->ScreenSelected && !this->optionSelected) {
-            this->optionSelected = true;
-        } else if (this->optionSelected) {
-            if (currentScreen == CONFIG) {
-                if (this->option == 1) {
-                    // Cambiar entre modo manual y automático
-                    this->currentMode = (this->currentMode == MANUAL_MODE) ? AUTOMATIC_MODE : MANUAL_MODE;
-                    Serial.println(this->currentMode == MANUAL_MODE ? "Modo Manual" : "Modo Automático");
-                } else if (this->option == 2) {
-                    // Editar DELAY 1
-                    Serial.println("Editando DELAY 1...");
-                } else if (this->option == 3) {
-                    // Editar DELAY 2
-                    Serial.println("Editando DELAY 2...");
-                }
-            } else if (currentScreen == MANUAL && this->currentMode == MANUAL_MODE) {
-                // Cambiar estado de MOTOR o CHILLER (solo en modo manual)
-                switch (this->option) {
-                    case 1:
-                        Serial.println("Cambiando estado de MOTOR 1...");
-                        break;
-                    case 2:
-                        Serial.println("Cambiando estado de CHILLER 1...");
-                        break;
-                    case 3:
-                        Serial.println("Cambiando estado de MOTOR 2...");
-                        break;
-                    case 4:
-                        Serial.println("Cambiando estado de CHILLER 2...");
-                        break;
-                }
+    if (this->ScreenSelected) {
+        // Si estamos en una pantalla y una opción está seleccionada
+        if (this->optionSelected) {
+            switch (this->currentScreen) {
+                case HOME:
+                    // En la pantalla HOME, al presionar ENTER, activamos el modo automático
+                    this->currentMode = AUTOMATIC_MODE;
+                    Serial.printf("Automatic mode activated\n");
+                    break;
+                case CONFIG:
+                    // En la pantalla CONFIG, al presionar ENTER, confirmamos la selección de la opción
+                    Serial.printf("Option %d selected in CONFIG\n", this->currentOption);
+                    break;
+                case MANUAL:
+                    // En la pantalla MANUAL, al presionar ENTER, activamos el modo manual
+                    this->currentMode = MANUAL_MODE;
+                    Serial.printf("Manual mode activated\n");
+                    break;
+                case LOG:
+                    // En la pantalla LOG, al presionar ENTER, no hay acciones específicas
+                    Serial.printf("Nothing to do in LOG\n");
+                    break;
             }
+        } else {
+            // Si no hay una opción seleccionada, seleccionamos la opción actual
+            this->optionSelected = true;
+            Serial.printf("Option %d selected\n", this->currentOption);
+        }
+    } 
+    else {
+        // Si no hay una pantalla seleccionada, seleccionamos la pantalla actual
+        this->ScreenSelected = true;
+        Serial.printf("Screen %d selected\n", this->currentScreen);
+        if (this->currentScreen == HOME) {
+            this->currentMode = AUTOMATIC_MODE;
+            Serial.printf("Automatic mode activated\n");
+        } else if (this->currentScreen == MANUAL) {
+            this->currentMode = MANUAL_MODE;
+            Serial.printf("Manual mode activated\n");
         }
     }
+
 }
 
 void Control::proccessBackKey() {
-    if (currentScreen == CONFIG || currentScreen == MANUAL) {
-        if (this->ScreenSelected && this->optionSelected) {
+    if (this->ScreenSelected) {
+        if (this->optionSelected) {
+            // Si una opción está seleccionada, deseleccionamos la opción
             this->optionSelected = false;
-        } else if (this->ScreenSelected && !this->optionSelected) {
+            Serial.printf("Option deselected\n");
+        } else {
+            // Si no hay una opción seleccionada, deseleccionamos la pantalla
             this->ScreenSelected = false;
+            Serial.printf("Screen deselected\n");
         }
+    } else {
+        // Si no hay una pantalla seleccionada, no hacemos nada
+        Serial.printf("Nothing to do\n");
     }
 }
 
 void Control::proccessUpKey() {
     if (this->ScreenSelected) {
-        if (currentScreen == CONFIG) {
-            uint8_t maxScreenOptions = 3;  // Ahora hay 3 opciones: Modo, DELAY 1, DELAY 2
-            if (!this->optionSelected) {
-                this->option = (this->option % maxScreenOptions) + 1;
-            } else {
-                // Aumentar valor de DELAY
-                if (this->option == 2) {
-                    this->delay1 += 1;  // Aumentar DELAY 1
-                    Serial.printf("DELAY 1: %lu\n", this->delay1);
-                } else if (this->option == 3) {
-                    this->delay2 += 1;  // Aumentar DELAY 2
-                    Serial.printf("DELAY 2: %lu\n", this->delay2);
-                }
-            }
-        } else if (currentScreen == MANUAL && this->currentMode == MANUAL_MODE) {
-            uint8_t maxScreenOptions = 4;
-            if (!this->optionSelected) {
-                this->option = (this->option % maxScreenOptions) + 1;
-            } else {
-                // Cambiar estado de MOTOR o CHILLER
-                switch (this->option) {
-                    case 1:
-                        Serial.println("Encendiendo MOTOR 1...");
-                        break;
-                    case 2:
-                        Serial.println("Encendiendo CHILLER 1...");
-                        break;
-                    case 3:
-                        Serial.println("Encendiendo MOTOR 2...");
-                        break;
-                    case 4:
-                        Serial.println("Encendiendo CHILLER 2...");
-                        break;
-                }
+        if(this->optionSelected){
+            switch(this->currentScreen){
+                case HOME:
+                    Serial.printf("nothing to do in home \n");
+                    break;
+                case CONFIG:
+                    if(this->currentOption == 1){
+                        this->delay1 += 1;
+                        this->lcd->setProgressBarDelay(0,delay1);
+                        this->lcd->update();
+                        Serial.printf("delay 1 : %d\n",delay1);
+                    }
+                    else if(this->currentOption == 2){
+                        this->delay1 += 1;
+                        this->lcd->setProgressBarDelay(1,delay1);
+                        this->lcd->update();
+                        Serial.printf("delay 2 : %d\n",delay1);
+                    }
             }
         }
-    } else {
+        else{
+            this->currentOption ++;
+            switch(this->currentScreen){  
+                case HOME:
+                    if(this->currentOption > this->maxOptions[0]) this->currentOption = 1;
+                    break;
+                case CONFIG:
+                    if(this->currentOption > this->maxOptions[1]) this->currentOption = 1;
+                    break;
+                case MANUAL:
+                    if(this->currentOption > this->maxOptions[2]) this->currentOption = 1;
+                    break;
+                case LOG:
+                    if(this->currentOption > this->maxOptions[3]) this->currentOption = 1;
+                    break;
+            }
+        }
+    } 
+    else {
         this->nextScreen();
-        //this->lcd->nextScreen();
-        this->option = 0;
     }
 }
 
 void Control::proccessDownKey() {
     if (this->ScreenSelected) {
-        if (currentScreen == CONFIG) {
-            uint8_t maxScreenOptions = 3;  // Ahora hay 3 opciones: Modo, DELAY 1, DELAY 2
-            if (!this->optionSelected) {
-                this->option = (this->option - 2 + maxScreenOptions) % maxScreenOptions + 1;
-            } else {
-                // Disminuir valor de DELAY
-                if (this->option == 2) {
-                    this->delay1 = (this->delay1 > 0) ? this->delay1 - 1 : 0;  // Disminuir DELAY 1
-                    Serial.printf("DELAY 1: %lu\n", this->delay1);
-                } else if (this->option == 3) {
-                    this->delay2 = (this->delay2 > 0) ? this->delay2 - 1 : 0;  // Disminuir DELAY 2
-                    Serial.printf("DELAY 2: %lu\n", this->delay2);
-                }
-            }
-        } else if (currentScreen == MANUAL && this->currentMode == MANUAL_MODE) {
-            uint8_t maxScreenOptions = 4;
-            if (!this->optionSelected) {
-                this->option = (this->option - 2 + maxScreenOptions) % maxScreenOptions + 1;
-            } else {
-                // Cambiar estado de MOTOR o CHILLER
-                switch (this->option) {
-                    case 1:
-                        Serial.println("Apagando MOTOR 1...");
-                        break;
-                    case 2:
-                        Serial.println("Apagando CHILLER 1...");
-                        break;
-                    case 3:
-                        Serial.println("Apagando MOTOR 2...");
-                        break;
-                    case 4:
-                        Serial.println("Apagando CHILLER 2...");
-                        break;
-                }
+        if(this->optionSelected){
+            switch(this->currentScreen){
+                case HOME:
+                    Serial.printf("nothing to do in home \n");
+                    break;
+                case CONFIG:
+                    if(this->currentOption == 1){
+                        this->delay1 -= 1;
+                        if(delay1<0)delay1=0;
+                        Serial.printf("delay 1 : %d\n",delay1);
+                    }
+                    else if(this->currentOption == 2){
+                        this->delay2 -= 1;
+                        if(delay2<0)delay2=0;
+                        Serial.printf("delay 2 : %d\n",delay1);
+                    }
             }
         }
-    } else {
+        else{
+            this->currentOption --;
+            switch(this->currentScreen){
+                case HOME:
+                    if(this->currentOption > this->maxOptions[0] || this->currentOption <1) this->currentOption = this->maxOptions[0];
+                    break;
+                case CONFIG:
+                    if(this->currentOption > this->maxOptions[1] || this->currentOption <1) this->currentOption = this->maxOptions[1];
+                    break;
+                case MANUAL:
+                    if(this->currentOption > this->maxOptions[2] || this->currentOption <1) this->currentOption = this->maxOptions[2];
+                    break;
+                case LOG:
+                    if(this->currentOption > this->maxOptions[3] || this->currentOption <1) this->currentOption = this->maxOptions[3];
+                    break;
+            }
+        }
+    } 
+    else {
         this->previousScreen();
-        this->option = 0;
     }
 }
 
@@ -236,6 +250,8 @@ void Control::nextScreen(){
             break;
     }
     this->lcd->setScreen(this->currentScreen);    
+    this->lcd->update();
+    Serial.printf("CurrentScreen: %d  ",this->currentScreen);
 }
 
 void Control::previousScreen(){
@@ -254,6 +270,8 @@ void Control::previousScreen(){
             break;
     }  
     this->lcd->setScreen(this->currentScreen);  
+    this->lcd->update();
+    Serial.printf("CurrentScreen: %d  ",this->currentScreen);
 }
 
 Screen Control::getScreen(){

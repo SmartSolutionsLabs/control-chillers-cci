@@ -59,14 +59,9 @@ void GraphicLCD::run(void* data) {
     this->splashScreen();
     vTaskDelay(splashScreenTimer/portTICK_PERIOD_MS);
     this->u8g2->clearBuffer();
+    this->update();
 	while (1) {
 		vTaskDelay(this->iterationDelay);
-        if(newScreen){
-            newScreen = false;
-        }//this->testprint();
-        else{
-            this->update();
-        }
 	}
 }
 

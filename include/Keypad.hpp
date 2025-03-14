@@ -5,7 +5,7 @@
 #include "Control.hpp"
 #include <Wire.h>
 #include <PCF8574.h>
-#define SCAN_INTERVAL 50    // Intervalo de escaneo en milisegundos
+#define SCAN_INTERVAL 10    // Intervalo de escaneo en milisegundos
 
 class Keypad : public Module {
 private:

@@ -88,7 +88,7 @@ uint8_t progressBarLCD::getPercentage(){
 void progressBarLCD::setPosition(uint8_t xpos , uint8_t ypos){
     this->xPosition = xpos;
     this->yPosition = ypos;
-    this->setLabelPosition(xpos, ypos + 10);
+    this->setLabelPosition(xpos, ypos + 8);
     this->textInputDelay[0].setPosition(xPosition,yPosition);
     this->textInputDelay[1].setPosition(xPosition,yPosition + 32);
 }
