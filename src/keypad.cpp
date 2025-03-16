@@ -72,11 +72,9 @@ void Keypad::run(void* data) {
     this->iterationDelay = 1 / portTICK_PERIOD_MS;
 
     while (1) {
-        // Verificar si se ha producido una interrupción
-        if (this->interruptFlag) {
-            noInterrupts();  // Deshabilitar interrupciones mientras se accede a la variable
-            this->interruptFlag = false;  // Reiniciar la bandera
-            interrupts();     // Rehabilitar interrupciones
+        if (interruptFlag) {
+            // Limpiar la bandera de interrupción
+            interruptFlag = false;
 
             // Leer el registro de captura de interrupción del bloque B
             uint8_t intCap = readRegister(INTCAPB);
@@ -84,13 +82,45 @@ void Keypad::run(void* data) {
             // Verificar qué botón se presionó (pines 8, 9, 10 y 11)
             for (uint8_t i = 0; i < 4; i++) {
                 if (!(intCap & (1 << i))) {  // Si el botón está presionado (LOW)
+                    lastKeyPressed = 'A' + i;  // Asignar una tecla a cada botón (A, B, C, D)
+                    keyPressed = true;
+                    lastKeyPressTime = millis();  // Registrar el tiempo de la primera pulsación
                     if (control != nullptr) {
-                        char key = 'A' + i;  // Asignar una tecla al pulsador (A, B, C, D)
-                        control->handleKey(key);  // Procesar la tecla
-                        Serial.printf("Botón presionado: %c\n", key);  // Debug: imprimir el botón presionado
+                        control->handleKey(lastKeyPressed);  // Enviar la primera pulsación
                     }
                     break;  // Solo procesar un pulsador a la vez
                 }
+            }
+        }
+
+        if (keyPressed) {
+            // Leer el estado actual de los pines del banco B
+            uint8_t gpioB = readRegister(GPIOB);
+
+            // Verificar si el pulsador sigue presionado
+            bool keyStillPressed = false;
+            for (uint8_t i = 0; i < 4; i++) {
+                if (!(gpioB & (1 << i))) {  // Si el botón está presionado (LOW)
+                    keyStillPressed = true;
+                    break;
+                }
+            }
+
+            if (keyStillPressed) {
+                // Si el pulsador sigue presionado, verificar si ha pasado el retardo inicial
+                if (millis() - lastKeyPressTime >= initialDelay) {
+                    // Enviar pulsaciones repetidas cada 100 ms
+                    if (millis() - lastKeyPressTime >= repeatInterval) {
+                        lastKeyPressTime = millis();
+                        if (control != nullptr) {
+                            control->handleKey(lastKeyPressed);  // Enviar una pulsación repetida
+                            Serial.printf("Pulsación repetida: %c, Tiempo: %lu ms\n", lastKeyPressed, millis());
+                        }
+                    }
+                }
+            } else {
+                // Si el pulsador se ha soltado, liberar la tecla
+                keyPressed = false;
             }
         }
 
