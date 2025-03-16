@@ -65,18 +65,18 @@ void Control::handleKey(char key) {
     sprintf(msg, "key pressed: %c", key);
 
     switch (key) {
-        case '*':  // Enter
+        case 'A':  // Enter
             proccessEnterKey();
             break;
-        case '#':  // Back
+        case 'B':  // Back
             proccessBackKey();
             break;
 
-        case 'A':  // Navegar hacia arriba o aumentar valor
+        case 'C':  // Navegar hacia arriba o aumentar valor
             proccessUpKey();
             break;
 
-        case 'B':  // Navegar hacia abajo o disminuir valor
+        case 'D':  // Navegar hacia abajo o disminuir valor
             proccessDownKey();
             break;
     }
@@ -107,13 +107,14 @@ void Control::proccessEnterKey() {
                     Serial.printf("Nothing to do in LOG\n");
                     break;
             }
+            this->lcd->update();  // Actualizar la pantalla después de confirmar la selección
         } else {
             // Si no hay una opción seleccionada, seleccionamos la opción actual
             this->optionSelected = true;
             Serial.printf("Option %d selected\n", this->currentOption);
+            this->lcd->update();  // Actualizar la pantalla después de seleccionar la opción
         }
-    } 
-    else {
+    } else {
         // Si no hay una pantalla seleccionada, seleccionamos la pantalla actual
         this->ScreenSelected = true;
         Serial.printf("Screen %d selected\n", this->currentScreen);
@@ -124,8 +125,8 @@ void Control::proccessEnterKey() {
             this->currentMode = MANUAL_MODE;
             Serial.printf("Manual mode activated\n");
         }
+        this->lcd->update();  // Actualizar la pantalla después de seleccionar la pantalla
     }
-
 }
 
 void Control::proccessBackKey() {
@@ -139,6 +140,7 @@ void Control::proccessBackKey() {
             this->ScreenSelected = false;
             Serial.printf("Screen deselected\n");
         }
+        this->lcd->update();  // Actualizar la pantalla después de deseleccionar
     } else {
         // Si no hay una pantalla seleccionada, no hacemos nada
         Serial.printf("Nothing to do\n");
@@ -147,92 +149,91 @@ void Control::proccessBackKey() {
 
 void Control::proccessUpKey() {
     if (this->ScreenSelected) {
-        if(this->optionSelected){
-            switch(this->currentScreen){
+        if (this->optionSelected) {
+            switch (this->currentScreen) {
                 case HOME:
                     Serial.printf("nothing to do in home \n");
                     break;
                 case CONFIG:
-                    if(this->currentOption == 1){
+                    if (this->currentOption == 1) {
                         this->delay1 += 1;
-                        this->lcd->setProgressBarDelay(0,delay1);
-                        this->lcd->update();
-                        Serial.printf("delay 1 : %d\n",delay1);
+                        this->lcd->setProgressBarDelay(0, delay1);  // Actualizar la barra de progreso
+                        Serial.printf("delay 1 : %d\n", delay1);
+                    } else if (this->currentOption == 2) {
+                        this->delay2 += 1;
+                        this->lcd->setProgressBarDelay(1, delay2);  // Actualizar la barra de progreso
+                        Serial.printf("delay 2 : %d\n", delay2);
                     }
-                    else if(this->currentOption == 2){
-                        this->delay1 += 1;
-                        this->lcd->setProgressBarDelay(1,delay1);
-                        this->lcd->update();
-                        Serial.printf("delay 2 : %d\n",delay1);
-                    }
+                    this->lcd->update();  // Actualizar la pantalla
+                    break;
             }
-        }
-        else{
-            this->currentOption ++;
-            switch(this->currentScreen){  
+        } else {
+            this->currentOption++;
+            switch (this->currentScreen) {
                 case HOME:
-                    if(this->currentOption > this->maxOptions[0]) this->currentOption = 1;
+                    if (this->currentOption > this->maxOptions[0]) this->currentOption = 1;
                     break;
                 case CONFIG:
-                    if(this->currentOption > this->maxOptions[1]) this->currentOption = 1;
+                    if (this->currentOption > this->maxOptions[1]) this->currentOption = 1;
                     break;
                 case MANUAL:
-                    if(this->currentOption > this->maxOptions[2]) this->currentOption = 1;
+                    if (this->currentOption > this->maxOptions[2]) this->currentOption = 1;
                     break;
                 case LOG:
-                    if(this->currentOption > this->maxOptions[3]) this->currentOption = 1;
+                    if (this->currentOption > this->maxOptions[3]) this->currentOption = 1;
                     break;
             }
+            this->lcd->update();  // Actualizar la pantalla después de cambiar la opción
         }
-    } 
-    else {
+    } else {
         this->nextScreen();
     }
 }
 
 void Control::proccessDownKey() {
     if (this->ScreenSelected) {
-        if(this->optionSelected){
-            switch(this->currentScreen){
+        if (this->optionSelected) {
+            switch (this->currentScreen) {
                 case HOME:
                     Serial.printf("nothing to do in home \n");
                     break;
                 case CONFIG:
-                    if(this->currentOption == 1){
+                    if (this->currentOption == 1) {
                         this->delay1 -= 1;
-                        if(delay1<0)delay1=0;
-                        Serial.printf("delay 1 : %d\n",delay1);
-                    }
-                    else if(this->currentOption == 2){
+                        if (delay1 < 0) delay1 = 0;
+                        this->lcd->setProgressBarDelay(0, delay1);  // Actualizar la barra de progreso
+                        Serial.printf("delay 1 : %d\n", delay1);
+                    } else if (this->currentOption == 2) {
                         this->delay2 -= 1;
-                        if(delay2<0)delay2=0;
-                        Serial.printf("delay 2 : %d\n",delay1);
+                        if (delay2 < 0) delay2 = 0;
+                        this->lcd->setProgressBarDelay(1, delay2);  // Actualizar la barra de progreso
+                        Serial.printf("delay 2 : %d\n", delay2);
                     }
+                    this->lcd->update();  // Actualizar la pantalla
+                    break;
             }
-        }
-        else{
-            this->currentOption --;
-            switch(this->currentScreen){
+        } else {
+            this->currentOption--;
+            switch (this->currentScreen) {
                 case HOME:
-                    if(this->currentOption > this->maxOptions[0] || this->currentOption <1) this->currentOption = this->maxOptions[0];
+                    if (this->currentOption > this->maxOptions[0] || this->currentOption < 1) this->currentOption = this->maxOptions[0];
                     break;
                 case CONFIG:
-                    if(this->currentOption > this->maxOptions[1] || this->currentOption <1) this->currentOption = this->maxOptions[1];
+                    if (this->currentOption > this->maxOptions[1] || this->currentOption < 1) this->currentOption = this->maxOptions[1];
                     break;
                 case MANUAL:
-                    if(this->currentOption > this->maxOptions[2] || this->currentOption <1) this->currentOption = this->maxOptions[2];
+                    if (this->currentOption > this->maxOptions[2] || this->currentOption < 1) this->currentOption = this->maxOptions[2];
                     break;
                 case LOG:
-                    if(this->currentOption > this->maxOptions[3] || this->currentOption <1) this->currentOption = this->maxOptions[3];
+                    if (this->currentOption > this->maxOptions[3] || this->currentOption < 1) this->currentOption = this->maxOptions[3];
                     break;
             }
+            this->lcd->update();  // Actualizar la pantalla después de cambiar la opción
         }
-    } 
-    else {
+    } else {
         this->previousScreen();
     }
 }
-
 
 void Control::nextScreen(){
     switch(this->currentScreen){

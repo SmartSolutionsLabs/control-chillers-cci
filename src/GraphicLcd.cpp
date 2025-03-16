@@ -202,26 +202,51 @@ void GraphicLCD::setChillerState(uint8_t chillerNumber , bool state){
     this->chillerIcon[chillerNumber].state = state;
 }
 
-void GraphicLCD::update(){
-    this->screenTimer = millis();
-    this->u8g2->clearBuffer();
-    switch(currentScreen){
-        case HOME:
-            this->drawHomePage();
-            break;
-        case CONFIG:
-            this->drawConfigPage();
-            break;
-        case MANUAL:
-            this->drawManualPage();
-            break;
-        case LOG:
-            this->drawLogPage();
-            break;
-    }
-    this->u8g2->sendBuffer();
-}
+void GraphicLCD::update() {
+    static Screen lastScreen = HOME;  // Guardar el último estado de la pantalla
+    static bool lastMotorState[2] = {false, false};  // Guardar el último estado de los motores
+    static bool lastChillerState[2] = {false, false};  // Guardar el último estado de los chillers
+    static uint16_t lastDelay1 = progressBar[0].getValue();  // Guardar el último valor de delay1
+    static uint16_t lastDelay2 = progressBar[1].getValue();  // Guardar el último valor de delay2
 
+    bool screenChanged = (this->currentScreen != lastScreen);
+    bool motorStateChanged = (this->motorIcon[0].getState() != lastMotorState[0]) || 
+                             (this->motorIcon[1].getState() != lastMotorState[1]);
+    bool chillerStateChanged = (this->chillerIcon[0].state != lastChillerState[0]) || 
+                               (this->chillerIcon[1].state != lastChillerState[1]);
+    bool delayChanged = (progressBar[0].getValue() != lastDelay1) || 
+                        (progressBar[1].getValue() != lastDelay2);
+
+    if (screenChanged || motorStateChanged || chillerStateChanged || delayChanged) {
+        this->u8g2->clearBuffer();
+
+        switch (this->currentScreen) {
+            case HOME:
+                this->drawHomePage();
+                break;
+            case CONFIG:
+                this->drawConfigPage();
+                break;
+            case MANUAL:
+                this->drawManualPage();
+                break;
+            case LOG:
+                this->drawLogPage();
+                break;
+        }
+
+        this->u8g2->sendBuffer();
+
+        // Actualizar los últimos estados
+        lastScreen = this->currentScreen;
+        lastMotorState[0] = this->motorIcon[0].getState();
+        lastMotorState[1] = this->motorIcon[1].getState();
+        lastChillerState[0] = this->chillerIcon[0].state;
+        lastChillerState[1] = this->chillerIcon[1].state;
+        lastDelay1 = progressBar[0].getValue();
+        lastDelay2 = progressBar[1].getValue();
+    }
+}
 
 void GraphicLCD::drawRotatedImage(int xPos, int yPos, const Bitmap &image, float angle) {
     float radians = angle * M_PI / 180.0;

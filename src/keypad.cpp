@@ -1,17 +1,18 @@
 #include "Keypad.hpp"
 #include <Wire.h>
 
-#define MCP23017_ADDR 0x27  // Dirección I2C del MCP23017 (ajústala si es necesario)
-#define IODIRA 0x00         // Registro para configurar pines como entrada/salida (banco A)
-#define IODIRB 0x01         // Registro para configurar pines como entrada/salida (banco B)
-#define GPIOA  0x12         // Registro de lectura de pines (banco A)
-#define GPIOB  0x13         // Registro de lectura de pines (banco B)
+// Variable estática para manejar la instancia de Keypad en las interrupciones
+static Keypad* keypadInstance = nullptr;
+
+// Variable para almacenar el estado del pulsador
+volatile bool interruptFlag = false;  // Bandera de interrupción
 
 Keypad::Keypad(const char * name, int taskCore) : Module(name, taskCore) {
-    Serial.println("keypad constructor");
+    Serial.println("Keypad constructor");
+    keypadInstance = this;  // Asignar la instancia actual a la variable estática
+    this->control = nullptr;  // Inicializar el controlador
 }
 
-// Función para escribir en un registro del MCP23017
 void Keypad::writeRegister(uint8_t reg, uint8_t value) {
     Wire.beginTransmission(MCP23017_ADDR);
     Wire.write(reg);
@@ -19,7 +20,6 @@ void Keypad::writeRegister(uint8_t reg, uint8_t value) {
     Wire.endTransmission();
 }
 
-// Función para leer un registro del MCP23017
 uint8_t Keypad::readRegister(uint8_t reg) {
     Wire.beginTransmission(MCP23017_ADDR);
     Wire.write(reg);
@@ -29,59 +29,83 @@ uint8_t Keypad::readRegister(uint8_t reg) {
 }
 
 void Keypad::connect(void * data) {
-    pinMode(15,OUTPUT);
-    pinMode(41,OUTPUT);
-    digitalWrite(15,HIGH);
-    digitalWrite(41,HIGH);
-    this->writeRegister(IODIRA, 0xFF);  // Todos los pines del banco A como entrada
-    this->writeRegister(IODIRB, 0xFF);  // Todos los pines del banco B como entrada
-    // Configurar pines del PCF8574
-    
+    // Habilitar el MCP23017 (pin 15 como salida)
+    pinMode(15, OUTPUT);
+    pinMode(41, OUTPUT);
+    digitalWrite(15, HIGH);  // Activar el pin ENABLE del MCP23017
+    digitalWrite(41, HIGH);  // Activar el pin ENABLE del MCP23017
+
+    // Configurar los pines de los botones como entradas (banco B)
+    writeRegister(IODIRB, 0xFF);  // Todos los pines del banco B como entradas
+
+    // Habilitar resistencias pull-up para los pines de los botones (banco B)
+    writeRegister(GPPUB, 0xFF);  // Habilitar pull-up en todos los pines del banco B
+
+    // Habilitar interrupciones solo en los pines 8, 9, 10 y 11 (banco B)
+    writeRegister(GPINTENB, 0x0F);  // Habilitar interrupciones en los pines 8, 9, 10 y 11 (bits 0-3)
+
+    // Configurar interrupciones por cambio de estado (FALLING)
+    writeRegister(INTCONB, 0x00);   // Interrupciones por cambio de estado
+    writeRegister(DEFVALB, 0xFF);   // Valor por defecto HIGH (para detectar FALLING)
+
+    // Configurar los pines de interrupción del MCP23017
+    pinMode(6, INPUT_PULLUP);  // Pin de interrupción del bloque A (INTA)
+    pinMode(7, INPUT_PULLUP);  // Pin de interrupción del bloque B (INTB)
+
+    // Asignar manejadores de interrupción
+    attachInterrupt(digitalPinToInterrupt(6), []() { keypadInstance->handleInterruptA(); }, FALLING);
+    attachInterrupt(digitalPinToInterrupt(7), []() { keypadInstance->handleInterruptB(); }, FALLING);
+
+    // Depuración: Leer y mostrar los registros del MCP23017
+    Serial.println("Registros del MCP23017:");
+    Serial.printf("IODIRB: 0x%02X\n", readRegister(IODIRB));
+    Serial.printf("GPPUB: 0x%02X\n", readRegister(GPPUB));
+    Serial.printf("GPINTENB: 0x%02X\n", readRegister(GPINTENB));
+    Serial.printf("INTCONB: 0x%02X\n", readRegister(INTCONB));
+    Serial.printf("DEFVALB: 0x%02X\n", readRegister(DEFVALB));
+    Serial.printf("GPIOB: 0x%02X\n", readRegister(GPIOB));  // Estado actual de los pines del banco B
+
+    Serial.println("Keypad configurado correctamente.");
 }
+
 void Keypad::run(void* data) {
     this->iterationDelay = 1 / portTICK_PERIOD_MS;
-    bool lastState[16] = {1}; // Array para guardar el estado anterior de cada pin (asumimos que inician en ALTO)
 
     while (1) {
-        vTaskDelay(this->iterationDelay);
-        vTaskDelay(this->iterationDelay);
-        unsigned long currentMillis = millis();
+        // Verificar si se ha producido una interrupción
+        if (this->interruptFlag) {
+            noInterrupts();  // Deshabilitar interrupciones mientras se accede a la variable
+            this->interruptFlag = false;  // Reiniciar la bandera
+            interrupts();     // Rehabilitar interrupciones
 
-        if (currentMillis - lastScanTime >= SCAN_INTERVAL) {
-            lastScanTime = currentMillis;
+            // Leer el registro de captura de interrupción del bloque B
+            uint8_t intCap = readRegister(INTCAPB);
 
-            // Leer ambos bancos de una vez
-            uint8_t estadoA = this->readRegister(GPIOA);
-            uint8_t estadoB = this->readRegister(GPIOB);
-
-            for (int i = 0; i < 16; i++) {
-                bool currentState = (i < 8) ? (estadoA & (1 << i)) : (estadoB & (1 << (i % 8)));
-
-                if (lastState[i] == HIGH && currentState == LOW) { // Detectar cambio de ALTO a BAJO
-                    if (i == 8) {
-                        this->control->handleKey('A');
-                    } 
-                    else if (i == 9) {
-                        this->control->handleKey('B');
+            // Verificar qué botón se presionó (pines 8, 9, 10 y 11)
+            for (uint8_t i = 0; i < 4; i++) {
+                if (!(intCap & (1 << i))) {  // Si el botón está presionado (LOW)
+                    if (control != nullptr) {
+                        char key = 'A' + i;  // Asignar una tecla al pulsador (A, B, C, D)
+                        control->handleKey(key);  // Procesar la tecla
+                        Serial.printf("Botón presionado: %c\n", key);  // Debug: imprimir el botón presionado
                     }
-                    else if (i == 10) {
-                        this->control->handleKey('*');
-                    }
-                    else if (i == 11) {
-                        this->control->handleKey('#');
-                    }
-                    Serial.printf("| IO%d FALLING EDGE DETECTED!\t", i);
+                    break;  // Solo procesar un pulsador a la vez
                 }
-
-                lastState[i] = currentState; // Actualizar estado anterior
             }
         }
+
+        vTaskDelay(this->iterationDelay);
     }
 }
 
+// ISR para el bloque A
+void IRAM_ATTR Keypad::handleInterruptA() {
+    // Este método maneja las interrupciones del bloque A (pines 0-7)
+    // No se usa en este caso, pero se deja implementado por si es necesario en el futuro.
+}
 
-bool Keypad::leerPin(uint8_t pin) {
-    uint8_t registro = (pin < 8) ? GPIOA : GPIOB; // Determinar si está en GPIOA o GPIOB
-    uint8_t estado = this->readRegister(registro);      // Leer el registro del banco
-    return estado & (1 << (pin % 8));             // Extraer el estado del pin específico
+// ISR para el bloque B
+void IRAM_ATTR Keypad::handleInterruptB() {
+    // Establecer la bandera de interrupción
+    this->interruptFlag = true;
 }
