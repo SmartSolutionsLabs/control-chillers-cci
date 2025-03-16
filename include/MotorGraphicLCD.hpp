@@ -21,6 +21,8 @@ class MotorGraphicLCD {
 
         uint8_t xPosition,yPosition;
 
+        bool selected = false;
+
     public:
 
         MotorGraphicLCD();
@@ -62,5 +64,13 @@ class MotorGraphicLCD {
 
         void setPosition(uint8_t xpos , uint8_t ypos);
         void show();
+
+        void setSelected(bool isSelected) {
+            this->selected = isSelected;
+        }
+    
+        bool isSelected() const {
+            return this->selected;
+        }
 };
 #endif

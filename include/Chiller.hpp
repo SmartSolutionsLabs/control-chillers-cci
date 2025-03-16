@@ -35,6 +35,8 @@ class Chiller : public Module {
 
 		bool getState();
 
+		void toggle();
+
 };
 
 #endif

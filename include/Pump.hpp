@@ -34,6 +34,8 @@ class Pump : public Module {
 		void setPin(uint8_t newPin);
 
 		bool getState();
+
+		void toggle();
 };
 
 #endif

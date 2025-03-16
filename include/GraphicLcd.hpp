@@ -48,6 +48,22 @@ class GraphicLCD : public Module {
 		bool newScreen;
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
+		
+		~GraphicLCD() {
+            delete[] progressBar;  // Liberar la memoria del arreglo
+        }
+    
+        // Método para obtener una referencia a un progressBarLCD
+        progressBarLCD& getProgressBar(uint8_t index) {
+            if (index < 2) {  // Asegurarse de que el índice esté dentro del rango
+                return progressBar[index];
+            }
+            // Manejar el caso de índice inválido (opcional)
+            static progressBarLCD dummy;  // Objeto dummy para evitar errores
+            return dummy;
+        }
+		
+		textInputLCD* getTextInput(uint8_t index) ;
 
 		void connect(void * data) override;
 

@@ -3,13 +3,17 @@
 
 #include <U8g2lib.h>
 #include <string>  // Para usar std::string
+enum class InputState {
+    NONE,       // No seleccionado ni navegado
+    NAVIGATED,  // Navegado (resaltado pero no seleccionado)
+    SELECTED    // Seleccionado (activo para edición)
+};
 
 class textInputLCD {
 private:
     U8G2_ST7920_128X64_F_SW_SPI *u8g2;  // Puntero al objeto LCD
 
     uint8_t ID;                         // Identificador del objeto
-    bool state;                         // Estado actual (activo/inactivo)
     bool run;                           // Indica si el objeto está en ejecución
     uint32_t updateTimer;               // Temporizador para actualizaciones
     uint32_t timer;                     // Temporizador general
@@ -22,7 +26,7 @@ private:
     uint8_t xLabelPosition, yLabelPosition; // Posición del label
 
     std::string labelInput;             // Texto del label (usando std::string)
-
+    InputState currentState;
 public:
     // Constructores
     textInputLCD();
@@ -34,11 +38,7 @@ public:
     // Métodos para gestionar el ID
     void setID(uint8_t newID);
     uint8_t getID() const;
-
-    // Métodos para gestionar el estado
-    void setState(bool newState);
-    bool getState() const;
-
+    
     // Métodos para gestionar la ejecución
     void setRun(bool newRun);
     bool getRun() const;
@@ -79,6 +79,19 @@ public:
     // Métodos para gestionar el tamaño
     void setWidth(uint8_t newWidth);
     void setHeight(uint8_t newHeight);
+
+    uint32_t getInteger() const ;
+    uint8_t getWidth() const ;
+    uint8_t getHeight() const ;
+    // Métodos para gestionar el centro del label
+    void setCenterLabel(uint8_t xCenter, uint8_t yCenter) ;
+
+    void setState(InputState newState);
+    InputState getState() const ;
+
+    uint8_t getXCenterLabel() const;
+    uint8_t getYCenterLabel() const;
+
 };
 
 #endif

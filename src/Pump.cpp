@@ -2,48 +2,43 @@
 
 #define MCP23017_ADDR 0x27  // Dirección I2C del MCP23017 (ajústala si es necesario)
 #define IODIRA 0x00         // Registro para configurar pines como entrada/salida (banco A)
-#define IODIRB 0x01         // Registro para configurar pines como entrada/salida (banco B)
-#define GPIOA  0x12         // Registro de lectura de pines (banco A)
-#define GPIOB  0x13         // Registro de lectura de pines (banco B)
+#define GPIOA  0x12         // Registro de lectura/escritura de pines (banco A)
 
 Pump::Pump() : Module("Pump", 1) {
     // Constructor por defecto necesario para permitir new Pump[2]
 }
 
 Pump::Pump(const char * name, int taskCore) : Module(name, taskCore) {
+    // Constructor con nombre y núcleo de tarea
 }
 
 void Pump::connect(void *data) {
-	this->wire = static_cast<TwoWire*>(data);  // Asignar el puntero a Wire desde los datos
+    this->wire = static_cast<TwoWire*>(data);  // Asignar el puntero a Wire desde los datos
 
     if (this->wire) {
-        // Configurar todos los pines del MCP23017 como entrada
-        this->writeRegister(IODIRA, 0xFF);  // Todos los pines del banco A como entrada
-        this->writeRegister(IODIRB, 0xFF);  // Todos los pines del banco B como entrada
+        // Configurar todos los pines del banco A como salidas
+        this->writeRegister(IODIRA, 0x00);  // 0x00 = todos los pines como salidas
     }
 
-	pinMode(15,OUTPUT);
-    pinMode(41,OUTPUT);
-    digitalWrite(15,HIGH);
-    digitalWrite(41,HIGH);
-    this->writeRegister(IODIRA, 0xFF);  // Todos los pines del banco A como entrada
-    this->writeRegister(IODIRB, 0xFF);  // Todos los pines del banco B como entrada
-    // Aquí puedes realizar cualquier inicialización adicional que requiera Wire
-	this->state = false;
+    pinMode(15, OUTPUT);  // Configurar el pin 15 como salida
+    pinMode(41, OUTPUT);  // Configurar el pin 41 como salida
+    digitalWrite(15, HIGH);  // Establecer el pin 15 en HIGH
+    digitalWrite(41, HIGH);  // Establecer el pin 41 en HIGH
+
+    this->state = false;  // Inicializar el estado de la bomba como apagado
 }
 
 void Pump::run(void* data) {
     this->iterationDelay = 1 / portTICK_PERIOD_MS;
-	if (this->wire) {
-        // Usar Wire para comunicación I2C
+
+    if (this->wire) {
+        // Usar Wire para comunicación I2C (si es necesario)
     }
-	while (1) {
-		vTaskDelay(this->iterationDelay);
-	}
+
+    while (1) {
+        vTaskDelay(this->iterationDelay);
+    }
 }
-
-
-
 
 // Función para escribir en un registro del MCP23017
 void Pump::writeRegister(uint8_t reg, uint8_t value) {
@@ -62,35 +57,45 @@ uint8_t Pump::readRegister(uint8_t reg) {
     return Wire.available() ? Wire.read() : 0;
 }
 
+// Función para escribir en un pin específico del banco A
 void Pump::writePin(uint8_t pin, bool state) {
     if (this->wire) {
-        uint8_t registro = (pin < 8) ? GPIOA : GPIOB;  // Determinar si está en GPIOA o GPIOB
-        uint8_t estadoActual = this->readRegister(registro);  // Leer el estado actual del banco
+        uint8_t estadoActual = this->readRegister(GPIOA);  // Leer el estado actual del banco A
 
         if (state) {
-            estadoActual |= (1 << (pin % 8));  // Encender el pin (establecer el bit en 1)
+            estadoActual |= (1 << pin);  // Encender el pin (establecer el bit en 1)
         } else {
-            estadoActual &= ~(1 << (pin % 8));  // Apagar el pin (establecer el bit en 0)
+            estadoActual &= ~(1 << pin);  // Apagar el pin (establecer el bit en 0)
         }
 
-        this->writeRegister(registro, estadoActual);  // Escribir el nuevo estado en el banco
+        this->writeRegister(GPIOA, estadoActual);  // Escribir el nuevo estado en el banco A
     }
 }
 
-void Pump::turnOn(){
-	this->state = true;
-	writePin(this->pin,this->state);
+// Método para encender la bomba
+void Pump::turnOn() {
+    this->state = true;
+    writePin(this->pin, this->state);
 }
 
-void Pump::turnOff(){
-	this->state = false;
-	writePin(this->pin,this->state);
+// Método para apagar la bomba
+void Pump::turnOff() {
+    this->state = false;
+    writePin(this->pin, this->state);
 }
 
-void Pump::setPin(uint8_t newPin){
-	this->pin = newPin;
+// Método para alternar el estado de la bomba
+void Pump::toggle() {
+    this->state = !this->state;  // Alternar el estado
+    writePin(this->pin, this->state);  // Actualizar el estado del pin
 }
 
-bool Pump::getState(){
-	return this->state;
+// Método para establecer el pin de control de la bomba
+void Pump::setPin(uint8_t newPin) {
+    this->pin = newPin;
+}
+
+// Método para obtener el estado actual de la bomba
+bool Pump::getState() {
+    return this->state;
 }

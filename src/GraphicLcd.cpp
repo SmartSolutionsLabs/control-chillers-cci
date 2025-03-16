@@ -3,51 +3,45 @@
 GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore) {
 }
 
-void GraphicLCD::connect(void * data) {
-    //this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 27, 26, 25, 14); // esp32 
+void GraphicLCD::connect(void *data) {
     this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 47, 21, 14, 38); // smart board R8-AI8-DI8
-    pinMode(48,OUTPUT);
-    digitalWrite(48,LOW);
+    this->u8g2->setFont(u8g2_font_6x10_tf);  // Establecer la fuente una vez
+    pinMode(48, OUTPUT);
+    digitalWrite(48, LOW);
     this->motorIcon = new MotorGraphicLCD[2];
     this->progressBar = new progressBarLCD[2];
+    this->screenTimer = millis();
 
     for (int i = 0; i < 2; i++) {
-        motorIcon[i]   = MotorGraphicLCD(u8g2);
+        motorIcon[i] = MotorGraphicLCD(u8g2);
         progressBar[i] = progressBarLCD(u8g2);
-    }
 
-    for(int i=0 ;i<2;i++){
-        motorIcon[i].setID(i+1);
-        motorIcon[i].setRun(true) ;
+        motorIcon[i].setID(i + 1);
+        motorIcon[i].setRun(true);
         motorIcon[i].setState(false);
         motorIcon[i].setUpdateTimer(200);
-        motorIcon[i].setTimer(millis());
+        motorIcon[i].setTimer(this->screenTimer);
 
-        progressBar[i].setID(i+1);
-        progressBar[i].setRun(false) ;
+        progressBar[i].setID(i + 1);
+        progressBar[i].setRun(false);
         progressBar[i].setState(false);
         progressBar[i].setUpdateTimer(200);
-        progressBar[i].setTimer(millis());
-        progressBar[i].setValue(100); //valor de delay inicial
+        progressBar[i].setTimer(this->screenTimer);
+        progressBar[i].setValue(100); // valor de delay inicial
         progressBar[i].setPercentage(0);
-        
     }
-    chillerIcon[0].number = 1;
-    chillerIcon[0].run = true;
-    chillerIcon[0].state = 1;
-    chillerIcon[0].updateTimer = 1;
-    chillerIcon[0].timer = millis();
-    chillerIcon[1].number = 2;
-    chillerIcon[1].run = true;
-    chillerIcon[1].state = 1;
-    chillerIcon[1].updateTimer = 1;
-    chillerIcon[1].timer = millis();
 
+    for (int i = 0; i < 2; i++) {
+        chillerIcon[i].number = i + 1;
+        chillerIcon[i].run = true;
+        chillerIcon[i].state = 1;
+        chillerIcon[i].updateTimer = 1;
+        chillerIcon[i].timer = this->screenTimer;
+    }
 
     if (!this->u8g2->begin()) {
         Serial.println("Display initialization failed!");
-    }
-    else{
+    } else {
         Serial.println("Display ok!");
     }
     this->u8g2->setFont(u8g2_font_6x10_tf);
@@ -114,61 +108,67 @@ void GraphicLCD::drawMenu(){
     //this->drawImage(0,0, IMAGE_HOME_SCREEN_DATA);
 }
 
-void GraphicLCD::drawHomePage(){
+void GraphicLCD::drawHomePage() {
     this->drawMenu();
     this->drawBoxes();
-    motorIcon[0].setPosition(33,5);
+
+    // Dibujar motor 1
+    motorIcon[0].setPosition(33, 5);
     motorIcon[0].showIcon();
     motorIcon[0].hideLabelState();
     motorIcon[0].animate(millis());
 
-    progressBar[0].setPosition(62,5);
+    // Dibujar progressBar 1
+    progressBar[0].setPosition(62, 5);
     progressBar[0].showIcon();
     progressBar[0].showLabelState();
     progressBar[0].animate(millis());
     progressBar[0].hideTextInput();
 
-    this->drawImage(90,5,ICON_CHILLER_DATA);
-    
-    
-    motorIcon[1].setPosition(33,37);
+    // Dibujar chiller 1
+    this->drawImage(90, 5, ICON_CHILLER_DATA);
+
+    // Dibujar motor 2
+    motorIcon[1].setPosition(33, 37);
     motorIcon[1].showIcon();
     motorIcon[1].hideLabelState();
     motorIcon[1].animate(millis());
 
-    progressBar[1].setPosition(62,37);
+    // Dibujar progressBar 2
+    progressBar[1].setPosition(62, 37);
     progressBar[1].showIcon();
     progressBar[1].showLabelState();
     progressBar[1].animate(millis());
     progressBar[1].hideTextInput();
-    this->drawImage(90,37,ICON_CHILLER_DATA);
-    // CHILLER 1
+
+    // Dibujar chiller 2
+    this->drawImage(90, 37, ICON_CHILLER_DATA);
+
     this->u8g2->sendBuffer();
-    //motorIcon 1
 }
 
-void GraphicLCD::drawConfigPage(){
+void GraphicLCD::drawConfigPage() {
     this->drawMenu();
-    char *text = new char[20];  // Asigna memoria dinámica
-    strcpy(text, "12345"); 
+    this->drawBoxes();
     
+    // Dibujar CHILLER 1
     this->u8g2->setFont(u8g2_font_6x10_tf);
-    this->u8g2->drawStr(42,12, "CHILLER 1");
-    progressBar[0].setPosition(70,15);
+    this->u8g2->drawStr(42, 12, "CHILLER 1");
+    progressBar[0].setPosition(70, 15);
     progressBar[0].hideIcon();
     progressBar[0].hideLabelState();
     progressBar[0].showTextInput();
     progressBar[0].showLabelInput();
 
-    this->u8g2->setFont(u8g2_font_6x10_tf);
-    this->u8g2->drawStr(42,44, "CHILLER 2");
-    progressBar[1].setPosition(70,47);
+    // Dibujar CHILLER 2
+    this->u8g2->drawStr(42, 44, "CHILLER 2");
+    progressBar[1].setPosition(70, 47);
     progressBar[1].hideIcon();
     progressBar[1].hideLabelState();
     progressBar[1].showTextInput();
     progressBar[1].showLabelInput();
 
-    this->drawBoxes();
+    
     this->u8g2->sendBuffer();
 }
 
@@ -203,6 +203,7 @@ void GraphicLCD::setChillerState(uint8_t chillerNumber , bool state){
 }
 
 void GraphicLCD::update() {
+
     static Screen lastScreen = HOME;  // Guardar el último estado de la pantalla
     static bool lastMotorState[2] = {false, false};  // Guardar el último estado de los motores
     static bool lastChillerState[2] = {false, false};  // Guardar el último estado de los chillers
@@ -217,7 +218,7 @@ void GraphicLCD::update() {
     bool delayChanged = (progressBar[0].getValue() != lastDelay1) || 
                         (progressBar[1].getValue() != lastDelay2);
 
-    if (screenChanged || motorStateChanged || chillerStateChanged || delayChanged) {
+    if (screenChanged || motorStateChanged || chillerStateChanged || delayChanged ) {
         this->u8g2->clearBuffer();
 
         switch (this->currentScreen) {
@@ -313,25 +314,19 @@ void GraphicLCD::setProgressBarPercentage(uint8_t index ,uint8_t newPercentage){
     this->progressBar[index].setPercentage(newPercentage);
 }
 
-void GraphicLCD::drawBoxes(){
+void GraphicLCD::drawBoxes() {
     this->u8g2->setFont(u8g2_font_ncenB12_tr);
     uint8_t dy = 32;
-    this->u8g2->drawLine(18, 2, 126, 2);
-    this->u8g2->drawLine(18, 30, 126, 30);
-    this->u8g2->drawLine(18, 2, 18, 30);
-    this->u8g2->drawLine(126, 2, 126, 30);
 
-    this->u8g2->drawLine(18, 2+dy , 126, 2 +dy);
-    this->u8g2->drawLine(18, 30+dy, 126, 30+dy);
-    this->u8g2->drawLine(18, 2+dy , 18 , 30+dy);
-    this->u8g2->drawLine(126,2+dy , 126, 30+dy);
-
-    this->u8g2->drawStr(19,22   , "1");
-    this->u8g2->drawStr(19,22+dy, "2");
-
-    this->u8g2->drawLine(29,  2    , 29 ,29);
-    this->u8g2->drawLine(29,  2+dy , 29, 29 +dy);
-
+    for (int i = 0; i < 2; i++) {
+        int yOffset = i * dy;
+        this->u8g2->drawLine(18, 2 + yOffset, 126, 2 + yOffset);
+        this->u8g2->drawLine(18, 30 + yOffset, 126, 30 + yOffset);
+        this->u8g2->drawLine(18, 2 + yOffset, 18, 30 + yOffset);
+        this->u8g2->drawLine(126, 2 + yOffset, 126, 30 + yOffset);
+        this->u8g2->drawStr(19, 22 + yOffset, String(i + 1).c_str());
+        this->u8g2->drawLine(29, 2 + yOffset, 29, 29 + yOffset);
+    }
 }
 
 void GraphicLCD::drawCenteredText(int xCenter, int yCenter, const char *text) {
@@ -352,4 +347,8 @@ void GraphicLCD::setProgressBarDelay(uint8_t index , uint8_t newDelay){
 		
 uint8_t GraphicLCD::getProgressBarDelay(uint8_t index ){
     return this->progressBar[index].getValue();
+}
+
+textInputLCD* GraphicLCD::getTextInput(uint8_t index) {
+    return this->progressBar[index].getTextInput();  // Sin '&'
 }

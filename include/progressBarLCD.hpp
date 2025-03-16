@@ -16,6 +16,8 @@ class progressBarLCD {
         
         bool run;
         
+        uint8_t width;
+
         uint32_t updateTimer;
         
         uint32_t timer;
@@ -28,12 +30,16 @@ class progressBarLCD {
 
         uint8_t counter;
 
+        bool selected,navigated;
+
     public:
 
         progressBarLCD();
 
         progressBarLCD(U8G2_ST7920_128X64_F_SW_SPI *lcd);
 
+        textInputLCD* getTextInput() { return this->textInputDelay; }
+        
         void drawCenteredText(int xCenter, int y, const char *text);
 
         void drawRotatedImage(int xPos, int yPos, const Bitmap &image, float angle);
@@ -52,8 +58,10 @@ class progressBarLCD {
         void setValue(uint8_t newValue);
         uint8_t getValue();
 
-        void setCounter(uint8_t newCounter);
-        uint8_t getCounter();
+        void incrementCounter();
+        void resetCounter() ;
+        uint16_t getCounter() const ;
+        void setCounter(uint16_t value);
 
         void setPercentage(uint8_t newPercentage);
         uint8_t getPercentage();
@@ -84,6 +92,11 @@ class progressBarLCD {
         void hideTextInput();
         void showLabelInput();
         void hideLabelInput();
+
+        void setSelected(bool isSelected);
+        bool isSelected() const;
+        void setNavigated(bool isNavigated);
+        bool isNavigated() const;
     
 };
 
