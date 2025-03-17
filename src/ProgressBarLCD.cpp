@@ -153,7 +153,8 @@ void progressBarLCD::hideLabelState(){
     drawLabelState(0);
 }
 
-void progressBarLCD::animate(uint32_t externalTimer){
+void progressBarLCD::animate(){
+    uint32_t externalTimer = millis();
     if(externalTimer - this->timer > this->updateTimer ) {
         uint16_t cicles = this->percentage / 5 ;
         for(int i= 0; i< cicles ;i++){

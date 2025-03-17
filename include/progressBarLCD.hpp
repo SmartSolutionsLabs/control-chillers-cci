@@ -81,7 +81,7 @@ class progressBarLCD {
         void showLabelState();
         void hideLabelState();
 
-        void animate(uint32_t externalTimer);
+        void animate();
         void deanimate();
 
         void setPosition(uint8_t xpos , uint8_t ypos);

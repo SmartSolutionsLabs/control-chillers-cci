@@ -5,6 +5,7 @@
 #include <U8g2lib.h>
 #include "Screens.hpp"
 #include "MotorGraphicLcd.hpp"
+#include "ChillerGraphicLcd.hpp"
 #include "progressBarLCD.hpp"
 #include "textInputLCD.hpp"
 
@@ -37,7 +38,7 @@ class GraphicLCD : public Module {
 
 		progressBarLCD *progressBar;
 
-		ChillerIcon chillerIcon[2];
+		ChillerGraphicLCD *chillerIcon;
 
 		uint16_t splashScreenTimer = 2500;
 
@@ -46,6 +47,8 @@ class GraphicLCD : public Module {
 		Screen currentScreen = HOME; // memoria cache
 
 		bool newScreen;
+
+		uint32_t timerFPS ;
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
 		

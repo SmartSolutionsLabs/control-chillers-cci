@@ -10,33 +10,34 @@ void GraphicLCD::connect(void *data) {
     digitalWrite(48, LOW);
     this->motorIcon = new MotorGraphicLCD[2];
     this->progressBar = new progressBarLCD[2];
-    this->screenTimer = millis();
+    this->chillerIcon = new ChillerGraphicLCD[2];
+    this->screenTimer = millis();  
+    this->timerFPS = millis();
 
     for (int i = 0; i < 2; i++) {
-        motorIcon[i] = MotorGraphicLCD(u8g2);
-        progressBar[i] = progressBarLCD(u8g2);
+        this->motorIcon[i] = MotorGraphicLCD(u8g2);
+        this->progressBar[i] = progressBarLCD(u8g2);
+        this->chillerIcon [i] = ChillerGraphicLCD(u8g2);
 
-        motorIcon[i].setID(i + 1);
-        motorIcon[i].setRun(true);
-        motorIcon[i].setState(false);
-        motorIcon[i].setUpdateTimer(200);
-        motorIcon[i].setTimer(this->screenTimer);
+        this->motorIcon[i].setID(i + 1);
+        this->motorIcon[i].setRun(true);
+        this->motorIcon[i].setState(false);
+        this->motorIcon[i].setUpdateTimer(200);
+        this->motorIcon[i].setTimer(this->screenTimer);
 
-        progressBar[i].setID(i + 1);
-        progressBar[i].setRun(false);
-        progressBar[i].setState(false);
-        progressBar[i].setUpdateTimer(200);
-        progressBar[i].setTimer(this->screenTimer);
-        progressBar[i].setValue(100); // valor de delay inicial
-        progressBar[i].setPercentage(0);
-    }
+        this->chillerIcon[i].setID(i + 1);
+        this->chillerIcon[i].setRun(true);
+        this->chillerIcon[i].setState(false);
+        this->chillerIcon[i].setUpdateTimer(200);
+        this->chillerIcon[i].setTimer(this->screenTimer);
 
-    for (int i = 0; i < 2; i++) {
-        chillerIcon[i].number = i + 1;
-        chillerIcon[i].run = true;
-        chillerIcon[i].state = 1;
-        chillerIcon[i].updateTimer = 1;
-        chillerIcon[i].timer = this->screenTimer;
+        this->progressBar[i].setID(i + 1);
+        this->progressBar[i].setRun(false);
+        this->progressBar[i].setState(false);
+        this->progressBar[i].setUpdateTimer(200);
+        this->progressBar[i].setTimer(this->screenTimer);
+        this->progressBar[i].setValue(100); // valor de delay inicial
+        this->progressBar[i].setPercentage(0);
     }
 
     if (!this->u8g2->begin()) {
@@ -55,6 +56,7 @@ void GraphicLCD::run(void* data) {
     this->u8g2->clearBuffer();
     this->update();
 	while (1) {
+        this->update();
 		vTaskDelay(this->iterationDelay);
 	}
 }
@@ -116,33 +118,39 @@ void GraphicLCD::drawHomePage() {
     motorIcon[0].setPosition(33, 5);
     motorIcon[0].showIcon();
     motorIcon[0].hideLabelState();
-    motorIcon[0].animate(millis());
+    motorIcon[0].animate();
 
     // Dibujar progressBar 1
     progressBar[0].setPosition(62, 5);
     progressBar[0].showIcon();
     progressBar[0].showLabelState();
-    progressBar[0].animate(millis());
+    progressBar[0].animate();
     progressBar[0].hideTextInput();
 
     // Dibujar chiller 1
-    this->drawImage(90, 5, ICON_CHILLER_DATA);
+    chillerIcon[0].setPosition(90, 5);
+    chillerIcon[0].showIcon();
+    chillerIcon[0].hideLabelState();
+    //chillerIcon[0].animate();
 
     // Dibujar motor 2
     motorIcon[1].setPosition(33, 37);
     motorIcon[1].showIcon();
     motorIcon[1].hideLabelState();
-    motorIcon[1].animate(millis());
+    motorIcon[1].animate();
 
     // Dibujar progressBar 2
     progressBar[1].setPosition(62, 37);
     progressBar[1].showIcon();
     progressBar[1].showLabelState();
-    progressBar[1].animate(millis());
+    progressBar[1].animate();
     progressBar[1].hideTextInput();
 
     // Dibujar chiller 2
-    this->drawImage(90, 37, ICON_CHILLER_DATA);
+    chillerIcon[1].setPosition(90, 37);
+    chillerIcon[1].showIcon();
+    chillerIcon[1].hideLabelState();
+    //chillerIcon[1].animate();
 
     this->u8g2->sendBuffer();
 }
@@ -151,24 +159,24 @@ void GraphicLCD::drawConfigPage() {
     this->drawMenu();
     this->drawBoxes();
     
-    // Dibujar CHILLER 1
     this->u8g2->setFont(u8g2_font_6x10_tf);
     this->u8g2->drawStr(42, 12, "CHILLER 1");
+    this->u8g2->drawStr(42, 44, "CHILLER 2");
+
+    // Dibujar Progress bar 1
     progressBar[0].setPosition(70, 15);
     progressBar[0].hideIcon();
     progressBar[0].hideLabelState();
     progressBar[0].showTextInput();
     progressBar[0].showLabelInput();
 
-    // Dibujar CHILLER 2
-    this->u8g2->drawStr(42, 44, "CHILLER 2");
+    // Dibujar Progress bar 2
     progressBar[1].setPosition(70, 47);
     progressBar[1].hideIcon();
     progressBar[1].hideLabelState();
     progressBar[1].showTextInput();
     progressBar[1].showLabelInput();
 
-    
     this->u8g2->sendBuffer();
 }
 
@@ -179,13 +187,25 @@ void GraphicLCD::drawManualPage(){
     motorIcon[0].setPosition(33,5);
     motorIcon[0].showIcon();
     motorIcon[0].showLabelState();
-    motorIcon[0].animate(millis());
+    motorIcon[0].animate();
 
     motorIcon[1].setPosition(33,37);
     motorIcon[1].showIcon();
     motorIcon[1].showLabelState();
-    motorIcon[1].animate(millis());
+    motorIcon[1].animate();
 
+    // Dibujar CHILLER 1
+    chillerIcon[0].setPosition(90, 5);
+    chillerIcon[0].showIcon();
+    chillerIcon[0].hideLabelState();
+    //chillerIcon[0].animate();
+
+    // Dibujar CHILLER 1
+    chillerIcon[1].setPosition(90, 37);
+    chillerIcon[1].showIcon();
+    chillerIcon[1].hideLabelState();
+    //chillerIcon[1].animate();
+    
     this->u8g2->sendBuffer();
 }
 
@@ -196,29 +216,33 @@ void GraphicLCD::drawLogPage(){
 
 void GraphicLCD::setMotorState(uint8_t motorNumber , bool state){
     this->motorIcon[motorNumber].setState(state);
+    this->motorIcon[motorNumber].setRun(state);
 }
 
 void GraphicLCD::setChillerState(uint8_t chillerNumber , bool state){
-    this->chillerIcon[chillerNumber].state = state;
+    this->chillerIcon[chillerNumber].setState(state);
+    this->chillerIcon[chillerNumber].setRun(state);
 }
 
-void GraphicLCD::update() {
+void GraphicLCD::update(){
+    if(millis() - this->timerFPS < 100){
+        return;
+    }
+    this->timerFPS = millis();
 
-    static Screen lastScreen = HOME;  // Guardar el último estado de la pantalla
     static bool lastMotorState[2] = {false, false};  // Guardar el último estado de los motores
     static bool lastChillerState[2] = {false, false};  // Guardar el último estado de los chillers
     static uint16_t lastDelay1 = progressBar[0].getValue();  // Guardar el último valor de delay1
     static uint16_t lastDelay2 = progressBar[1].getValue();  // Guardar el último valor de delay2
 
-    bool screenChanged = (this->currentScreen != lastScreen);
     bool motorStateChanged = (this->motorIcon[0].getState() != lastMotorState[0]) || 
                              (this->motorIcon[1].getState() != lastMotorState[1]);
-    bool chillerStateChanged = (this->chillerIcon[0].state != lastChillerState[0]) || 
-                               (this->chillerIcon[1].state != lastChillerState[1]);
+    bool chillerStateChanged = (this->chillerIcon[0].getState() != lastChillerState[0]) || 
+                               (this->chillerIcon[1].getState() != lastChillerState[1]);
     bool delayChanged = (progressBar[0].getValue() != lastDelay1) || 
                         (progressBar[1].getValue() != lastDelay2);
 
-    if (screenChanged || motorStateChanged || chillerStateChanged || delayChanged ) {
+    if (this->newScreen || motorStateChanged || chillerStateChanged || delayChanged ) {
         this->u8g2->clearBuffer();
 
         switch (this->currentScreen) {
@@ -239,11 +263,10 @@ void GraphicLCD::update() {
         this->u8g2->sendBuffer();
 
         // Actualizar los últimos estados
-        lastScreen = this->currentScreen;
-        lastMotorState[0] = this->motorIcon[0].getState();
-        lastMotorState[1] = this->motorIcon[1].getState();
-        lastChillerState[0] = this->chillerIcon[0].state;
-        lastChillerState[1] = this->chillerIcon[1].state;
+        lastMotorState[0]   =   this->motorIcon[0].getState();
+        lastMotorState[1]   =   this->motorIcon[1].getState();
+        lastChillerState[0] = this->chillerIcon[0].getState();
+        lastChillerState[1] = this->chillerIcon[1].getState();
         lastDelay1 = progressBar[0].getValue();
         lastDelay2 = progressBar[1].getValue();
     }

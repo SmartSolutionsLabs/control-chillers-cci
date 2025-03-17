@@ -1,9 +1,9 @@
-#ifndef _INC_MOTORGRAPHICLCD_
-#define _INC_MOTORGRAPHICLCD_
+#ifndef _INC_ChillerGraphicLCD_
+#define _INC_ChillerGraphicLCD_
 #include <U8g2lib.h>
 #include "Screens.hpp"
 
-class MotorGraphicLCD {
+class ChillerGraphicLCD {
     private:
         U8G2_ST7920_128X64_F_SW_SPI *u8g2;
 
@@ -25,9 +25,9 @@ class MotorGraphicLCD {
 
     public:
 
-        MotorGraphicLCD();
+        ChillerGraphicLCD();
 
-        MotorGraphicLCD(U8G2_ST7920_128X64_F_SW_SPI *lcd);
+        ChillerGraphicLCD(U8G2_ST7920_128X64_F_SW_SPI *lcd);
 
         void drawCenteredText(int xCenter, int y, const char *text);
 

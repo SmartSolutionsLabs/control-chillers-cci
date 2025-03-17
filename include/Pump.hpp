@@ -9,7 +9,8 @@ class Pump : public Module {
 		TwoWire *wire;  // Referencia a la instancia de Wire
 		uint8_t pin;
 		bool state;
-
+		uint8_t estadoGPIOA = 0x00;
+		
 	public:
 		Pump();
 
@@ -32,10 +33,15 @@ class Pump : public Module {
 		void turnOff();
 
 		void setPin(uint8_t newPin);
-
+		uint8_t getPin(){
+			return this->pin;
+		}
+		
 		bool getState();
 
-		void toggle();
+		void toggle(uint8_t newRegister);
+
+		void setGPIOA(uint8_t newState);
 };
 
 #endif

@@ -32,6 +32,8 @@ private:
 
 	Screen currentScreen = HOME;
 
+    uint8_t GPIOA = 0x00;
+
 public:
     Control(const char *name, int taskCore = 1);
 
@@ -82,6 +84,8 @@ public:
 	void previousScreen();
 
 	Screen getScreen();
+
+    void manual();
 };
 
 #endif
