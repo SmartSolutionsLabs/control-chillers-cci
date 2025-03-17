@@ -32,6 +32,10 @@ private:
 
 	Screen currentScreen = HOME;
 
+    bool showPopup;
+    uint32_t popupStartTime;
+    Screen lastScreen;
+
 public:
     Control(const char *name, int taskCore = 1);
 
@@ -82,6 +86,8 @@ public:
 	void previousScreen();
 
 	Screen getScreen();
+
+    void update();
 };
 
 #endif

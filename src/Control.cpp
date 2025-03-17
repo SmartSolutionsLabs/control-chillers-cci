@@ -1,27 +1,36 @@
 #include "Control.hpp"
 
 Control::Control(const char *name, int taskCore) : Module(name, taskCore) {
-    this->currentMode = AUTOMATIC_MODE;  // Por defecto, el modo es automático
-    this->delay1 = 0;                   // Inicializar delay1
-    this->delay2 = 0;                   // Inicializar delay2
+    this->currentMode = AUTOMATIC_MODE;
+    this->delay1 = 0;
+    this->delay2 = 0;
     this->iterationDelay = 1;
+    this->showPopup = false;
+    this->popupStartTime = 0;
+    this->lastScreen = HOME;
+    this->pumps = nullptr;
+    this->chillers = nullptr;
     Serial.println("Control initialized");
 }
 
 void Control::connect(void *data) {
     this->ScreenSelected = false;
     this->optionSelected = false;
-    this->currentOption = 0;
-    this->maxOptions = new uint8_t[4]; // delay 1, delay 2, 
-    this->lcd = (GraphicLCD *)data;    // Asignar el puntero a la pantalla LCD
+    this->currentOption = 1;
+    this->maxOptions = new uint8_t[4];
+    this->lcd = (GraphicLCD *)data;
+    
     this->chillers = new Chiller*[2];
     this->pumps = new Pump*[2];
+    
     this->maxOptions[0] = 0;
     this->maxOptions[1] = 2;
     this->maxOptions[2] = 4;
     this->maxOptions[3] = 0;
 
     Serial.println("Control connected to LCD");
+    
+    
 }
 
 void Control::run(void *data) {
@@ -38,9 +47,14 @@ void Control::run(void *data) {
 
     bool flag = false;
 
+    // FORZAR PRIMERA ACTUALIZACIÓN DE PANTALLA
+    this->lcd->splashScreen();
+    vTaskDelay(2000 * this->iterationDelay);
+    this->update();
+
     while (1) {
         vTaskDelay(this->iterationDelay);
-
+        this->update();
         // Lógica para el modo automático
         if (this->currentMode == AUTOMATIC_MODE) {
             if (flag) {
@@ -96,12 +110,15 @@ void Control::proccessEnterKey() {
                         this->lcd->getProgressBar(1).setSelected(true);
                         this->lcd->getProgressBar(1).setNavigated(false);
                     }
+                    // Activar popup de confirmación
+                    showPopup = true;
+                    popupStartTime = millis();
+                    Serial.println("Guardado exitosamente");
+                    this->lcd->showPopUp();
                     break;
                 case MANUAL:
                     this->currentMode = MANUAL_MODE;
                     Serial.println("Manual mode activated");
-
-                    // Activar/desactivar dispositivos según la opción seleccionada
                     if (this->currentOption == 1) {
                         this->pumps[0]->toggle();
                         Serial.println("Pump 1 toggled");
@@ -120,19 +137,14 @@ void Control::proccessEnterKey() {
                     Serial.println("Nothing to do in LOG");
                     break;
             }
-            this->lcd->update();  // Actualizar la pantalla después de confirmar la selección
+            this->lcd->update();
         } else {
-            // Si no hay una opción seleccionada, seleccionamos la opción actual
             this->optionSelected = true;
             Serial.printf("Option %d selected\n", this->currentOption);
-
-            // Actualizar el estado a SELECTED
             this->lcd->getTextInput(this->currentOption - 1)->setState(InputState::SELECTED);
-
-            this->lcd->update();  // Actualizar la pantalla después de seleccionar la opción
+            this->lcd->update();
         }
     } else {
-        // Si no hay una pantalla seleccionada, seleccionamos la pantalla actual
         this->ScreenSelected = true;
         Serial.printf("Screen %d selected\n", this->currentScreen);
         if (this->currentScreen == HOME) {
@@ -142,7 +154,7 @@ void Control::proccessEnterKey() {
             this->currentMode = MANUAL_MODE;
             Serial.println("Manual mode activated");
         }
-        this->lcd->update();  // Actualizar la pantalla después de seleccionar la pantalla
+        this->lcd->update();
     }
 }
 
@@ -302,9 +314,9 @@ void Control::nextScreen() {
             this->currentScreen = HOME;
             break;
     }
+    Serial.printf("Screen changed to: %d\n", this->currentScreen);
     this->lcd->setScreen(this->currentScreen);
     this->lcd->update();
-    Serial.printf("CurrentScreen: %d\n", this->currentScreen);
 }
 
 void Control::previousScreen() {
@@ -337,4 +349,38 @@ void Control::setChiller(uint8_t index, Chiller *newChiller) {
 
 void Control::setPump(uint8_t index, Pump *newPump) {
     this->pumps[index] = newPump;
+}
+
+void Control::update() {
+    if (showPopup) {
+        if (millis() - popupStartTime > 2000) {
+            showPopup = false;
+            this->lcd->hidePopUp();
+            this->lcd->update();
+        } else {
+            return; // Evita actualizar la pantalla mientras el popup está activo
+        }
+    }
+    
+    // Limpiar buffer antes de dibujar
+    this->lcd->clearBuffer();
+    
+    // Dibujar la pantalla actual
+    switch (this->currentScreen) {
+        case HOME:
+            this->lcd->drawHomePage();
+            break;
+        case CONFIG:
+            this->lcd->drawConfigPage();
+            break;
+        case MANUAL:
+            this->lcd->drawManualPage();
+            break;
+        case LOG:
+            this->lcd->drawLogPage();
+            break;
+    }
+    
+    // Enviar buffer a la pantalla solo una vez
+    this->lcd->sendBuffer();
 }

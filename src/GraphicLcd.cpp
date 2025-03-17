@@ -4,10 +4,16 @@ GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore)
 }
 
 void GraphicLCD::connect(void *data) {
-    this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 47, 21, 14, 38); // smart board R8-AI8-DI8
-    this->u8g2->setFont(u8g2_font_6x10_tf);  // Establecer la fuente una vez
     pinMode(48, OUTPUT);
     digitalWrite(48, LOW);
+    this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 47, 21, 14, 38); // smart board R8-AI8-DI8
+    if (!this->u8g2->begin()) {
+        Serial.println("Display initialization failed!");
+    } else {
+        Serial.println("Display ok!");
+    }
+    this->u8g2->setFont(u8g2_font_6x10_tf);
+    
     this->motorIcon = new MotorGraphicLCD[2];
     this->progressBar = new progressBarLCD[2];
     this->screenTimer = millis();
@@ -39,12 +45,7 @@ void GraphicLCD::connect(void *data) {
         chillerIcon[i].timer = this->screenTimer;
     }
 
-    if (!this->u8g2->begin()) {
-        Serial.println("Display initialization failed!");
-    } else {
-        Serial.println("Display ok!");
-    }
-    this->u8g2->setFont(u8g2_font_6x10_tf);
+    
 }
 
 void GraphicLCD::run(void* data) {
@@ -71,6 +72,7 @@ void GraphicLCD::splashScreen(){
 }
 
 void GraphicLCD::drawMenu(){
+    this->u8g2->clearBuffer();  // clear buffer to init
     this->u8g2->drawLine(16, 0, 16, 64);
     this->u8g2->drawLine(0, 16, 16, 16);
     this->u8g2->drawLine(0, 32, 16, 32);
@@ -172,6 +174,28 @@ void GraphicLCD::drawConfigPage() {
     this->u8g2->sendBuffer();
 }
 
+void GraphicLCD::showPopUp(){
+    this->drawPopUp(true);
+}
+
+void GraphicLCD::hidePopUp(){
+    this->drawPopUp(false);
+}
+
+void GraphicLCD::drawPopUp(bool state){
+    // Dibujar popup si está activo
+    if (state) {
+        this->u8g2->setDrawColor(1);
+        this->u8g2->drawFrame(20, 20, 88, 24);
+        this->u8g2->drawStr(30, 35, "Guardado!");
+    }
+    else{
+        this->u8g2->setDrawColor(0);
+        this->u8g2->drawFrame(20, 20, 88, 24);
+        this->u8g2->drawStr(30, 35, "Guardado!");
+    }
+}
+
 void GraphicLCD::drawManualPage(){
     this->drawMenu();
     this->drawBoxes();
@@ -203,6 +227,12 @@ void GraphicLCD::setChillerState(uint8_t chillerNumber , bool state){
 }
 
 void GraphicLCD::update() {
+    this->drawMenu();
+    this->sendBuffer();
+    if (millis() - this->lastUpdate < 1000) {
+        return; // Evita actualizar demasiado rápido
+    }
+    this->lastUpdate = millis();
 
     static Screen lastScreen = HOME;  // Guardar el último estado de la pantalla
     static bool lastMotorState[2] = {false, false};  // Guardar el último estado de los motores
@@ -236,7 +266,7 @@ void GraphicLCD::update() {
                 break;
         }
 
-        this->u8g2->sendBuffer();
+       
 
         // Actualizar los últimos estados
         lastScreen = this->currentScreen;
@@ -247,6 +277,7 @@ void GraphicLCD::update() {
         lastDelay1 = progressBar[0].getValue();
         lastDelay2 = progressBar[1].getValue();
     }
+    this->sendBuffer();
 }
 
 void GraphicLCD::drawRotatedImage(int xPos, int yPos, const Bitmap &image, float angle) {
@@ -351,4 +382,12 @@ uint8_t GraphicLCD::getProgressBarDelay(uint8_t index ){
 
 textInputLCD* GraphicLCD::getTextInput(uint8_t index) {
     return this->progressBar[index].getTextInput();  // Sin '&'
+}
+
+void  GraphicLCD::clearBuffer(){
+    this->u8g2->clearBuffer();
+}
+
+void  GraphicLCD::sendBuffer(){
+    this->u8g2->sendBuffer();
 }

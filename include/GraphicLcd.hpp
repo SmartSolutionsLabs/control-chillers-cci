@@ -46,6 +46,8 @@ class GraphicLCD : public Module {
 		Screen currentScreen = HOME; // memoria cache
 
 		bool newScreen;
+
+		uint32_t lastUpdate;
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
 		
@@ -115,6 +117,15 @@ class GraphicLCD : public Module {
 		
 		uint8_t getProgressBarDelay(uint8_t index);
 
+		void showPopUp();
+		
+		void hidePopUp();
+		
+		void drawPopUp(bool state);
+
+		void clearBuffer();
+
+		void sendBuffer();
 	};
 
 #endif
