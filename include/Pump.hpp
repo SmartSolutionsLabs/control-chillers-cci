@@ -10,7 +10,7 @@ class Pump : public Module {
 		uint8_t pin;
 		bool state;
 		uint8_t estadoGPIOA = 0x00;
-		
+
 	public:
 		Pump();
 
@@ -38,6 +38,7 @@ class Pump : public Module {
 		}
 		
 		bool getState();
+		void setState(bool newState);
 
 		void toggle(uint8_t newRegister);
 

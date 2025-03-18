@@ -15,6 +15,8 @@
 #define INTCAPB 0x11        // Registro de captura de interrupción (banco B)
 #define GPIOB 0x13
 
+#define INTFBB 0x0F
+
 class Keypad : public Module {
 private:
     Control * control;
@@ -29,6 +31,9 @@ private:
      unsigned long lastKeyPressTime = 0;  // Tiempo de la última pulsación
      const unsigned long initialDelay = 750;  // Retardo inicial antes de repetir (750 ms)
      const unsigned long repeatInterval = 100;  // Intervalo de repetición (100 ms)
+
+     bool lastKeyStates[8] = {true, true, true, true, true, true, true, true};
+     uint32_t timerAutomatic;
 public:
     Keypad(const char * name, int taskCore = 1);
     void connect(void* data);

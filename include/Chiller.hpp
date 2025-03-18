@@ -37,6 +37,7 @@ class Chiller : public Module {
 			return this->pin;
 		}
 		bool getState();
+		void setState(bool newState);
 
 		void toggle(uint8_t newRegister);
 

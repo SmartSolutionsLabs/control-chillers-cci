@@ -124,7 +124,7 @@ void progressBarLCD::setLabelPosition(uint8_t xCenter , uint8_t yCenter){
 
 void progressBarLCD::drawLabelState(bool show){
     int textWidth;
-    width  = 25;
+    this-> width  = 10;
     this->u8g2->setFont(u8g2_font_6x10_tf);
     if (show) {
         char buffer[10];
@@ -133,15 +133,9 @@ void progressBarLCD::drawLabelState(bool show){
         // Calcular el ancho y alto del texto
         int textWidth = this->u8g2->getStrWidth(buffer);
         int textHeight = this->u8g2->getMaxCharHeight();
-
-        // Posición del cuadro que contiene el número de delay
-        int boxX = this->xPosition + this->width + 5;  // Ajustar la posición X
-        int boxY = this->yPosition;                   // Ajustar la posición Y
-        int boxWidth = textWidth + 4;                 // Ancho del cuadro
-        int boxHeight = textHeight + 4;               // Alto del cuadro
         
         // Dibujar el número de delay dentro del cuadro
-        this->drawCenteredText(this->xCenterLabel+textWidth/2 ,this->yCenterLabel,buffer);
+        this->drawCenteredText(this->xCenterLabel+ this-> width  ,this->yCenterLabel + textHeight/2 ,buffer);
     }
 }
 

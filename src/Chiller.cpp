@@ -111,3 +111,6 @@ void Chiller::setPin(uint8_t newPin) {
 bool Chiller::getState() {
     return this->state;
 }
+void Chiller::setState(bool newState){
+    this->state = newState;
+}

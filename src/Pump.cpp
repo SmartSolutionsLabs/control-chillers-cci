@@ -107,3 +107,7 @@ void Pump::setPin(uint8_t newPin) {
 bool Pump::getState() {
     return this->state;
 }
+
+void Pump::setState(bool newState){
+    this->state = newState;
+}
