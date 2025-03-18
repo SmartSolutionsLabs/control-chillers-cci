@@ -20,13 +20,13 @@ void GraphicLCD::connect(void *data) {
         this->chillerIcon [i] = ChillerGraphicLCD(u8g2);
 
         this->motorIcon[i].setID(i + 1);
-        this->motorIcon[i].setRun(true);
+        this->motorIcon[i].setRun(false);
         this->motorIcon[i].setState(false);
         this->motorIcon[i].setUpdateTimer(200);
         this->motorIcon[i].setTimer(this->screenTimer);
 
         this->chillerIcon[i].setID(i + 1);
-        this->chillerIcon[i].setRun(true);
+        this->chillerIcon[i].setRun(false);
         this->chillerIcon[i].setState(false);
         this->chillerIcon[i].setUpdateTimer(200);
         this->chillerIcon[i].setTimer(this->screenTimer);
@@ -36,7 +36,7 @@ void GraphicLCD::connect(void *data) {
         this->progressBar[i].setState(false);
         this->progressBar[i].setUpdateTimer(200);
         this->progressBar[i].setTimer(this->screenTimer);
-        this->progressBar[i].setValue(100); // valor de delay inicial
+        this->progressBar[i].setValue(60); // valor de delay inicial
         this->progressBar[i].setPercentage(0);
     }
 
