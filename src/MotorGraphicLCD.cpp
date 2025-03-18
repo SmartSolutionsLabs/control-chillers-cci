@@ -152,7 +152,13 @@ void MotorGraphicLCD::hideLabelState(){
     drawLabelState(0);
 }
 ///////////////
+void MotorGraphicLCD::setAnimation( bool newAnimation){
+    this->animated = newAnimation;
+}
 void MotorGraphicLCD::animate(){
+    if(!this->animated){
+        return;
+    }
     uint32_t externalTimer = millis();
     if(externalTimer - this->timer > this->updateTimer ) {
         this->setTimer(externalTimer);
@@ -187,7 +193,7 @@ void MotorGraphicLCD::animate(){
 }
 
 void MotorGraphicLCD::deanimate(){
-
+    this->animated = false;
 }
 
 void MotorGraphicLCD::setPosition(uint8_t xpos , uint8_t ypos){

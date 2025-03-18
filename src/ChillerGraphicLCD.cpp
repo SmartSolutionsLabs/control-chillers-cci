@@ -151,8 +151,17 @@ void ChillerGraphicLCD::showLabelState(){
 void ChillerGraphicLCD::hideLabelState(){
     drawLabelState(0);
 }
+
+void ChillerGraphicLCD::setAnimation( bool newAnimation){
+    this->animated = newAnimation;
+}
+
 ///////////////
 void ChillerGraphicLCD::animate(){
+    if(!this->animated){
+        return;
+    }
+    
     uint32_t externalTimer = millis();
     if(externalTimer - this->timer > this->updateTimer ) {
         this->setTimer(externalTimer);
@@ -165,23 +174,15 @@ void ChillerGraphicLCD::animate(){
         //MOTOR 2
         if(this->state == false){
             this->u8g2->setDrawColor(0);
-            this->u8g2->drawBox(this->xPosition,this->yPosition,ICON_MOTOR_DATA.width,ICON_MOTOR_DATA.height);
+            this->u8g2->drawBox(this->xPosition,this->yPosition,ICON_CHILLER_0_DATA.width,ICON_CHILLER_0_DATA.height);
             this->u8g2->setDrawColor(1);
-            this->drawImage(this->xPosition,this->yPosition,ICON_CHILLER_DATA);
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawDisc(this->xPosition + 8 ,this->yPosition + 9 , 6);
-            this->u8g2->setDrawColor(1);
-            this->drawRotatedImage(this->xPosition,this->yPosition + 1 ,ICON_FAN_11_11_DATA , 0);
+            this->drawImage(this->xPosition,this->yPosition,ICON_CHILLER_0_DATA);
         }
         else{
             this->u8g2->setDrawColor(0);
-            this->u8g2->drawBox(this->xPosition,this->yPosition,ICON_MOTOR_DATA.width,ICON_MOTOR_DATA.height);
+            this->u8g2->drawBox(this->xPosition,this->yPosition,ICON_CHILLER_1_DATA.width,ICON_CHILLER_1_DATA.height);
             this->u8g2->setDrawColor(1);
-            this->drawImage(this->xPosition,this->yPosition,ICON_CHILLER_DATA);
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawDisc(this->xPosition + 8 ,this->yPosition + 9 , 6);
-            this->u8g2->setDrawColor(1);
-            this->drawRotatedImage(this->xPosition,this->yPosition + 1 ,ICON_FAN_11_11_DATA , 45);
+            this->drawImage(this->xPosition,this->yPosition,ICON_CHILLER_1_DATA);
         }
     }
 }

@@ -63,6 +63,9 @@ void Control::run(void *data) {
 
     this->lcd->getProgressBar(0).setTimer(this->delay[0]);
     this->lcd->getProgressBar(1).setTimer(this->delay[1]);
+
+    this->pumps[0]->toggle(this->GPIOA);
+    this->pumps[1]->toggle(this->GPIOA);
     //Serial.printf("Pump 0 Pin: %d, Pump 1 Pin: %d\n", 
     //    this->pumps[0]->getPin(), this->pumps[1]->getPin());
 
@@ -101,10 +104,10 @@ void Control::handleKey(char key) {
             setProcessChiller(2);
             break;
         case 'G':  // Navegar hacia abajo o disminuir valor
-            setProcessChiller(1);
+            setProcessChiller(0);
             break;
         case 'H':  // Navegar hacia abajo o disminuir valor
-            setProcessChiller(2);
+            setProcessChiller(0);
             break;
     }
     Serial.printf("ScreenSelected: %d, optionSelected: %d, currentOption: %d\n", 
@@ -401,6 +404,7 @@ void Control::processChiller(){
         case NONE_SELECTED:
             timerDelayCounter[0] = millis();
             timerDelayCounter[1] = millis();
+            this->automaticSecuence(2);
             break;
         
         case CHILLER_1_SELECTED:
@@ -429,6 +433,34 @@ void Control::setProcessChiller(uint8_t index){
 
 void Control::automaticSecuence(uint8_t index){
     //Serial.printf("processing chiller %d in automatic mode  \n",index + 1);
+    
+    if(index == 2){
+        this->GPIOA &= ~(1 << this->pumps[0]->getPin());
+        this->GPIOA &= ~(1 << this->pumps[1]->getPin());
+        this->GPIOA &= ~(1 << this->chillers[0]->getPin());
+        this->GPIOA &= ~(1 << this->chillers[1]->getPin());
+
+
+        this->pumps[0]->toggle(this->GPIOA);
+        this->chillers[1]->toggle(this->GPIOA);
+        this->pumps[0]->toggle(this->GPIOA);
+        this->chillers[1]->toggle(this->GPIOA);
+        //this->pumps[index]->toggle(this->GPIOA);
+
+
+        //this->GPIOA &= ~(1 << this->chillers[index]->getPin());
+    
+        //this->chillers[index]->toggle(this->GPIOA);
+
+        this->lcd->setChillerState(0, false);
+        this->lcd->setMotorState(0,false);
+        this->lcd->setChillerState(1, false);
+        this->lcd->setMotorState(1,false);
+        this->flag_process[0] = false;
+        this->flag_process[1] = false;
+        return;
+    }
+
     this->delayCounter[index] = millis() - timerDelayCounter[index];
 
     if(this->pumps[index]->getState()){
@@ -445,9 +477,8 @@ void Control::automaticSecuence(uint8_t index){
             this->lcd->getProgressBar(index).setPercentage(percentage);
             this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
             this->chillers[index]->toggle(this->GPIOA);
-            this->lcd->setChillerState(index, false);
+            this->lcd->setChillerState(index, true);
 
-            
             this->flag_process[index] = true;
         }
 
@@ -462,6 +493,7 @@ void Control::automaticSecuence(uint8_t index){
                 // updating progressBar
                 this->lcd->getProgressBar(index).setPercentage(percentage);
                 this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
+                
 
                 Serial.printf("\rProgress Bar : |");  // Retorno de carro para sobrescribir
                 for (int i = 0; i < 20; i++) {

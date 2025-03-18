@@ -23,6 +23,8 @@ class ChillerGraphicLCD {
 
         bool selected = false;
 
+        bool animated = false;
+        
     public:
 
         ChillerGraphicLCD();
@@ -59,6 +61,7 @@ class ChillerGraphicLCD {
         void showLabelState();
         void hideLabelState();
 
+        void setAnimation( bool newAnimation);
         void animate();
         void deanimate();
 

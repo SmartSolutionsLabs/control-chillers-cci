@@ -93,7 +93,8 @@ void Pump::turnOff() {
 // Método para alternar el estado del Pump
 void Pump::toggle(uint8_t newRegister) {
     this->estadoGPIOA = newRegister ;
-    this->state = !this->state;  // Alternar el estado
+    uint8_t bitValue = (this->estadoGPIOA >> this->pin) & 1;
+    this->state = bitValue;  // Alternar el estado
     writeRegister(GPIOA , newRegister);
     //writePin(this->pin, this->state);  // Actualizar el estado del pin
 }

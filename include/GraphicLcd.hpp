@@ -82,9 +82,9 @@ class GraphicLCD : public Module {
 
 		void drawMenu();
 
-		void setMotorState(uint8_t motorNumber , bool state);
+		void setMotorState(int motorNumber , bool state);
 
-		void setChillerState(uint8_t chillerNumber , bool state);
+		void setChillerState(int chillerNumber , bool state);
 
 		void drawHomePage();
 

@@ -118,12 +118,14 @@ void GraphicLCD::drawHomePage() {
     motorIcon[0].setPosition(33, 5);
     motorIcon[0].showIcon();
     motorIcon[0].hideLabelState();
+    motorIcon[0].setAnimation(true);
     motorIcon[0].animate();
 
     // Dibujar progressBar 1
     progressBar[0].setPosition(62, 5);
     progressBar[0].showIcon();
     progressBar[0].showLabelState();
+    //progressBar[0].setAnimation(true);
     progressBar[0].animate();
     progressBar[0].hideTextInput();
 
@@ -131,18 +133,22 @@ void GraphicLCD::drawHomePage() {
     chillerIcon[0].setPosition(90, 5);
     chillerIcon[0].showIcon();
     chillerIcon[0].hideLabelState();
+    chillerIcon[0].setAnimation(true);
+    chillerIcon[0].animate();
     //chillerIcon[0].animate();
 
     // Dibujar motor 2
     motorIcon[1].setPosition(33, 37);
     motorIcon[1].showIcon();
     motorIcon[1].hideLabelState();
+    motorIcon[1].setAnimation(true);
     motorIcon[1].animate();
 
     // Dibujar progressBar 2
     progressBar[1].setPosition(62, 37);
     progressBar[1].showIcon();
     progressBar[1].showLabelState();
+    //progressBar[1].setAnimation(true);
     progressBar[1].animate();
     progressBar[1].hideTextInput();
 
@@ -150,6 +156,8 @@ void GraphicLCD::drawHomePage() {
     chillerIcon[1].setPosition(90, 37);
     chillerIcon[1].showIcon();
     chillerIcon[1].hideLabelState();
+    chillerIcon[1].setAnimation(true);
+    chillerIcon[1].animate();
     //chillerIcon[1].animate();
 
     this->u8g2->sendBuffer();
@@ -214,12 +222,12 @@ void GraphicLCD::drawLogPage(){
     this->u8g2->sendBuffer();
 }
 
-void GraphicLCD::setMotorState(uint8_t motorNumber , bool state){
+void GraphicLCD::setMotorState(int motorNumber , bool state){
     this->motorIcon[motorNumber].setState(state);
     this->motorIcon[motorNumber].setRun(state);
 }
 
-void GraphicLCD::setChillerState(uint8_t chillerNumber , bool state){
+void GraphicLCD::setChillerState(int chillerNumber , bool state){
     this->chillerIcon[chillerNumber].setState(state);
     this->chillerIcon[chillerNumber].setRun(state);
 }

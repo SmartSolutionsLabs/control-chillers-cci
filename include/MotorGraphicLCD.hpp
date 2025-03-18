@@ -23,6 +23,8 @@ class MotorGraphicLCD {
 
         bool selected = false;
 
+        bool animated = false;
+
     public:
 
         MotorGraphicLCD();
@@ -59,6 +61,7 @@ class MotorGraphicLCD {
         void showLabelState();
         void hideLabelState();
 
+        void setAnimation( bool newAnimation);
         void animate();
         void deanimate();
 
