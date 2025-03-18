@@ -114,7 +114,6 @@ void textInputLCD::draw(bool show) {
         switch (this->currentState) {
             case InputState::SELECTED:
                 // Fondo blanco, texto negro
-                Serial.println("\t\t\t\t\t---------------- InputState::SELECTED ");
                 this->u8g2->setDrawColor(1);
                 this->u8g2->drawBox(this->xPosition, this->yPosition, this->width, this->height);
                 this->u8g2->setDrawColor(0);
@@ -122,7 +121,6 @@ void textInputLCD::draw(bool show) {
 
             case InputState::NAVIGATED:
                 // Borde resaltado, fondo normal
-                Serial.println("\t\t\t\t\t---------------- InputState::NAVIGATED ");
                 this->u8g2->setDrawColor(1);
                 this->u8g2->drawFrame(this->xPosition, this->yPosition, this->width, this->height);
                 this->u8g2->setDrawColor(0);
@@ -131,7 +129,6 @@ void textInputLCD::draw(bool show) {
             case InputState::NONE:
             default:
                 // Fondo normal, texto normal
-                Serial.println("\t\t\t\t\t---------------- InputState::NONE ");
                 this->u8g2->setDrawColor(1);
                 break;
         }

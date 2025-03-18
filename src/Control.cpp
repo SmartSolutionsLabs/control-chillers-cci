@@ -19,7 +19,7 @@ void Control::connect(void *data) {
     this->currentOption = 1;
     this->maxOptions = new uint8_t[4]; // delay 1, delay 2, 
     this->lcd = (GraphicLCD *)data;    // Asignar el puntero a la pantalla LCD
-    
+
     // ✅ CREAR NUEVAS INSTANCIAS DE Pump[]
     this->pumps = new Pump*[2];  // Se asigna memoria para el array de punteros
     this->pumps[0] = new Pump("Pump0", 1);  // Nueva instancia de Pump
@@ -29,6 +29,7 @@ void Control::connect(void *data) {
     this->chillers = new Chiller*[2];
     this->chillers[0] = new Chiller("Chiller0", 1);
     this->chillers[1] = new Chiller("Chiller1", 1);
+
 
     this->maxOptions[0] = 0;
     this->maxOptions[1] = 2;
@@ -44,11 +45,11 @@ void Control::run(void *data) {
     // ✅ Asegurar que pumps[0] y pumps[1] son objetos diferentes
     if (this->pumps[0] && this->pumps[1]) {
         this->pumps[0]->setPin(1);
-        this->pumps[1]->setPin(2);
+        this->pumps[1]->setPin(3);
     }
 
     if (this->chillers[0] && this->chillers[1]) {
-        this->chillers[0]->setPin(3);
+        this->chillers[0]->setPin(2);
         this->chillers[1]->setPin(4);
     }
 
@@ -60,6 +61,8 @@ void Control::run(void *data) {
     this->lcd->getProgressBar(0).setCounter(0);
     this->lcd->getProgressBar(1).setCounter(0);
 
+    this->lcd->getProgressBar(0).setTimer(this->delay[0]);
+    this->lcd->getProgressBar(1).setTimer(this->delay[1]);
     //Serial.printf("Pump 0 Pin: %d, Pump 1 Pin: %d\n", 
     //    this->pumps[0]->getPin(), this->pumps[1]->getPin());
 
@@ -437,6 +440,10 @@ void Control::automaticSecuence(uint8_t index){
             this->GPIOA |= (1 << this->chillers[index]->getPin());
             Serial.printf("\n ChilleR %d Initiated \n", index);
             Serial.printf("the chiller %d pin is : %d \n",index,this->chillers[index]->getPin());
+            
+            uint8_t percentage = (100 * this->delayCounter[index]) / (1000 * this->delay[index]);
+            this->lcd->getProgressBar(index).setPercentage(percentage);
+            this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
             this->chillers[index]->toggle(this->GPIOA);
             this->lcd->setChillerState(index, false);
 
@@ -445,9 +452,17 @@ void Control::automaticSecuence(uint8_t index){
         }
 
         else{
-            if (this->delayCounter[index] % 1000 == 0) {
+            static unsigned long lastUpdateTime[8] = {0};  // Suponiendo hasta 8 chillers
+            
+            if (millis() - lastUpdateTime[index] >= 1000) {  // Se actualiza cada 1 segundo
+                lastUpdateTime[index] = millis();
+
                 uint8_t percentage = (100 * this->delayCounter[index]) / (1000 * this->delay[index]);
                 
+                // updating progressBar
+                this->lcd->getProgressBar(index).setPercentage(percentage);
+                this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
+
                 Serial.printf("\rProgress Bar : |");  // Retorno de carro para sobrescribir
                 for (int i = 0; i < 20; i++) {
                     if (i < percentage / 5) {

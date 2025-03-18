@@ -6,6 +6,7 @@ ChillerGraphicLCD::ChillerGraphicLCD()  {
 ChillerGraphicLCD::ChillerGraphicLCD(U8G2_ST7920_128X64_F_SW_SPI *newu8g2)  {
     this->u8g2 = newu8g2;
     this->timer = 0 ;
+    this->state = false;
 }
 
 void ChillerGraphicLCD::setID(uint8_t newID){

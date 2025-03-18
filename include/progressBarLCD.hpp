@@ -28,7 +28,7 @@ class progressBarLCD {
 
         uint16_t value,percentage;
 
-        uint8_t counter;
+        uint32_t counter;
 
         bool selected,navigated;
 
@@ -55,13 +55,13 @@ class progressBarLCD {
         void setRun(bool newState);
         bool getRun();
 
-        void setValue(uint8_t newValue);
-        uint8_t getValue();
+        void setValue(uint16_t newValue);
+        uint16_t getValue();
 
         void incrementCounter();
         void resetCounter() ;
-        uint16_t getCounter() const ;
-        void setCounter(uint16_t value);
+        uint32_t getCounter() const ;
+        void setCounter(uint32_t newCounter);
 
         void setPercentage(uint8_t newPercentage);
         uint8_t getPercentage();
@@ -97,7 +97,7 @@ class progressBarLCD {
         bool isSelected() const;
         void setNavigated(bool isNavigated);
         bool isNavigated() const;
-    
+
 };
 
 #endif

@@ -9,7 +9,7 @@ progressBarLCD::progressBarLCD(U8G2_ST7920_128X64_F_SW_SPI *newu8g2)  {
     this->timer = 0 ;
     this->selected = false;
     this->textInputDelay = new textInputLCD(u8g2);
-    
+    this->counter = 0;
 
     this->textInputDelay->setID(1);
     this->textInputDelay->setRun(true) ;
@@ -71,20 +71,20 @@ void progressBarLCD::resetCounter() {
     this->counter = 0;
 }
 
-uint16_t progressBarLCD::getCounter() const {
+uint32_t progressBarLCD::getCounter() const {
     return this->counter;
 }
 
-void progressBarLCD::setCounter(uint16_t value) {
-    this->counter = value;
+void progressBarLCD::setCounter(uint32_t newCounter){
+    this->counter = newCounter;
 }
 
-void progressBarLCD::setValue(uint8_t newValue){
+void progressBarLCD::setValue(uint16_t newValue){
     this->value = newValue;
     this->textInputDelay->setInteger(newValue);
 }
 
-uint8_t progressBarLCD::getValue(){
+uint16_t progressBarLCD::getValue(){
     return this->value;
 }
 

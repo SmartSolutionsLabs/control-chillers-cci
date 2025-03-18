@@ -58,16 +58,6 @@ void Keypad::connect(void * data) {
     attachInterrupt(digitalPinToInterrupt(6), []() { keypadInstance->handleInterruptA(); }, FALLING);
     attachInterrupt(digitalPinToInterrupt(7), []() { keypadInstance->handleInterruptB(); }, FALLING);
 
-    // Depuración: Mostrar registros del MCP23017
-    Serial.println("Registros del MCP23017:");
-    Serial.printf("IODIRB: 0x%02X\n", readRegister(IODIRB));
-    Serial.printf("GPPUB: 0x%02X\n", readRegister(GPPUB));
-    Serial.printf("GPINTENB: 0x%02X\n", readRegister(GPINTENB));
-    Serial.printf("INTCONB: 0x%02X\n", readRegister(INTCONB));
-    Serial.printf("DEFVALB: 0x%02X\n", readRegister(DEFVALB));
-    Serial.printf("GPIOB: 0x%02X\n", readRegister(GPIOB));  
-
-    Serial.println("Keypad configurado correctamente.");
 }
 
 
@@ -132,7 +122,7 @@ void Keypad::run(void* data) {
                 bool isFalling = lastKeyStates[i] && !(gpioB & (1 << i));  // Antes era HIGH, ahora es LOW
                 lastKeyStates[i] = gpioB & (1 << i);  // Actualizar estado
 
-
+                /*
                 Serial.print("Pin ");
                 Serial.print(8 + i);
                 Serial.print(" - Estado: ");
@@ -141,7 +131,7 @@ void Keypad::run(void* data) {
                 Serial.print((intCap & (1 << i)) ? "1" : "0");
                 Serial.print(" - Falling detectado: ");
                 Serial.println(isFalling ? "Sí" : "No");
-
+                */
                 if (isFalling) {
                     lastKeyPressed = 'A' + i;  // Asignar tecla (A, B, C, D)
                     keyPressed = true;
