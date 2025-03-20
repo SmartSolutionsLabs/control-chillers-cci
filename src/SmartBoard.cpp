@@ -1,6 +1,11 @@
 #include "SmartBoard.hpp"
 #include "Control.hpp"
 #include "Keypad.hpp"
+#include "Network.hpp"
+
+String ssid = "SmartLabs";
+String password = "20120415H";
+
 
 void SmartBoard::processMessage(unsigned char * message, size_t length, bool printable) { // se define que hayq ue procesar
 	
@@ -52,6 +57,10 @@ SmartBoard * smartboard;
 
 void setup() {
 	Serial.begin(115200);
+	Network::SSID = ssid;
+	Network::PASSWORD = password;
+	Network::getInstance()->begin("SC-RAIDI8_CCI_CHILLERS",true);	
+	Network::getInstance()->connect();
 	Wire.begin(5,4);
 	smartboard = new SmartBoard();
 	//smartboard->beginSerialPort(Serial2);

@@ -338,11 +338,11 @@ void GraphicLCD::setScreen(Screen newScreen){
 }
 
 void GraphicLCD::setProgressBarValue(uint8_t index ,uint16_t newValue){
-    this->progressBar[index].setValue(newValue);
+    this->progressBar[index-1].setValue(newValue);
 }
 
 void GraphicLCD::setProgressBarPercentage(uint8_t index ,uint8_t newPercentage){
-    this->progressBar[index].setPercentage(newPercentage);
+    this->progressBar[index-1].setPercentage(newPercentage);
 }
 
 void GraphicLCD::drawBoxes() {
@@ -373,7 +373,7 @@ void GraphicLCD::setNewScreen(){
 }
 
 void GraphicLCD::setProgressBarDelay(uint8_t index , uint8_t newDelay){
-    this->progressBar[index].setValue(newDelay);
+    this->progressBar[index-1].setValue(newDelay);
 }
 		
 uint8_t GraphicLCD::getProgressBarDelay(uint8_t index ){

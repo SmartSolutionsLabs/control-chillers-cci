@@ -65,7 +65,7 @@ void Keypad::run(void* data) {
     this->iterationDelay = 1 / portTICK_PERIOD_MS;
 
     Serial.println("Keypad task started...");
-
+    vTaskDelay(2000* this->iterationDelay);
     while (1) {
         if (millis() - this->timerAutomatic > 100) {
             uint8_t gpioB = readRegister(GPIOB);  // Leer el estado actual del banco B

@@ -45,11 +45,11 @@ void Control::run(void *data) {
     // ✅ Asegurar que pumps[0] y pumps[1] son objetos diferentes
     if (this->pumps[0] && this->pumps[1]) {
         this->pumps[0]->setPin(1);
-        this->pumps[1]->setPin(3);
+        this->pumps[1]->setPin(2);
     }
 
     if (this->chillers[0] && this->chillers[1]) {
-        this->chillers[0]->setPin(2);
+        this->chillers[0]->setPin(3);
         this->chillers[1]->setPin(4);
     }
 
@@ -58,11 +58,12 @@ void Control::run(void *data) {
     this->lcd->setChillerState(0, false);
     this->lcd->setChillerState(1, false);
 
-    this->lcd->getProgressBar(0).setCounter(0);
-    this->lcd->getProgressBar(1).setCounter(0);
+    
+    this->lcd->setProgressBarValue(1,0);
+    this->lcd->setProgressBarValue(2,0);
 
-    this->lcd->getProgressBar(0).setTimer(this->delay[0]);
-    this->lcd->getProgressBar(1).setTimer(this->delay[1]);
+    this->lcd->getProgressBar(1).setTimer(this->delay[0]);
+    this->lcd->getProgressBar(2).setTimer(this->delay[1]);
 
     this->pumps[0]->toggle(this->GPIOA);
     this->pumps[1]->toggle(this->GPIOA);
@@ -198,11 +199,11 @@ void Control::proccessUpKey() {
                 case CONFIG:
                     if (this->currentOption == 1) {
                         this->delay[0] += 1;
-                        this->lcd->setProgressBarDelay(0, delay[0]);
+                        this->lcd->setProgressBarDelay(1, delay[0]);
                         Serial.printf("Delay 1: %d\n", delay[0]);
                     } else if (this->currentOption == 2) {
                         this->delay[1] += 1;
-                        this->lcd->setProgressBarDelay(1, delay[1]);
+                        this->lcd->setProgressBarDelay(2, delay[1]);
                         Serial.printf("Delay 2: %d\n", delay[1]);
                     }
                     //this->lcd->update();
@@ -257,21 +258,20 @@ void Control::proccessDownKey() {
                     Serial.println("Nothing to do in home");
                     break;
                 case CONFIG:
-                    if (this->currentOption == 1) {
-                        this->delay[0] -= 1;
-                        if (delay[0] < 0) delay[0] = 0;
-                        this->lcd->setProgressBarDelay(0, delay[0]);
-                        Serial.printf("Delay 1: %d\n", delay[0]);
-                    } else if (this->currentOption == 2) {
-                        this->delay[1] -= 1;
-                        if (delay[1] < 0) delay[1] = 0;
-                        this->lcd->setProgressBarDelay(1, delay[1]);
-                        Serial.printf("Delay 2: %d\n", delay[1]);
+                    if (this->currentOption == 1 || this->currentOption == 2) {
+                        uint8_t index = this->currentOption;
+                        this->delay[index -1 ] -= 1;
+                        if (delay[index -1 ] < 0) {
+                            delay[index - 1] = 0;
+                        }
+                        this->lcd->setProgressBarDelay(index, delay[ index -1 ]);
+                        Serial.printf("Delay 1: %d\n", delay[ index - 1 ]);
                     }
                     //this->lcd->update();
                     break;
-            }
-        } else {
+            }    
+        } 
+        else {
             this->currentOption--;
             switch (this->currentScreen) {
                 case CONFIG:
@@ -305,9 +305,11 @@ void Control::proccessDownKey() {
                     if (this->currentOption > this->maxOptions[3] || this->currentOption < 1) this->currentOption = this->maxOptions[3];
                     break;
             }
-            //this->lcd->update();  // Actualizar la pantalla después de cambiar la opción
         }
-    } else {
+            //this->lcd->update();  // Actualizar la pantalla después de cambiar la opción
+    }
+
+    else {
         this->previousScreen();
     }
 }
@@ -431,7 +433,7 @@ void Control::setProcessChiller(uint8_t index){
 }
 
 
-void Control::automaticSecuence(uint8_t index){
+void Control::automaticSecuence(int index){
     //Serial.printf("processing chiller %d in automatic mode  \n",index + 1);
     
     if(index == 2){
@@ -456,13 +458,20 @@ void Control::automaticSecuence(uint8_t index){
         this->lcd->setMotorState(0,false);
         this->lcd->setChillerState(1, false);
         this->lcd->setMotorState(1,false);
+
+        this->lcd->setProgressBarValue(1,0);
+        this->lcd->setProgressBarValue(2,0);
+
+        
+        this->lcd->setProgressBarPercentage(1,0);
+        this->lcd->setProgressBarPercentage(2,0);
+        
         this->flag_process[0] = false;
         this->flag_process[1] = false;
         return;
     }
 
     this->delayCounter[index] = millis() - timerDelayCounter[index];
-
     if(this->pumps[index]->getState()){
         if(this->flag_process[index] == true){
             return;
@@ -471,9 +480,10 @@ void Control::automaticSecuence(uint8_t index){
         if(this->delayCounter[index] > this->delay[index] * 1000 ){ // cuando pase el tiempo
             this->GPIOA |= (1 << this->chillers[index]->getPin());
             Serial.printf("\n ChilleR %d Initiated \n", index);
-            Serial.printf("the chiller %d pin is : %d \n",index,this->chillers[index]->getPin());
+            //Serial.printf("the chiller %d pin is : %d \n",index,this->chillers[index]->getPin());
             
             uint8_t percentage = (100 * this->delayCounter[index]) / (1000 * this->delay[index]);
+            Serial.printf("\n The DelayCounter # %d is : %d ",index,this->delayCounter[index]);
             this->lcd->getProgressBar(index).setPercentage(percentage);
             this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
             this->chillers[index]->toggle(this->GPIOA);
@@ -514,5 +524,8 @@ void Control::automaticSecuence(uint8_t index){
         this->GPIOA |= (1 << this->pumps[index]->getPin());
         this->pumps[index]->toggle(this->GPIOA);
         this->lcd->setMotorState(index, true);
+
+        this->timerDelayCounter[index] = millis();
+        Serial.printf("\n Delay %d is : %d\n",index+1,this->delay[index]);
     }
 }

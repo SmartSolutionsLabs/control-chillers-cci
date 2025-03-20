@@ -91,7 +91,7 @@ public:
 
     void setProcessChiller(uint8_t index);
 
-    void automaticSecuence(uint8_t index);
+    void automaticSecuence(int index);
 };
 
 #endif
