@@ -57,10 +57,10 @@ SmartBoard * smartboard;
 
 void setup() {
 	Serial.begin(115200);
-	Network::SSID = ssid;
+	/*Network::SSID = ssid;
 	Network::PASSWORD = password;
 	Network::getInstance()->begin("SC-RAIDI8_CCI_CHILLERS",true);	
-	Network::getInstance()->connect();
+	Network::getInstance()->connect();*/
 	Wire.begin(5,4);
 	smartboard = new SmartBoard();
 	//smartboard->beginSerialPort(Serial2);

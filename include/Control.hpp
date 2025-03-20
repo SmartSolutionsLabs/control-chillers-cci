@@ -92,6 +92,20 @@ public:
     void setProcessChiller(uint8_t index);
 
     void automaticSecuence(int index);
+
+    void turnOnAutomaticSecuence(int index);
+
+    void turnOffAutomaticSecuence(int index);
+
+    void turnOnChiller(int index);
+    void turnOffChiller(int index);
+    
+    void turnOnPump(int index);
+    void turnOffPump(int index);
+
+    
+    void updateProgressBar(int index);
+
 };
 
 #endif

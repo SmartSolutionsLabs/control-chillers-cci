@@ -434,25 +434,17 @@ void Control::setProcessChiller(uint8_t index){
 
 
 void Control::automaticSecuence(int index){
-    //Serial.printf("processing chiller %d in automatic mode  \n",index + 1);
-    
+    //Serial.printf("processing chiller %d in automatic mode  \n",index + 1);   
     if(index == 2){
         this->GPIOA &= ~(1 << this->pumps[0]->getPin());
         this->GPIOA &= ~(1 << this->pumps[1]->getPin());
         this->GPIOA &= ~(1 << this->chillers[0]->getPin());
         this->GPIOA &= ~(1 << this->chillers[1]->getPin());
 
-
         this->pumps[0]->toggle(this->GPIOA);
         this->chillers[1]->toggle(this->GPIOA);
         this->pumps[0]->toggle(this->GPIOA);
         this->chillers[1]->toggle(this->GPIOA);
-        //this->pumps[index]->toggle(this->GPIOA);
-
-
-        //this->GPIOA &= ~(1 << this->chillers[index]->getPin());
-    
-        //this->chillers[index]->toggle(this->GPIOA);
 
         this->lcd->setChillerState(0, false);
         this->lcd->setMotorState(0,false);
@@ -462,7 +454,6 @@ void Control::automaticSecuence(int index){
         this->lcd->setProgressBarValue(1,0);
         this->lcd->setProgressBarValue(2,0);
 
-        
         this->lcd->setProgressBarPercentage(1,0);
         this->lcd->setProgressBarPercentage(2,0);
         
@@ -470,62 +461,84 @@ void Control::automaticSecuence(int index){
         this->flag_process[1] = false;
         return;
     }
+    
+}
 
-    this->delayCounter[index] = millis() - timerDelayCounter[index];
-    if(this->pumps[index]->getState()){
-        if(this->flag_process[index] == true){
-            return;
+
+
+void Control::turnOnAutomaticSecuence(int index){
+    if(this->flag_process[index] == false){ // incia el contador 
+        this->flag_process[index] = true;
+        this->timerDelayCounter[index] = millis();
+    }
+    else{ // ya incio el contador
+        this->delayCounter[index] = millis() - timerDelayCounter[index];
+        this->timerDelayCounter[index] = millis();
+        this->updateProgressBar(index);
+        this->turnOnPump(index);         // se enciende bomba ;
+        if(this->delayCounter[index] > this->delay[index] * 1000 ){  // se espera el tiempo para encender el chiller
+            this->turnOnChiller(index);  // se enciende el chiller;
+            this->flag_process[index] = false;
         }
-
+    }    
+    
         if(this->delayCounter[index] > this->delay[index] * 1000 ){ // cuando pase el tiempo
-            this->GPIOA |= (1 << this->chillers[index]->getPin());
-            Serial.printf("\n ChilleR %d Initiated \n", index);
-            //Serial.printf("the chiller %d pin is : %d \n",index,this->chillers[index]->getPin());
-            
+            turnOnChiller(index);
             uint8_t percentage = (100 * this->delayCounter[index]) / (1000 * this->delay[index]);
-            Serial.printf("\n The DelayCounter # %d is : %d ",index,this->delayCounter[index]);
             this->lcd->getProgressBar(index).setPercentage(percentage);
             this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
-            this->chillers[index]->toggle(this->GPIOA);
-            this->lcd->setChillerState(index, true);
-
             this->flag_process[index] = true;
         }
 
-        else{
-            static unsigned long lastUpdateTime[8] = {0};  // Suponiendo hasta 8 chillers
+}
+
+void Control::updateProgressBar(int index){
+    static unsigned long lastUpdateTime[8] = {0};  // Suponiendo hasta 8 chillers
             
-            if (millis() - lastUpdateTime[index] >= 1000) {  // Se actualiza cada 1 segundo
-                lastUpdateTime[index] = millis();
+    if (millis() - lastUpdateTime[index] >= 1000) {  // Se actualiza cada 1 segundo
+        lastUpdateTime[index] = millis();
 
-                uint8_t percentage = (100 * this->delayCounter[index]) / (1000 * this->delay[index]);
-                
-                // updating progressBar
-                this->lcd->getProgressBar(index).setPercentage(percentage);
-                this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
-                
-
-                Serial.printf("\rProgress Bar : |");  // Retorno de carro para sobrescribir
-                for (int i = 0; i < 20; i++) {
-                    if (i < percentage / 5) {
-                        Serial.printf("█");  // Bloques llenos
-                    } else {
-                        Serial.printf(" ");  // Espacios vacíos
-                    }
-                }
-                Serial.printf("| %d% %", percentage);  // Espacios extras para borrar residuos
-                
-                Serial.flush();  // Asegurar que se imprima en la terminal en tiempo real
+        uint8_t percentage = (100 * this->delayCounter[index]) / (1000 * this->delay[index]);
+        this->lcd->getProgressBar(index).setPercentage(percentage);
+        this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
+        
+        Serial.printf("\rProgress Bar : |");  // Retorno de carro para sobrescribir
+        for (int i = 0; i < 20; i++) {
+            if (i < percentage / 5) {
+                Serial.printf("█");  // Bloques llenos
+            } else {
+                Serial.printf(" ");  // Espacios vacíos
             }
         }
+        Serial.printf("| %d% %", percentage);  // Espacios extras para borrar residuos
+        Serial.flush();  // Asegurar que se imprima en la terminal en tiempo real
     }
-    else{
-        Serial.printf("Initiating Pump # %d \n", index);
-        this->GPIOA |= (1 << this->pumps[index]->getPin());
-        this->pumps[index]->toggle(this->GPIOA);
-        this->lcd->setMotorState(index, true);
+}
 
-        this->timerDelayCounter[index] = millis();
-        Serial.printf("\n Delay %d is : %d\n",index+1,this->delay[index]);
-    }
+void Control::turnOffAutomaticSecuence(int index){
+
+}
+
+void Control::turnOnChiller(int index){
+    this->GPIOA |= (1 << this->chillers[index]->getPin());
+    this->chillers[index]->toggle(this->GPIOA);
+    this->lcd->setChillerState(index, true);
+}
+
+void Control::turnOffChiller(int index){
+    this->GPIOA &= ~(1 << this->chillers[index]->getPin());
+    this->chillers[index]->toggle(this->GPIOA);
+    this->lcd->setMotorState(index, false);
+}
+
+void Control::turnOnPump(int index){
+    this->GPIOA |= (1 << this->pumps[index]->getPin());
+    this->pumps[index]->toggle(this->GPIOA);
+    this->lcd->setMotorState(index, true);
+}
+
+void Control::turnOffPump(int index){
+    this->GPIOA &= ~(1 << this->pumps[index]->getPin());
+    this->pumps[index]->toggle(this->GPIOA);
+    this->lcd->setMotorState(index, false);
 }

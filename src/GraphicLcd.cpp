@@ -206,12 +206,14 @@ void GraphicLCD::drawManualPage(){
     chillerIcon[0].setPosition(90, 5);
     chillerIcon[0].showIcon();
     chillerIcon[0].hideLabelState();
+    chillerIcon[0].update();
     //chillerIcon[0].animate();
 
     // Dibujar CHILLER 1
     chillerIcon[1].setPosition(90, 37);
     chillerIcon[1].showIcon();
     chillerIcon[1].hideLabelState();
+    chillerIcon[1].update();
     //chillerIcon[1].animate();
     
     this->u8g2->sendBuffer();

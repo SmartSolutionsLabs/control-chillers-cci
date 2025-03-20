@@ -25,6 +25,10 @@ class ChillerGraphicLCD {
 
         bool animated = false;
         
+        bool labelState = false;
+
+        bool iconState = false;
+
     public:
 
         ChillerGraphicLCD();
@@ -52,16 +56,16 @@ class ChillerGraphicLCD {
         void setTimer(uint32_t newTimer);
         uint32_t getTimer();
 
-        void drawIcon(bool show);
+        void drawIcon();
         void showIcon();
         void hideIcon();
 
         void setLabelPosition(uint8_t xCenter , uint8_t yCenter);
-        void drawLabelState(bool show);
+        void drawLabelState();
         void showLabelState();
         void hideLabelState();
 
-        void setAnimation( bool newAnimation);
+        void setAnimation(bool newAnimation);
         void animate();
         void deanimate();
 
@@ -75,5 +79,7 @@ class ChillerGraphicLCD {
         bool isSelected() const {
             return this->selected;
         }
+
+        void update();
 };
 #endif
