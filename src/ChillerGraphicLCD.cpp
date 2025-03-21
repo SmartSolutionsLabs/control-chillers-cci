@@ -204,7 +204,25 @@ void ChillerGraphicLCD::show(){
 
 }
 
+
+void ChillerGraphicLCD::setSelected(){
+    this->selected = true;
+}
+
+
+void ChillerGraphicLCD::setUnselected(){
+    this->selected = false;
+}
+
+void ChillerGraphicLCD::drawSelected(){
+    if(!this->selected){
+        return;
+    }
+    this->drawCenteredText(this->xCenterLabel - 15 ,   this->yCenterLabel, ">");
+}
+
 void ChillerGraphicLCD::update(){
     this->drawLabelState();
     this->drawIcon();
+    this->drawSelected();
 }

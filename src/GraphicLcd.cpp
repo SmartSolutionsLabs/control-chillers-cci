@@ -198,7 +198,7 @@ void GraphicLCD::drawManualPage(){
     motorIcon[0].animate();
 
     motorIcon[1].setPosition(33,37);
-    motorIcon[1].showIcon();
+    motorIcon[1].showIcon(); 
     motorIcon[1].showLabelState();
     motorIcon[1].animate();
 

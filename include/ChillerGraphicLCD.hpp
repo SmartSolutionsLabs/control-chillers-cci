@@ -72,10 +72,10 @@ class ChillerGraphicLCD {
         void setPosition(uint8_t xpos , uint8_t ypos);
         void show();
 
-        void setSelected(bool isSelected) {
-            this->selected = isSelected;
-        }
-    
+        void setSelected();
+        void setUnselected();
+        void drawSelected();
+
         bool isSelected() const {
             return this->selected;
         }

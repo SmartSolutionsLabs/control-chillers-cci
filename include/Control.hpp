@@ -85,16 +85,17 @@ public:
 
 	Screen getScreen();
 
-    void manual();
+    void manualControlDevice();
 
     void processChiller();
 
     void setProcessChiller(uint8_t index);
 
-    void automaticSecuence(int index);
+    void automaticSecuence();
+
+    void shutDownAutomatic();
 
     void turnOnAutomaticSecuence(int index);
-
     void turnOffAutomaticSecuence(int index);
 
     void turnOnChiller(int index);

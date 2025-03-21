@@ -139,7 +139,7 @@ void Control::proccessEnterKey() {
                 case MANUAL:
                     this->currentMode = MANUAL_MODE;
                     Serial.println("Manual mode activated");
-                    this->manual();
+                    this->manualControlDevice();
                     // Activar/desactivar dispositivos según la opción seleccionada
                     break;
                 case LOG:
@@ -369,52 +369,67 @@ bool readBit(uint8_t byte, uint8_t pin) {
     return (byte & (1 << pin)) != 0;
 }
 
-void Control::manual() {
+void Control::manualControlDevice() {
     uint8_t index = this->currentOption - 1;  // 🟢 Crear un índice sin modificar `currentOption`
 
-    if (index < 2) {  // 🟢 Para `pumps[0]` y `pumps[1]`
-        this->GPIOA ^= (1 << this->pumps[index]->getPin());
-        this->pumps[index]->toggle(this->GPIOA);
-
-        // 🟢 Actualizar pantalla
-        bool isOn = readBit(this->GPIOA, this->pumps[index]->getPin());
-        this->lcd->setMotorState(index, isOn);
-        Serial.printf("Pump %d toggled: %d\n", this->currentOption, isOn);
-    } 
-    else if (index < 4) {  // 🟢 Para `chillers[0]` y `chillers[1]`
-        uint8_t chillerIndex = index - 2;  // 🟢 Ajustar índice para `chillers[]`
-        this->GPIOA ^= (1 << this->chillers[chillerIndex]->getPin());
-        this->chillers[chillerIndex]->toggle(this->GPIOA);
-
-        // 🟢 Actualizar pantalla
-        bool isOn = readBit(this->GPIOA, this->chillers[chillerIndex]->getPin());
-        this->lcd->setChillerState(chillerIndex, isOn);
-        Serial.printf("Chiller %d toggled: %d\n", this->currentOption - 2, isOn);
+    if(index == 1){
+        if(this->chillers[index-1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
+            this->turnOffAutomaticSecuence(1);
+        }
+        else{
+            if(this->pumps[index-1]->getState()){ // si no ;  y si la bomba esta encendida ; se puede apagar directamente la bomba
+                this->turnOffPump(1);
+            }
+            else{
+                this->turnOnPump(1);  // si la bomba esta apagada ; se enciende.
+            }
+        }
     }
-
-    // 📝 Mostrar el estado actual de GPIOA
-    Serial.print("\t\t ********* DATA: 0b");
-    for (int j = 7; j >= 0; j--) {
-        Serial.print(bitRead(this->GPIOA, j));  
+    if(index == 2){    
+        if(this->chillers[0]->getState()){// si el chiller esta encendido
+            this->turnOffChiller(1);
+        }
+        else{ // si el chiller esta apagado
+            this->turnOnChiller(1);
+        }
     }
-    Serial.println();
+    
+    if(index == 3){
+        if(this->chillers[1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
+            this->turnOffAutomaticSecuence(2);
+        }
+        else{
+            if(this->pumps[1]->getState()){ // si no ;  y si la bomba esta encendida ; se puede apagar directamente la bomba
+                this->turnOffPump(2);
+            }
+            else{
+                this->turnOnPump(2);  // si la bomba esta apagada ; se enciende.
+            }
+        }
+    }
+    if(index == 4){
+        if(this->chillers[1]->getState()){// si el chiller esta encendido
+            this->turnOffChiller(2);
+        }
+        else{ // si el chiller esta apagado
+            this->turnOnChiller(2);
+        }
+    }    
 }
 
 void Control::processChiller(){
     
     switch(this->chillerMode){
         case NONE_SELECTED:
-            timerDelayCounter[0] = millis();
-            timerDelayCounter[1] = millis();
-            this->automaticSecuence(2);
+            this->shutDownAutomatic();
             break;
         
         case CHILLER_1_SELECTED:
-            this->automaticSecuence(0);
+            this->turnOnAutomaticSecuence(1);
             break;
 
         case CHILLER_2_SELECTED:
-            this->automaticSecuence(1);
+            this->turnOnAutomaticSecuence(2);
             break;
     }
 }
@@ -433,62 +448,51 @@ void Control::setProcessChiller(uint8_t index){
 }
 
 
-void Control::automaticSecuence(int index){
+void Control::shutDownAutomatic(){
     //Serial.printf("processing chiller %d in automatic mode  \n",index + 1);   
-    if(index == 2){
-        this->GPIOA &= ~(1 << this->pumps[0]->getPin());
-        this->GPIOA &= ~(1 << this->pumps[1]->getPin());
-        this->GPIOA &= ~(1 << this->chillers[0]->getPin());
-        this->GPIOA &= ~(1 << this->chillers[1]->getPin());
-
-        this->pumps[0]->toggle(this->GPIOA);
-        this->chillers[1]->toggle(this->GPIOA);
-        this->pumps[0]->toggle(this->GPIOA);
-        this->chillers[1]->toggle(this->GPIOA);
-
-        this->lcd->setChillerState(0, false);
-        this->lcd->setMotorState(0,false);
-        this->lcd->setChillerState(1, false);
-        this->lcd->setMotorState(1,false);
-
-        this->lcd->setProgressBarValue(1,0);
-        this->lcd->setProgressBarValue(2,0);
-
-        this->lcd->setProgressBarPercentage(1,0);
-        this->lcd->setProgressBarPercentage(2,0);
-        
-        this->flag_process[0] = false;
-        this->flag_process[1] = false;
-        return;
-    }
-    
+    this->turnOffAutomaticSecuence(1);
+    this->turnOffAutomaticSecuence(2);    
+    return;
 }
 
 
 
 void Control::turnOnAutomaticSecuence(int index){
-    if(this->flag_process[index] == false){ // incia el contador 
-        this->flag_process[index] = true;
-        this->timerDelayCounter[index] = millis();
+    if(this->flag_process[index] == true){  // incia el contador 
+        return;
     }
-    else{ // ya incio el contador
-        this->delayCounter[index] = millis() - timerDelayCounter[index];
-        this->timerDelayCounter[index] = millis();
-        this->updateProgressBar(index);
-        this->turnOnPump(index);         // se enciende bomba ;
-        if(this->delayCounter[index] > this->delay[index] * 1000 ){  // se espera el tiempo para encender el chiller
-            this->turnOnChiller(index);  // se enciende el chiller;
-            this->flag_process[index] = false;
-        }
-    }    
     
-        if(this->delayCounter[index] > this->delay[index] * 1000 ){ // cuando pase el tiempo
-            turnOnChiller(index);
-            uint8_t percentage = (100 * this->delayCounter[index]) / (1000 * this->delay[index]);
-            this->lcd->getProgressBar(index).setPercentage(percentage);
-            this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
-            this->flag_process[index] = true;
-        }
+    if(!this->pumps[index-1]->getState()){ //  verifica el estado del motor
+        this->turnOnPump(index);           /// enciende el motor por primera vez
+        this->timerDelayCounter[index] = millis(); //incia el timer contador del delay entre motor y chiller
+    }
+
+    this->delayCounter[index] = millis() - timerDelayCounter[index];
+    this->updateProgressBar(index);
+
+    if(this->delayCounter[index] > this->delay[index] * 1000 ){  // se espera el tiempo para encender el chiller
+        this->turnOnChiller(index);  // se enciende el chiller;
+        this->flag_process[index] = true;
+    }
+}
+
+void Control::turnOffAutomaticSecuence(int index){
+    if(this->flag_process[index] == true){  // incia el contador 
+        return;
+    }
+    
+    if(this->pumps[index-1]->getState()){ //  verifica el estado del motor
+        this->turnOffPump(index);           /// enciende el motor por primera vez
+        this->timerDelayCounter[index] = millis(); //incia el timer contador del delay entre motor y chiller
+    }
+
+    this->delayCounter[index] = millis() - timerDelayCounter[index];
+    this->updateProgressBar(index);
+
+    if(this->delayCounter[index] > this->delay[index] * 1000 ){  // se espera el tiempo para encender el chiller
+        this->turnOffChiller(index);  // se enciende el chiller;
+        this->flag_process[index] = true;
+    }
 
 }
 
@@ -515,10 +519,6 @@ void Control::updateProgressBar(int index){
     }
 }
 
-void Control::turnOffAutomaticSecuence(int index){
-
-}
-
 void Control::turnOnChiller(int index){
     this->GPIOA |= (1 << this->chillers[index]->getPin());
     this->chillers[index]->toggle(this->GPIOA);
@@ -528,7 +528,7 @@ void Control::turnOnChiller(int index){
 void Control::turnOffChiller(int index){
     this->GPIOA &= ~(1 << this->chillers[index]->getPin());
     this->chillers[index]->toggle(this->GPIOA);
-    this->lcd->setMotorState(index, false);
+    this->lcd->setChillerState(index, false);
 }
 
 void Control::turnOnPump(int index){
