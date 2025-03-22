@@ -25,6 +25,10 @@ class MotorGraphicLCD {
 
         bool animated = false;
 
+        bool labelState = false;
+
+        bool iconState = false;
+
     public:
 
         MotorGraphicLCD();
@@ -52,12 +56,12 @@ class MotorGraphicLCD {
         void setTimer(uint32_t newTimer);
         uint32_t getTimer();
 
-        void drawIcon(bool show);
+        void drawIcon();
         void showIcon();
         void hideIcon();
 
         void setLabelPosition(uint8_t xCenter , uint8_t yCenter);
-        void drawLabelState(bool show);
+        void drawLabelState();
         void showLabelState();
         void hideLabelState();
 
@@ -66,7 +70,6 @@ class MotorGraphicLCD {
         void deanimate();
 
         void setPosition(uint8_t xpos , uint8_t ypos);
-        void show();
 
         void setSelected(bool isSelected) {
             this->selected = isSelected;
@@ -75,5 +78,7 @@ class MotorGraphicLCD {
         bool isSelected() const {
             return this->selected;
         }
+
+        void update();
 };
 #endif

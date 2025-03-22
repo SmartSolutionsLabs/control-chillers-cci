@@ -49,6 +49,8 @@ class GraphicLCD : public Module {
 		bool newScreen;
 
 		uint32_t timerFPS ;
+
+		bool initialized = false;
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
 		
@@ -73,8 +75,6 @@ class GraphicLCD : public Module {
 		void run(void* data) override;
 
 		void print(int x, int y,  char *text);
-
-		void testprint();
 
 		void splashScreen();
 
@@ -117,7 +117,13 @@ class GraphicLCD : public Module {
 		void setProgressBarDelay(uint8_t index , uint8_t newDelay);
 		
 		uint8_t getProgressBarDelay(uint8_t index);
+		
 
+		bool isInitialized() const { return initialized; }
+		void setInitialized(bool value) { initialized = value; }
+
+		void selectMotor(int index,bool mode);
+		void selectChiller(int index,bool mode);
 	};
 
 #endif

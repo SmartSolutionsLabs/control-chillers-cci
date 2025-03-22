@@ -13,7 +13,7 @@ private:
 
     GraphicLCD *lcd;   // Pantalla gráfica
 
-    Screen newScreen = HOME;  // Pantalla actual
+    Screen newScreen = MANUAL;  // Pantalla actual
     bool enter;               // Indica si se ha presionado "Enter"
     uint8_t currentOption;           // Opción seleccionada en el menú
     uint8_t *maxOptions;
@@ -33,6 +33,7 @@ private:
     };
 
     ChillerMode chillerMode;
+    ChillerMode lastChillerMode = NONE_SELECTED;
     Mode currentMode;    // Modo actual (manual o automático)
     uint32_t delayCounter[2];     // Tiempo 1 para modo automático
     uint32_t timerDelayCounter[2];
@@ -40,6 +41,9 @@ private:
     bool flag_process[2];
 	Screen currentScreen = HOME;
     uint8_t GPIOA = 0x00;
+
+    bool automaticSecuenceOn[2] = {false,false};
+    bool automaticSecuenceOff[2] = {false,false};
 
 public:
     Control(const char *name, int taskCore = 1);
@@ -91,10 +95,6 @@ public:
 
     void setProcessChiller(uint8_t index);
 
-    void automaticSecuence();
-
-    void shutDownAutomatic();
-
     void turnOnAutomaticSecuence(int index);
     void turnOffAutomaticSecuence(int index);
 
@@ -104,9 +104,15 @@ public:
     void turnOnPump(int index);
     void turnOffPump(int index);
 
-    
     void updateProgressBar(int index);
 
+    void nextOption();
+    void previousOption();
+
+    void upValueOption();
+    void downValueOption();
+    
+    void processOption();
 };
 
 #endif

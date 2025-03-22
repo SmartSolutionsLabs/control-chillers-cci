@@ -30,7 +30,6 @@ void Control::connect(void *data) {
     this->chillers[0] = new Chiller("Chiller0", 1);
     this->chillers[1] = new Chiller("Chiller1", 1);
 
-
     this->maxOptions[0] = 0;
     this->maxOptions[1] = 2;
     this->maxOptions[2] = 4;
@@ -53,25 +52,32 @@ void Control::run(void *data) {
         this->chillers[1]->setPin(4);
     }
 
-    this->lcd->setMotorState(0, false);
-    this->lcd->setMotorState(1, false);
-    this->lcd->setChillerState(0, false);
-    this->lcd->setChillerState(1, false);
+    while(this->lcd == nullptr || !this->lcd->isInitialized()) {
+        vTaskDelay(50 / portTICK_PERIOD_MS);
+    } 
 
-    
+    this->turnOffPump(1);
+    this->turnOffPump(2);
+    this->turnOffChiller(1);
+    Serial.printf("this->turnOffChiller(1);\n");
+    this->turnOffChiller(2);
+
+    Serial.printf("this->lcd->setProgressBarValue(0,0);\n");
     this->lcd->setProgressBarValue(1,0);
     this->lcd->setProgressBarValue(2,0);
+    Serial.printf("Pumps and Chillers powered off\n");
+    this->lcd->setProgressBarDelay(1,this->delay[0]);
+    this->lcd->setProgressBarDelay(2,this->delay[1]);
 
-    this->lcd->getProgressBar(1).setTimer(this->delay[0]);
-    this->lcd->getProgressBar(2).setTimer(this->delay[1]);
-
-    this->pumps[0]->toggle(this->GPIOA);
-    this->pumps[1]->toggle(this->GPIOA);
-    //Serial.printf("Pump 0 Pin: %d, Pump 1 Pin: %d\n", 
-    //    this->pumps[0]->getPin(), this->pumps[1]->getPin());
-
+    this->lcd->getProgressBar(0).setCounter(this->delayCounter[0]/1000);
+    this->lcd->getProgressBar(1).setCounter(this->delayCounter[1]/1000);
+    Serial.printf("this->lcd->setProgressBarDelay(0,this->delay[0]); \n");
     bool flag = false;
-
+    this->flag_process[0] = true;
+    this->flag_process[1] = true;
+    this->lcd->getProgressBar(0).setCounter(0);
+    this->lcd->getProgressBar(1).setCounter(0);
+    this->lcd->setScreen(MANUAL);
     while (1) {
         vTaskDelay(this->iterationDelay);
 
@@ -111,64 +117,19 @@ void Control::handleKey(char key) {
             setProcessChiller(0);
             break;
     }
-    Serial.printf("ScreenSelected: %d, optionSelected: %d, currentOption: %d\n", 
-                  this->ScreenSelected, this->optionSelected, this->currentOption);
+    Serial.printf("currentScreen : %d, ScreenSelected: %d, optionSelected: %d, currentOption: %d\n", 
+                  this->currentScreen, this->ScreenSelected, this->optionSelected, this->currentOption);
 }
 
 void Control::proccessEnterKey() {
-    if (this->ScreenSelected) {
-        if (this->optionSelected) {
-            switch (this->currentScreen) {
-                case HOME:
-                    this->currentMode = AUTOMATIC_MODE;
-                    Serial.println("Automatic mode activated");
-                    break;
-                case CONFIG:
-                    if (this->currentOption == 1) {
-                        this->lcd->getProgressBar(0).setSelected(true);
-                        this->lcd->getProgressBar(0).setNavigated(false);
-                        this->lcd->getProgressBar(1).setSelected(false);
-                        this->lcd->getProgressBar(1).setNavigated(false);
-                    } else if (this->currentOption == 2) {
-                        this->lcd->getProgressBar(0).setSelected(false);
-                        this->lcd->getProgressBar(0).setNavigated(false);
-                        this->lcd->getProgressBar(1).setSelected(true);
-                        this->lcd->getProgressBar(1).setNavigated(false);
-                    }
-                    break;
-                case MANUAL:
-                    this->currentMode = MANUAL_MODE;
-                    Serial.println("Manual mode activated");
-                    this->manualControlDevice();
-                    // Activar/desactivar dispositivos según la opción seleccionada
-                    break;
-                case LOG:
-                    Serial.println("Nothing to do in LOG");
-                    break;
-            }
-            //this->lcd->update();  // Actualizar la pantalla después de confirmar la selección
-        } else {
-            // Si no hay una opción seleccionada, seleccionamos la opción actual
-            this->optionSelected = true;
-            Serial.printf("Option %d selected\n", this->currentOption);
-
-            // Actualizar el estado a SELECTED
-            //this->lcd->getTextInput(this->currentOption - 1)->setState(InputState::SELECTED);
-
-            //this->lcd->update();  // Actualizar la pantalla después de seleccionar la opción
-        }
-    } else {
-        // Si no hay una pantalla seleccionada, seleccionamos la pantalla actual
+    if(!this->ScreenSelected){
         this->ScreenSelected = true;
-        Serial.printf("Screen %d selected\n", this->currentScreen);
-        if (this->currentScreen == HOME) {
-            this->currentMode = AUTOMATIC_MODE;
-            Serial.println("Automatic mode activated");
-        } else if (this->currentScreen == MANUAL) {
-            this->currentMode = MANUAL_MODE;
-            Serial.println("Manual mode activated");
-        }
-        //this->lcd->update();  // Actualizar la pantalla después de seleccionar la pantalla
+    }
+    else if(this->ScreenSelected && !this->optionSelected){
+        this->optionSelected = true;
+    }
+    else if(this->ScreenSelected && this->optionSelected){
+        this->manualControlDevice();
     }
 }
 
@@ -183,135 +144,107 @@ void Control::proccessBackKey() {
             this->ScreenSelected = false;
             Serial.println("Screen deselected");
         }
-        //this->lcd->update();  // Actualizar la pantalla después de deseleccionar
     } else {
         Serial.println("Nothing to do");
     }
 }
 
-void Control::proccessUpKey() {
-    if (this->ScreenSelected) {
-        if (this->optionSelected) {
-            switch (this->currentScreen) {
-                case HOME:
-                    Serial.println("Nothing to do in home");
-                    break;
-                case CONFIG:
-                    if (this->currentOption == 1) {
-                        this->delay[0] += 1;
-                        this->lcd->setProgressBarDelay(1, delay[0]);
-                        Serial.printf("Delay 1: %d\n", delay[0]);
-                    } else if (this->currentOption == 2) {
-                        this->delay[1] += 1;
-                        this->lcd->setProgressBarDelay(2, delay[1]);
-                        Serial.printf("Delay 2: %d\n", delay[1]);
-                    }
-                    //this->lcd->update();
-                    break;
-            }
-        } else {
-            this->currentOption++;
-            switch (this->currentScreen) {
-                case CONFIG:
-                    Serial.println("Navigating config");
-                    if (this->currentOption == 1) {
-                        this->lcd->getProgressBar(0).setNavigated(true);
-                        this->lcd->getProgressBar(0).setSelected(false);
-                        this->lcd->getProgressBar(1).setNavigated(false);
-                        this->lcd->getProgressBar(1).setSelected(false);
-                    } else if (this->currentOption == 2) {
-                        this->lcd->getProgressBar(0).setNavigated(false);
-                        this->lcd->getProgressBar(0).setSelected(false);
-                        this->lcd->getProgressBar(1).setNavigated(true);
-                        this->lcd->getProgressBar(1).setSelected(false);
-                    }
-                    //this->lcd->update();
-                    break;
-            }
 
-            switch (this->currentScreen) {
-                case HOME:
-                    if (this->currentOption > this->maxOptions[0]) this->currentOption = 1;
-                    break;
-                case CONFIG:
-                    if (this->currentOption > this->maxOptions[1]) this->currentOption = 1;
-                    break;
-                case MANUAL:
-                    if (this->currentOption > this->maxOptions[2]) this->currentOption = 1;
-                    break;
-                case LOG:
-                    if (this->currentOption > this->maxOptions[3]) this->currentOption = 1;
-                    break;
-            }
-            //this->lcd->update();  // Actualizar la pantalla después de cambiar la opción
-        }
-    } else {
+void Control::proccessUpKey() {
+    if(!ScreenSelected){   // navegando entre pantallas
         this->nextScreen();
+        this->currentOption = 1;
+    }
+    else if(ScreenSelected && !optionSelected ){ // navegando entre opciones
+        this->nextOption();
+    }
+    else if(ScreenSelected && optionSelected ){ // cambiando valor de una opcion
+        this->upValueOption();
     }
 }
 
 void Control::proccessDownKey() {
-    if (this->ScreenSelected) {
-        if (this->optionSelected) {
-            switch (this->currentScreen) {
-                case HOME:
-                    Serial.println("Nothing to do in home");
-                    break;
-                case CONFIG:
-                    if (this->currentOption == 1 || this->currentOption == 2) {
-                        uint8_t index = this->currentOption;
-                        this->delay[index -1 ] -= 1;
-                        if (delay[index -1 ] < 0) {
-                            delay[index - 1] = 0;
-                        }
-                        this->lcd->setProgressBarDelay(index, delay[ index -1 ]);
-                        Serial.printf("Delay 1: %d\n", delay[ index - 1 ]);
-                    }
-                    //this->lcd->update();
-                    break;
-            }    
-        } 
-        else {
-            this->currentOption--;
-            switch (this->currentScreen) {
-                case CONFIG:
-                    Serial.println("Down key navigating config");
-                    if (this->currentOption == 1) {
-                        this->lcd->getProgressBar(0).setNavigated(true);
-                        this->lcd->getProgressBar(0).setSelected(false);
-                        this->lcd->getProgressBar(1).setNavigated(false);
-                        this->lcd->getProgressBar(1).setSelected(false);
-                    } else if (this->currentOption == 2) {
-                        this->lcd->getProgressBar(0).setNavigated(false);
-                        this->lcd->getProgressBar(0).setSelected(false);
-                        this->lcd->getProgressBar(1).setNavigated(true);
-                        this->lcd->getProgressBar(1).setSelected(false);
-                    }
-                    //this->lcd->update();
-                    break;
-            }
-
-            switch (this->currentScreen) {
-                case HOME:
-                    if (this->currentOption > this->maxOptions[0] || this->currentOption < 1) this->currentOption = this->maxOptions[0];
-                    break;
-                case CONFIG:
-                    if (this->currentOption > this->maxOptions[1] || this->currentOption < 1) this->currentOption = this->maxOptions[1];
-                    break;
-                case MANUAL:
-                    if (this->currentOption > this->maxOptions[2] || this->currentOption < 1) this->currentOption = this->maxOptions[2];
-                    break;
-                case LOG:
-                    if (this->currentOption > this->maxOptions[3] || this->currentOption < 1) this->currentOption = this->maxOptions[3];
-                    break;
-            }
-        }
-            //this->lcd->update();  // Actualizar la pantalla después de cambiar la opción
-    }
-
-    else {
+    if(!ScreenSelected){
         this->previousScreen();
     }
+    else if(ScreenSelected && !optionSelected ){ // navegando entre opciones
+        this->previousOption();
+    }
+    else if(ScreenSelected && optionSelected ){ // navegando entre opciones
+        this->downValueOption();
+    }
+}
+
+void Control::upValueOption(){
+
+}
+
+void Control::downValueOption(){
+    
+}
+
+void Control::processOption(){
+    switch(this->currentScreen){
+        case 0: //home
+            this->currentOption = 0;
+            break;
+        case 1: // config
+            if(this->currentOption == 1 ){
+                this->lcd->getProgressBar(0).setNavigated(true);
+                this->lcd->getProgressBar(1).setNavigated(false);
+            }
+            else if(this->currentOption == 2 ){
+                this->lcd->getProgressBar(0).setNavigated(false);
+                this->lcd->getProgressBar(1).setNavigated(true);
+            }
+            break;
+        case 2: // manual
+            if(this->currentOption == 1){
+                this->lcd->selectMotor(0,true);
+                this->lcd->selectMotor(1,false);
+                this->lcd->selectChiller(0,false);
+                this->lcd->selectChiller(1,false);
+            }
+            else if(this->currentOption == 2){
+                this->lcd->selectMotor(0,false);
+                this->lcd->selectMotor(1,false);
+                this->lcd->selectChiller(0,true);
+                this->lcd->selectChiller(1,false);
+            }
+            else if(this->currentOption == 3){
+                this->lcd->selectMotor(0,false);
+                this->lcd->selectMotor(1,true);
+                this->lcd->selectChiller(0,false);
+                this->lcd->selectChiller(1,false);
+            }
+            else if(this->currentOption == 4){
+                this->lcd->selectMotor(0,false);
+                this->lcd->selectMotor(1,false);
+                this->lcd->selectChiller(0,false);
+                this->lcd->selectChiller(1,true);
+            }
+            break;
+        case 3: // log
+            this->currentOption = 0;
+            break;
+    }
+   
+}
+
+void Control::nextOption(){
+    this->currentOption ++ ;
+    if(this->currentOption > maxOptions[this->currentScreen]){
+        this->currentOption = 1;
+    }
+    this->processOption();
+}
+
+void Control::previousOption(){
+    this->currentOption -- ;
+    if(this->currentOption <= 0 || this->currentOption > maxOptions[this->currentScreen]){
+        this->currentOption = maxOptions[this->currentScreen];
+    }
+    this->processOption();
 }
 
 void Control::nextScreen() {
@@ -330,7 +263,6 @@ void Control::nextScreen() {
             break;
     }
     this->lcd->setScreen(this->currentScreen);
-    //this->lcd->update();
     Serial.printf("CurrentScreen: %d\n", this->currentScreen);
 }
 
@@ -358,11 +290,11 @@ Screen Control::getScreen() {
 }
 
 void Control::setChiller(uint8_t index, Chiller *newChiller) {
-    this->chillers[index-1] = newChiller;
+    this->chillers[index] = newChiller;
 }
 
 void Control::setPump(uint8_t index, Pump *newPump) {
-    this->pumps[index-1] = newPump;
+    this->pumps[index] = newPump;
 }
 
 bool readBit(uint8_t byte, uint8_t pin) {
@@ -370,9 +302,10 @@ bool readBit(uint8_t byte, uint8_t pin) {
 }
 
 void Control::manualControlDevice() {
-    uint8_t index = this->currentOption - 1;  // 🟢 Crear un índice sin modificar `currentOption`
-
+    uint8_t index = this->currentOption;  // 🟢 Crear un índice sin modificar `currentOption`
+    Serial.printf("index == %d",index);
     if(index == 1){
+        Serial.println("trying to change motor 1 ; state");
         if(this->chillers[index-1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
             this->turnOffAutomaticSecuence(1);
         }
@@ -386,6 +319,7 @@ void Control::manualControlDevice() {
         }
     }
     if(index == 2){    
+        Serial.println("trying to change chiller 1 ; state");
         if(this->chillers[0]->getState()){// si el chiller esta encendido
             this->turnOffChiller(1);
         }
@@ -395,6 +329,7 @@ void Control::manualControlDevice() {
     }
     
     if(index == 3){
+        Serial.println("trying to change motor 2 ; state");
         if(this->chillers[1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
             this->turnOffAutomaticSecuence(2);
         }
@@ -408,6 +343,7 @@ void Control::manualControlDevice() {
         }
     }
     if(index == 4){
+        Serial.println("trying to change chiller 1 ; state");
         if(this->chillers[1]->getState()){// si el chiller esta encendido
             this->turnOffChiller(2);
         }
@@ -418,19 +354,17 @@ void Control::manualControlDevice() {
 }
 
 void Control::processChiller(){
-    
-    switch(this->chillerMode){
-        case NONE_SELECTED:
-            this->shutDownAutomatic();
-            break;
-        
-        case CHILLER_1_SELECTED:
-            this->turnOnAutomaticSecuence(1);
-            break;
-
-        case CHILLER_2_SELECTED:
-            this->turnOnAutomaticSecuence(2);
-            break;
+    if(this->automaticSecuenceOn[0]){
+        this->turnOnAutomaticSecuence(1);
+    }
+    else if(this->automaticSecuenceOn[1]){
+        this->turnOnAutomaticSecuence(2);
+    }
+    else if(this->automaticSecuenceOff[0]){
+        this->turnOffAutomaticSecuence(1);
+    }
+    else if(this->automaticSecuenceOff[1]){
+        this->turnOffAutomaticSecuence(2);
     }
 }
 
@@ -445,66 +379,94 @@ void Control::setProcessChiller(uint8_t index){
         this->chillerMode = NONE_SELECTED;
     }
     
+    switch(this->chillerMode){
+        case NONE_SELECTED:
+            if(this->lastChillerMode == CHILLER_1_SELECTED){
+                this->automaticSecuenceOn[0] = false;
+                this->automaticSecuenceOff[0] = true;
+                this->flag_process[0] = false;
+            }
+            if(this->lastChillerMode == CHILLER_2_SELECTED){
+                this->automaticSecuenceOn[1] = false;
+                this->automaticSecuenceOff[1] = true;
+                this->flag_process[1] = false;
+            }
+            break;
+        
+        case CHILLER_1_SELECTED:
+            if(this->lastChillerMode == NONE_SELECTED){
+                this->automaticSecuenceOn[0] = true;
+                this->flag_process[0] = false;
+            }
+            break;
+
+        case CHILLER_2_SELECTED:
+            if(this->lastChillerMode == NONE_SELECTED){
+                this->automaticSecuenceOn[1] = true;
+                this->flag_process[1] = false;
+            }
+            break;
+    }
+    Serial.printf("lastChillerMode: %d | ChillerMode: %d",this->lastChillerMode,this->chillerMode);
+    this->lastChillerMode = this->chillerMode;
 }
-
-
-void Control::shutDownAutomatic(){
-    //Serial.printf("processing chiller %d in automatic mode  \n",index + 1);   
-    this->turnOffAutomaticSecuence(1);
-    this->turnOffAutomaticSecuence(2);    
-    return;
-}
-
-
 
 void Control::turnOnAutomaticSecuence(int index){
-    if(this->flag_process[index] == true){  // incia el contador 
+    if(this->flag_process[index-1] == true){  // incia el contador 
         return;
     }
     
     if(!this->pumps[index-1]->getState()){ //  verifica el estado del motor
         this->turnOnPump(index);           /// enciende el motor por primera vez
-        this->timerDelayCounter[index] = millis(); //incia el timer contador del delay entre motor y chiller
+        this->timerDelayCounter[index-1] = millis(); //incia el timer contador del delay entre motor y chiller
     }
 
-    this->delayCounter[index] = millis() - timerDelayCounter[index];
+    this->delayCounter[index-1] = millis() - timerDelayCounter[index-1];
     this->updateProgressBar(index);
 
-    if(this->delayCounter[index] > this->delay[index] * 1000 ){  // se espera el tiempo para encender el chiller
+    if(this->delayCounter[index-1] > this->delay[index-1] * 1000 ){  // se espera el tiempo para encender el chiller
         this->turnOnChiller(index);  // se enciende el chiller;
-        this->flag_process[index] = true;
+        this->flag_process[index-1] = true;
+        Serial.printf("Process %d already Done ;  this->flag_process%d = %d \n",index-1,index-1,this->flag_process[index-1]);
     }
 }
 
 void Control::turnOffAutomaticSecuence(int index){
-    if(this->flag_process[index] == true){  // incia el contador 
+    if(this->flag_process[index-1] == true){  // incia el contador 
         return;
     }
     
-    if(this->pumps[index-1]->getState()){ //  verifica el estado del motor
-        this->turnOffPump(index);           /// enciende el motor por primera vez
-        this->timerDelayCounter[index] = millis(); //incia el timer contador del delay entre motor y chiller
+    if(this->chillers[index-1]->getState()){ //  verifica el estado del motor
+        this->turnOffChiller(index);           /// enciende el motor por primera vez
+        this->timerDelayCounter[index-1] = millis(); //incia el timer contador del delay entre motor y chiller
     }
 
-    this->delayCounter[index] = millis() - timerDelayCounter[index];
+    this->delayCounter[index-1] = millis() - timerDelayCounter[index-1];
     this->updateProgressBar(index);
 
-    if(this->delayCounter[index] > this->delay[index] * 1000 ){  // se espera el tiempo para encender el chiller
-        this->turnOffChiller(index);  // se enciende el chiller;
-        this->flag_process[index] = true;
+    if(this->delayCounter[index-1] > this->delay[index-1] * 1000 ){  // se espera el tiempo para encender el chiller
+        this->turnOffPump(index);  // se enciende el chiller;
+        this->flag_process[index-1] = true;
     }
-
 }
 
 void Control::updateProgressBar(int index){
     static unsigned long lastUpdateTime[8] = {0};  // Suponiendo hasta 8 chillers
             
-    if (millis() - lastUpdateTime[index] >= 1000) {  // Se actualiza cada 1 segundo
-        lastUpdateTime[index] = millis();
+    if (millis() - lastUpdateTime[index-1] >= 1000) {  // Se actualiza cada 1 segundo
+        lastUpdateTime[index-1] = millis();
 
-        uint8_t percentage = (100 * this->delayCounter[index]) / (1000 * this->delay[index]);
-        this->lcd->getProgressBar(index).setPercentage(percentage);
-        this->lcd->getProgressBar(index).setCounter(this->delayCounter[index]/1000);
+        uint8_t percentage = (100 * this->delayCounter[index-1]) / (1000 * this->delay[index-1]);
+        if(percentage > 100) {
+            percentage = 100;
+        }
+
+        this->lcd->getProgressBar(index-1).setPercentage(percentage);
+        uint32_t secondsElapsed = this->delayCounter[index-1] / 1000;
+        if (secondsElapsed > this->delay[index-1]) {
+            secondsElapsed = this->delay[index-1]; // Evita overflow
+        }
+        this->lcd->getProgressBar(index-1).setCounter(secondsElapsed);
         
         Serial.printf("\rProgress Bar : |");  // Retorno de carro para sobrescribir
         for (int i = 0; i < 20; i++) {
@@ -520,25 +482,46 @@ void Control::updateProgressBar(int index){
 }
 
 void Control::turnOnChiller(int index){
-    this->GPIOA |= (1 << this->chillers[index]->getPin());
-    this->chillers[index]->toggle(this->GPIOA);
-    this->lcd->setChillerState(index, true);
+    this->GPIOA |= (1 << this->chillers[index-1]->getPin());
+    if (this->chillers[index-1] != nullptr) {
+        this->chillers[index-1]->toggle(this->GPIOA);
+    } else {
+        Serial.printf("Error: chiller %d es nullptr\n", index-1);
+    }
+
+    if (index < 1 || index > 2) {
+        Serial.printf("Error: Índice de chiller fuera de rango: %d\n", index);
+        return;
+    }
+    this->lcd->setChillerState(index-1, true);
 }
 
 void Control::turnOffChiller(int index){
-    this->GPIOA &= ~(1 << this->chillers[index]->getPin());
-    this->chillers[index]->toggle(this->GPIOA);
-    this->lcd->setChillerState(index, false);
+    this->GPIOA &= ~(1 << this->chillers[index-1]->getPin());
+
+    if (this->chillers[index-1] != nullptr) {
+        this->chillers[index-1]->toggle(this->GPIOA);
+    } 
+    else {
+        Serial.printf("Error: chiller %d es nullptr\n", index-1);
+    }
+
+    if (index < 1 || index > 2) {
+        Serial.printf("Error: Índice de chiller fuera de rango: %d\n", index);
+        return;
+    }
+    
+    this->lcd->setChillerState(index-1, false);
 }
 
 void Control::turnOnPump(int index){
-    this->GPIOA |= (1 << this->pumps[index]->getPin());
-    this->pumps[index]->toggle(this->GPIOA);
-    this->lcd->setMotorState(index, true);
+    this->GPIOA |= (1 << this->pumps[index-1]->getPin());
+    this->pumps[index-1]->toggle(this->GPIOA);
+    this->lcd->setMotorState(index-1, true);
 }
 
 void Control::turnOffPump(int index){
-    this->GPIOA &= ~(1 << this->pumps[index]->getPin());
-    this->pumps[index]->toggle(this->GPIOA);
-    this->lcd->setMotorState(index, false);
+    this->GPIOA &= ~(1 << this->pumps[index-1]->getPin());
+    this->pumps[index-1]->toggle(this->GPIOA);
+    this->lcd->setMotorState(index-1, false);
 }

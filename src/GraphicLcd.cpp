@@ -44,6 +44,7 @@ void GraphicLCD::connect(void *data) {
         Serial.println("Display initialization failed!");
     } else {
         Serial.println("Display ok!");
+        this->setInitialized(true); 
     }
     this->u8g2->setFont(u8g2_font_6x10_tf);
 }
@@ -196,25 +197,30 @@ void GraphicLCD::drawManualPage(){
     motorIcon[0].showIcon();
     motorIcon[0].showLabelState();
     motorIcon[0].animate();
+    motorIcon[0].update();
 
     motorIcon[1].setPosition(33,37);
     motorIcon[1].showIcon(); 
     motorIcon[1].showLabelState();
     motorIcon[1].animate();
+    motorIcon[1].update();
 
     // Dibujar CHILLER 1
-    chillerIcon[0].setPosition(90, 5);
+    chillerIcon[0].setPosition(80, 5);
     chillerIcon[0].showIcon();
-    chillerIcon[0].hideLabelState();
+    chillerIcon[0].showLabelState();
+    chillerIcon[0].setAnimation(true);
+    chillerIcon[0].animate();
     chillerIcon[0].update();
-    //chillerIcon[0].animate();
+    
 
     // Dibujar CHILLER 1
-    chillerIcon[1].setPosition(90, 37);
+    chillerIcon[1].setPosition(80, 37);
     chillerIcon[1].showIcon();
-    chillerIcon[1].hideLabelState();
+    chillerIcon[1].showLabelState();
+    chillerIcon[1].setAnimation(true);
+    chillerIcon[1].animate();
     chillerIcon[1].update();
-    //chillerIcon[1].animate();
     
     this->u8g2->sendBuffer();
 }
@@ -238,6 +244,8 @@ void GraphicLCD::update(){
     if(millis() - this->timerFPS < 100){
         return;
     }
+    //Serial.println("Actualizando LCD...");
+
     this->timerFPS = millis();
 
     static bool lastMotorState[2] = {false, false};  // Guardar el último estado de los motores
@@ -252,7 +260,8 @@ void GraphicLCD::update(){
     bool delayChanged = (progressBar[0].getValue() != lastDelay1) || 
                         (progressBar[1].getValue() != lastDelay2);
 
-    if (this->newScreen || motorStateChanged || chillerStateChanged || delayChanged ) {
+    //if (this->newScreen || motorStateChanged || chillerStateChanged || delayChanged ) {
+    if (true){
         this->u8g2->clearBuffer();
 
         switch (this->currentScreen) {
@@ -384,4 +393,12 @@ uint8_t GraphicLCD::getProgressBarDelay(uint8_t index ){
 
 textInputLCD* GraphicLCD::getTextInput(uint8_t index) {
     return this->progressBar[index].getTextInput();  // Sin '&'
+}
+
+void GraphicLCD::selectMotor(int index,bool mode){
+    this->motorIcon[index].setSelected(mode);
+}
+
+void GraphicLCD::selectChiller(int index,bool mode){
+    this->chillerIcon[index].setSelected(mode);
 }

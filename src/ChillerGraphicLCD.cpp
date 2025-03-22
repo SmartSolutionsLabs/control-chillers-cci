@@ -133,6 +133,8 @@ void ChillerGraphicLCD::drawLabelState(){
     int textWidth;
     this->u8g2->setFont(u8g2_font_6x10_tf);
     if(this->labelState){
+        
+
         if(this->run){
             this->drawCenteredText(this->xCenterLabel,   this->yCenterLabel, "ON");
             textWidth = this->u8g2->getStrWidth("ON");
@@ -141,8 +143,11 @@ void ChillerGraphicLCD::drawLabelState(){
             this->drawCenteredText(  this->xCenterLabel  ,  this->yCenterLabel, "OFF");
             textWidth= this->u8g2->getStrWidth("OFF");
         }
-        this->u8g2->setDrawColor(this->labelState); 
-        this->drawImage(this->xCenterLabel - (ICON_BOX_22_11_DATA.width/2), this->yCenterLabel -(ICON_BOX_22_11_DATA.height/2) ,ICON_BOX_22_11_DATA); 
+
+        if(this->selected){
+            this->u8g2->setDrawColor(this->labelState); 
+            this->drawImage(this->xCenterLabel - (ICON_BOX_22_11_DATA.width/2), this->yCenterLabel -(ICON_BOX_22_11_DATA.height/2) ,ICON_BOX_22_11_DATA); 
+        }
     }
 }
 
@@ -200,11 +205,6 @@ void ChillerGraphicLCD::setPosition(uint8_t xpos , uint8_t ypos){
     this->setLabelPosition(xpos+32, ypos + 11);
 }
 
-void ChillerGraphicLCD::show(){
-
-}
-
-
 void ChillerGraphicLCD::setSelected(){
     this->selected = true;
 }
@@ -214,15 +214,7 @@ void ChillerGraphicLCD::setUnselected(){
     this->selected = false;
 }
 
-void ChillerGraphicLCD::drawSelected(){
-    if(!this->selected){
-        return;
-    }
-    this->drawCenteredText(this->xCenterLabel - 15 ,   this->yCenterLabel, ">");
-}
-
 void ChillerGraphicLCD::update(){
     this->drawLabelState();
     this->drawIcon();
-    this->drawSelected();
 }

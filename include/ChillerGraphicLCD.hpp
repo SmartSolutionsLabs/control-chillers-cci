@@ -70,16 +70,16 @@ class ChillerGraphicLCD {
         void deanimate();
 
         void setPosition(uint8_t xpos , uint8_t ypos);
-        void show();
 
         void setSelected();
         void setUnselected();
-        void drawSelected();
 
         bool isSelected() const {
             return this->selected;
         }
-
+        void setSelected(bool newSelected){
+            this->selected = newSelected;
+        }
         void update();
 };
 #endif

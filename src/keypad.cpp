@@ -29,13 +29,18 @@ uint8_t Keypad::readRegister(uint8_t reg) {
 }
 
 void Keypad::connect(void * data) {
-    this->timerAutomatic = millis();
-    
+    this->timerAutomatic = millis();    
+    // Escanear el bus I2C para depuración
     // Habilitar el MCP23017 (pines 15 y 41 como salida)
     pinMode(15, OUTPUT);
     pinMode(41, OUTPUT);
+     // Habilitar el MCP23017, configurar pines, etc.
     digitalWrite(15, HIGH);  // Activar el MCP23017
     digitalWrite(41, HIGH);
+    
+    //scanI2C();
+
+    // Resto de la configuración...
 
     // Configurar los pines del banco B como entradas (botones)
     writeRegister(IODIRB, 0xFF);  // Todos los pines del banco B como entradas
@@ -110,11 +115,6 @@ void Keypad::run(void* data) {
             // Leer qué pines activaron la interrupción
             uint8_t intCap = readRegister(INTCAPB);
             uint8_t gpioB = readRegister(GPIOB);
-            
-            Serial.print("INTCAPB: ");
-            Serial.println(intCap, BIN);
-            Serial.print("GPIOB: ");
-            Serial.println(gpioB, BIN);
 
             // Detectar pines 8-11 (solo en FALLING)
             for (uint8_t i = 0; i < 4; i++) {
@@ -122,16 +122,6 @@ void Keypad::run(void* data) {
                 bool isFalling = lastKeyStates[i] && !(gpioB & (1 << i));  // Antes era HIGH, ahora es LOW
                 lastKeyStates[i] = gpioB & (1 << i);  // Actualizar estado
 
-                /*
-                Serial.print("Pin ");
-                Serial.print(8 + i);
-                Serial.print(" - Estado: ");
-                Serial.print((gpioB & (1 << i)) ? "HIGH" : "LOW");
-                Serial.print(" - Interrupción: ");
-                Serial.print((intCap & (1 << i)) ? "1" : "0");
-                Serial.print(" - Falling detectado: ");
-                Serial.println(isFalling ? "Sí" : "No");
-                */
                 if (isFalling) {
                     lastKeyPressed = 'A' + i;  // Asignar tecla (A, B, C, D)
                     keyPressed = true;
@@ -162,4 +152,33 @@ void IRAM_ATTR Keypad::handleInterruptA() {
 void IRAM_ATTR Keypad::handleInterruptB() {
     // Establecer la bandera de interrupción
     this->interruptFlag = true;
+}
+
+void Keypad::scanI2C(){
+    byte error, address; int nDevices = 0; 
+    Serial.println("Scanning I2C bus...");
+    for (address = 1; address < 127; address++ ) {
+        Wire.beginTransmission(address);
+        error = Wire.endTransmission();
+        
+        if (error == 0) {
+            Serial.print("I2C device found at address 0x");
+            if (address < 16) {
+                Serial.print("0");
+            }
+            Serial.print(address, HEX);
+            Serial.println(" !");
+            nDevices++;
+        } else if (error == 4) {
+            Serial.print("Unknown error at address 0x");
+            if (address < 16) {
+                Serial.print("0");
+            }
+            Serial.println(address, HEX);
+        }
+    }
+    if (nDevices == 0)
+        Serial.println("No I2C devices found\n");
+    else
+        Serial.println("I2C scan complete\n");
 }
