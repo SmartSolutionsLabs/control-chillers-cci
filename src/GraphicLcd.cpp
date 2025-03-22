@@ -402,3 +402,11 @@ void GraphicLCD::selectMotor(int index,bool mode){
 void GraphicLCD::selectChiller(int index,bool mode){
     this->chillerIcon[index].setSelected(mode);
 }
+
+void GraphicLCD::navigateMotor(int index,bool mode){
+    this->motorIcon[index].setNavigated(mode);
+}
+
+void GraphicLCD::navigateChiller(int index,bool mode){
+    this->chillerIcon[index].setNavigated(mode);
+}

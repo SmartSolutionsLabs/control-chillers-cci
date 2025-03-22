@@ -59,19 +59,17 @@ void Control::run(void *data) {
     this->turnOffPump(1);
     this->turnOffPump(2);
     this->turnOffChiller(1);
-    Serial.printf("this->turnOffChiller(1);\n");
     this->turnOffChiller(2);
 
-    Serial.printf("this->lcd->setProgressBarValue(0,0);\n");
     this->lcd->setProgressBarValue(1,0);
     this->lcd->setProgressBarValue(2,0);
-    Serial.printf("Pumps and Chillers powered off\n");
+
     this->lcd->setProgressBarDelay(1,this->delay[0]);
     this->lcd->setProgressBarDelay(2,this->delay[1]);
 
     this->lcd->getProgressBar(0).setCounter(this->delayCounter[0]/1000);
     this->lcd->getProgressBar(1).setCounter(this->delayCounter[1]/1000);
-    Serial.printf("this->lcd->setProgressBarDelay(0,this->delay[0]); \n");
+
     bool flag = false;
     this->flag_process[0] = true;
     this->flag_process[1] = true;
@@ -89,7 +87,7 @@ void Control::run(void *data) {
 }
 
 void Control::handleKey(char key) {
-    Serial.printf("Key pressed: %c\n", key);
+    //Serial.printf("Key pressed: %c\n", key);
 
     switch (key) {
         case 'A':  // Enter
@@ -117,8 +115,8 @@ void Control::handleKey(char key) {
             setProcessChiller(0);
             break;
     }
-    Serial.printf("currentScreen : %d, ScreenSelected: %d, optionSelected: %d, currentOption: %d\n", 
-                  this->currentScreen, this->ScreenSelected, this->optionSelected, this->currentOption);
+    Serial.printf("currentScreen : %d, ScreenSelected: %d, currentOption: %d, optionSelected: %d\n", 
+                  this->currentScreen, this->ScreenSelected, this->currentOption, this->optionSelected);
 }
 
 void Control::proccessEnterKey() {
@@ -127,6 +125,7 @@ void Control::proccessEnterKey() {
     }
     else if(this->ScreenSelected && !this->optionSelected){
         this->optionSelected = true;
+        /////////////////
     }
     else if(this->ScreenSelected && this->optionSelected){
         this->manualControlDevice();
@@ -134,19 +133,12 @@ void Control::proccessEnterKey() {
 }
 
 void Control::proccessBackKey() {
-    if (this->ScreenSelected) {
-        if (this->optionSelected) {
-            // Si una opción está seleccionada, deseleccionamos la opción
-            this->optionSelected = false;
-            Serial.println("Option deselected");
-        } else {
-            // Si no hay una opción seleccionada, deseleccionamos la pantalla
-            this->ScreenSelected = false;
-            Serial.println("Screen deselected");
-        }
-    } else {
-        Serial.println("Nothing to do");
+    if (this->ScreenSelected && this->optionSelected) {
+        this->optionSelected = false;
     }
+    else if(this->ScreenSelected && !this->optionSelected){
+        this->ScreenSelected = false;
+    }   
 }
 
 
@@ -200,28 +192,28 @@ void Control::processOption(){
             break;
         case 2: // manual
             if(this->currentOption == 1){
-                this->lcd->selectMotor(0,true);
-                this->lcd->selectMotor(1,false);
-                this->lcd->selectChiller(0,false);
-                this->lcd->selectChiller(1,false);
+                this->lcd->navigateMotor(0,true);
+                this->lcd->navigateMotor(1,false);
+                this->lcd->navigateChiller(0,false);
+                this->lcd->navigateChiller(1,false);
             }
             else if(this->currentOption == 2){
-                this->lcd->selectMotor(0,false);
-                this->lcd->selectMotor(1,false);
-                this->lcd->selectChiller(0,true);
-                this->lcd->selectChiller(1,false);
+                this->lcd->navigateMotor(0,false);
+                this->lcd->navigateMotor(1,false);
+                this->lcd->navigateChiller(0,true);
+                this->lcd->navigateChiller(1,false);
             }
             else if(this->currentOption == 3){
-                this->lcd->selectMotor(0,false);
-                this->lcd->selectMotor(1,true);
-                this->lcd->selectChiller(0,false);
-                this->lcd->selectChiller(1,false);
+                this->lcd->navigateMotor(0,false);
+                this->lcd->navigateMotor(1,true);
+                this->lcd->navigateChiller(0,false);
+                this->lcd->navigateChiller(1,false);
             }
             else if(this->currentOption == 4){
-                this->lcd->selectMotor(0,false);
-                this->lcd->selectMotor(1,false);
-                this->lcd->selectChiller(0,false);
-                this->lcd->selectChiller(1,true);
+                this->lcd->navigateMotor(0,false);
+                this->lcd->navigateMotor(1,false);
+                this->lcd->navigateChiller(0,false);
+                this->lcd->navigateChiller(1,true);
             }
             break;
         case 3: // log
@@ -303,9 +295,7 @@ bool readBit(uint8_t byte, uint8_t pin) {
 
 void Control::manualControlDevice() {
     uint8_t index = this->currentOption;  // 🟢 Crear un índice sin modificar `currentOption`
-    Serial.printf("index == %d",index);
     if(index == 1){
-        Serial.println("trying to change motor 1 ; state");
         if(this->chillers[index-1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
             this->turnOffAutomaticSecuence(1);
         }
@@ -319,7 +309,6 @@ void Control::manualControlDevice() {
         }
     }
     if(index == 2){    
-        Serial.println("trying to change chiller 1 ; state");
         if(this->chillers[0]->getState()){// si el chiller esta encendido
             this->turnOffChiller(1);
         }
@@ -329,7 +318,6 @@ void Control::manualControlDevice() {
     }
     
     if(index == 3){
-        Serial.println("trying to change motor 2 ; state");
         if(this->chillers[1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
             this->turnOffAutomaticSecuence(2);
         }
@@ -343,7 +331,6 @@ void Control::manualControlDevice() {
         }
     }
     if(index == 4){
-        Serial.println("trying to change chiller 1 ; state");
         if(this->chillers[1]->getState()){// si el chiller esta encendido
             this->turnOffChiller(2);
         }

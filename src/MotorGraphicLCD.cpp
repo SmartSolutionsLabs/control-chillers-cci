@@ -132,20 +132,33 @@ void MotorGraphicLCD::drawLabelState(){
     int textWidth;
     this->u8g2->setFont(u8g2_font_6x10_tf);
     if(this->labelState){
-    
+        if(this->selected){
+            this->u8g2->setDrawColor(1); 
+            this->u8g2->drawBox(this->xCenterLabel - 11, this->yCenterLabel - 5, 22, 11);
+            this->u8g2->setDrawColor(0); // Texto en negro
+            //this->drawImage(this->xCenterLabel - (ICON_BOX_22_11_DATA.width/2), this->yCenterLabel -(ICON_BOX_22_11_DATA.height/2) ,ICON_BOX_22_11_DATA);
+        } 
+        else if(this->navigated){
+            // Estado "navigated": dibujar solo el contorno del rectángulo en blanco,
+            // y luego el texto en blanco
+            this->u8g2->setDrawColor(1);
+            this->u8g2->drawFrame(this->xCenterLabel - 11, this->yCenterLabel - 5, 22, 11);
+            this->u8g2->setDrawColor(1); // Texto en blanco
+            //this->drawImage(this->xCenterLabel - (ICON_BOX_22_11_DATA.width/2), this->yCenterLabel -(ICON_BOX_22_11_DATA.height/2) ,ICON_BOX_22_11_DATA);
+        }
+
+        else{
+            // Caso por defecto: simplemente dibuja el texto (podrías ajustar según tu necesidad)
+            // Aquí se podría elegir un color predeterminado
+            this->u8g2->setDrawColor(1);
+        }
+        
         if(this->run){
             this->drawCenteredText(this->xCenterLabel,   this->yCenterLabel, "ON");
-            textWidth = this->u8g2->getStrWidth("ON");
         }
         else{
             this->drawCenteredText(  this->xCenterLabel  ,  this->yCenterLabel, "OFF");
-            textWidth= this->u8g2->getStrWidth("OFF");
         }
-
-        if(this->selected){
-            this->u8g2->setDrawColor(this->labelState); 
-            this->drawImage(this->xCenterLabel - (ICON_BOX_22_11_DATA.width/2), this->yCenterLabel -(ICON_BOX_22_11_DATA.height/2) ,ICON_BOX_22_11_DATA);
-        } 
     }
 }
 

@@ -124,6 +124,9 @@ class GraphicLCD : public Module {
 
 		void selectMotor(int index,bool mode);
 		void selectChiller(int index,bool mode);
+
+		void navigateMotor(int index,bool mode);
+		void navigateChiller(int index,bool mode);
 	};
 
 #endif

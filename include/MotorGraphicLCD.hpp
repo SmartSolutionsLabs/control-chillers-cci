@@ -23,6 +23,8 @@ class MotorGraphicLCD {
 
         bool selected = false;
 
+        bool navigated = false;
+
         bool animated = false;
 
         bool labelState = false;
@@ -74,11 +76,18 @@ class MotorGraphicLCD {
         void setSelected(bool isSelected) {
             this->selected = isSelected;
         }
+
+        void setNavigated(bool isNavigated) {
+            this->navigated = isNavigated;
+        }
     
         bool isSelected() const {
             return this->selected;
         }
-
+        
+        bool isNavigated() const {
+            return this->navigated;
+        }
         void update();
 };
 #endif

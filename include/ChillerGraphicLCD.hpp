@@ -22,6 +22,7 @@ class ChillerGraphicLCD {
         uint8_t xPosition,yPosition;
 
         bool selected = false;
+        bool navigated = false;
 
         bool animated = false;
         
@@ -74,11 +75,20 @@ class ChillerGraphicLCD {
         void setSelected();
         void setUnselected();
 
+        void setSelected(bool isSelected) {
+            this->selected = isSelected;
+        }
+
+        void setNavigated(bool isNavigated) {
+            this->navigated = isNavigated;
+        }
+    
         bool isSelected() const {
             return this->selected;
         }
-        void setSelected(bool newSelected){
-            this->selected = newSelected;
+        
+        bool isNavigated() const {
+            return this->navigated;
         }
         void update();
 };
