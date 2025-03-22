@@ -104,9 +104,11 @@ void Control::handleKey(char key) {
             break;
         case 'E':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(1);
+            this->connectWifi();
             break;
         case 'F':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(2);
+            this->disconectWifi();
             break;
         case 'G':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(0);
