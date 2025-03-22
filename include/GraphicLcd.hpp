@@ -4,8 +4,8 @@
 #include <Module.hpp>
 #include <U8g2lib.h>
 #include "Screens.hpp"
-#include "MotorGraphicLcd.hpp"
-#include "ChillerGraphicLcd.hpp"
+#include "MotorGraphicLCD.hpp"
+#include "ChillerGraphicLCD.hpp"
 #include "progressBarLCD.hpp"
 #include "textInputLCD.hpp"
 

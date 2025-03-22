@@ -1,4 +1,4 @@
-#include "GraphicLCD.hpp"
+#include "GraphicLcd.hpp"
 
 GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore) {
 }
