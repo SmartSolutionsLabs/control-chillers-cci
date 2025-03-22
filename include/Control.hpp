@@ -5,6 +5,7 @@
 #include "GraphicLcd.hpp"
 #include "Chiller.hpp"
 #include "Pump.hpp"
+#include "Network.hpp"
 
 class Control : public Module {
 private:
@@ -44,6 +45,8 @@ private:
 
     bool automaticSecuenceOn[2] = {false,false};
     bool automaticSecuenceOff[2] = {false,false};
+    IPAddress IP;
+    bool wifiStatus = false;
 
 public:
     Control(const char *name, int taskCore = 1);
@@ -113,6 +116,35 @@ public:
     void downValueOption();
     
     void processOption();
+
+    void setWifiIP(IPAddress newIP){ // aqui añadir metodos para impresion de pantalla
+        this->IP = newIP;
+        Serial.print("setWifiIP: ");
+        Serial.println(this->IP);
+    }
+
+    void setWifiStatus(bool newWifiStatus){
+        this->wifiStatus = newWifiStatus;
+        Serial.print("setWifiStatus: ");
+        Serial.println(this->wifiStatus);
+    }
+
+    void connectWifi(){
+        Network::getInstance()->connect();
+    }
+
+    void disconectWifi(){
+        //Network::getInstance()->disconnect(); // como george no lo incluyo en la clase
+        WiFi.disconnect(true);
+    }
+
+    void setWifiSSID(String newSSID){
+        Network::SSID = newSSID;
+    }
+
+    void setWifiPSW(String newPSWD){
+        Network::PASSWORD = newPSWD;
+    }
 };
 
 #endif
