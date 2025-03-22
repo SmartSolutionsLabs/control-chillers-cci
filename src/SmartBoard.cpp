@@ -58,6 +58,7 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 	WiFi.onEvent(
 		[](WiFiEvent_t event, WiFiEventInfo_t info) {
 			Serial.print("WiFi connected.\n");
+			globalControl->setWifiStatus(true);
 		},
 		WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED
 	);
@@ -65,15 +66,17 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 		[](WiFiEvent_t event, WiFiEventInfo_t info) {
 			Serial.print("Addressed with IP \n");
 			Serial.print(WiFi.localIP());
-
 			// Ejecutar el método del objeto que controla todo
-			globalControl->run(0);
+			globalControl->setWifiIP(WiFi.localIP());
 		},
 		WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP
 	);
 	WiFi.onEvent(
 		[](WiFiEvent_t event, WiFiEventInfo_t info) {
 			Serial.print("Diconnected.\n");
+			IPAddress disconectedIP(0, 0, 0, 0);
+			globalControl->setWifiIP(disconectedIP);
+			globalControl->setWifiStatus(false);
 		},
 		WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED
 	);
@@ -81,6 +84,8 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 	WiFi.onEvent(
 		[](WiFiEvent_t event, WiFiEventInfo_t info) {
 			Serial.print("WiFi lost IP\n");
+			IPAddress disconectedIP(0, 0, 0, 0);
+			globalControl->setWifiIP(disconectedIP);
 		},
 		WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_LOST_IP
 	);
