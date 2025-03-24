@@ -73,13 +73,8 @@ class MotorGraphicLCD {
 
         void setPosition(uint8_t xpos , uint8_t ypos);
 
-        void setSelected(bool isSelected) {
-            this->selected = isSelected;
-        }
-
-        void setNavigated(bool isNavigated) {
-            this->navigated = isNavigated;
-        }
+        void setSelected(bool isSelected);
+        void setNavigated(bool isNavigated);
     
         bool isSelected() const {
             return this->selected;

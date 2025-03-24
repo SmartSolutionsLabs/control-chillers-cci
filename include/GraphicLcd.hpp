@@ -8,6 +8,7 @@
 #include "ChillerGraphicLCD.hpp"
 #include "progressBarLCD.hpp"
 #include "textInputLCD.hpp"
+#include "WifiGraphicLCD.hpp"
 
 struct ChillerIcon {
     uint8_t number;
@@ -40,6 +41,8 @@ class GraphicLCD : public Module {
 
 		ChillerGraphicLCD *chillerIcon;
 
+		WifiGraphicLCD *wifiIcon;
+
 		uint16_t splashScreenTimer = 2500;
 
 		uint32_t screenTimer;
@@ -51,6 +54,9 @@ class GraphicLCD : public Module {
 		uint32_t timerFPS ;
 
 		bool initialized = false;
+	
+		textInputLCD SSID,PSWD;
+		
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
 		
@@ -124,9 +130,12 @@ class GraphicLCD : public Module {
 
 		void selectMotor(int index,bool mode);
 		void selectChiller(int index,bool mode);
+		void selectProgressBar(int index,bool mode);
 
 		void navigateMotor(int index,bool mode);
 		void navigateChiller(int index,bool mode);
+		void navigateProgressBar(int index,bool mode);
+		void setWifiIP(IPAddress newIp);
 	};
 
 #endif

@@ -33,9 +33,11 @@ void Control::connect(void *data) {
     this->maxOptions[0] = 0;
     this->maxOptions[1] = 2;
     this->maxOptions[2] = 4;
-    this->maxOptions[3] = 0;
+    this->maxOptions[3] = 1;
 
     Serial.println("Control connected to LCD");
+    this->scanningActive = false;
+    this->lastScanAttempt = 0;
 }
 
 void Control::run(void *data) {
@@ -75,7 +77,13 @@ void Control::run(void *data) {
     this->flag_process[1] = true;
     this->lcd->getProgressBar(0).setCounter(0);
     this->lcd->getProgressBar(1).setCounter(0);
-    this->lcd->setScreen(MANUAL);
+    this->lcd->setScreen(HOME);
+    WiFi.disconnect();
+
+    WiFi.scanNetworks(true);
+    this->scanningActive = true;
+    this->lastScanAttempt = millis();
+    this->connectWifi();
     while (1) {
         vTaskDelay(this->iterationDelay);
 
@@ -83,12 +91,21 @@ void Control::run(void *data) {
         if (this->currentMode == AUTOMATIC_MODE) {
             processChiller();
         }
+
+        this->scanNetwork();
+        
+        // Si ha pasado el intervalo de tiempo, inicia un nuevo escaneo
+        /*if (!this->scanningActive && (millis() - this->lastScanAttempt > scanInterval)) {
+            Serial.println("Iniciando un nuevo escaneo...");
+            WiFi.scanNetworks(true);
+            this->scanningActive = true;
+            this->lastScanAttempt = millis();
+        }*/
     }
 }
 
 void Control::handleKey(char key) {
     //Serial.printf("Key pressed: %c\n", key);
-
     switch (key) {
         case 'A':  // Enter
             proccessEnterKey();
@@ -104,11 +121,9 @@ void Control::handleKey(char key) {
             break;
         case 'E':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(1);
-            this->connectWifi();
             break;
         case 'F':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(2);
-            this->disconectWifi();
             break;
         case 'G':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(0);
@@ -121,33 +136,47 @@ void Control::handleKey(char key) {
                   this->currentScreen, this->ScreenSelected, this->currentOption, this->optionSelected);
 }
 
-void Control::proccessEnterKey() {
-    if(!this->ScreenSelected){
+void Control::proccessEnterKey(){
+    if(!this->ScreenSelected && !this->optionSelected && this->currentScreen != HOME){
         this->ScreenSelected = true;
+        this->currentOption = 1;
+        this->processOption();
     }
     else if(this->ScreenSelected && !this->optionSelected){
         this->optionSelected = true;
-        /////////////////
+        this->processOption();
     }
     else if(this->ScreenSelected && this->optionSelected){
-        this->manualControlDevice();
+        switch(this->currentScreen){
+            case MANUAL:
+                this->manualControlDevice();
+                break;
+            case CONFIG:
+                Serial.println("Enter in option , that is already selected");
+                break;
+            case LOG:
+                if(this->optionSelected == 1){
+                    this->triggerScan();
+                }
+                break;
+        }
     }
 }
 
-void Control::proccessBackKey() {
-    if (this->ScreenSelected && this->optionSelected) {
-        this->optionSelected = false;
-    }
-    else if(this->ScreenSelected && !this->optionSelected){
+void Control::proccessBackKey() { 
+    if(this->ScreenSelected && !this->optionSelected){
         this->ScreenSelected = false;
+        this->processOption();
     }   
+    else if(this->ScreenSelected && this->optionSelected){
+        this->optionSelected = false;
+        this->processOption();
+    }  
 }
-
 
 void Control::proccessUpKey() {
-    if(!ScreenSelected){   // navegando entre pantallas
+    if(!ScreenSelected  && !optionSelected){   // navegando entre pantallas
         this->nextScreen();
-        this->currentOption = 1;
     }
     else if(ScreenSelected && !optionSelected ){ // navegando entre opciones
         this->nextOption();
@@ -170,59 +199,157 @@ void Control::proccessDownKey() {
 }
 
 void Control::upValueOption(){
-
+    switch(this->currentScreen){
+        case HOME:
+            break;
+        case CONFIG:
+            if(this->currentOption == 1){
+                this->delay[0]++ ;
+                if(this->delay[0]>999){
+                    this->delay[0] = 1;
+                }
+                this->lcd->setProgressBarDelay(1,this->delay[0]);
+            }
+            else if(this->currentOption == 2){
+                this->delay[1]++ ;
+                if(this->delay[1]>999){
+                    this->delay[1] = 1;
+                }
+                this->lcd->setProgressBarDelay(2,this->delay[1]);
+            }
+            break;
+        case MANUAL:
+            break;
+    }
 }
 
 void Control::downValueOption(){
-    
-}
-
-void Control::processOption(){
     switch(this->currentScreen){
-        case 0: //home
-            this->currentOption = 0;
+        case HOME:
             break;
-        case 1: // config
-            if(this->currentOption == 1 ){
-                this->lcd->getProgressBar(0).setNavigated(true);
-                this->lcd->getProgressBar(1).setNavigated(false);
-            }
-            else if(this->currentOption == 2 ){
-                this->lcd->getProgressBar(0).setNavigated(false);
-                this->lcd->getProgressBar(1).setNavigated(true);
-            }
-            break;
-        case 2: // manual
+        case CONFIG:
             if(this->currentOption == 1){
-                this->lcd->navigateMotor(0,true);
-                this->lcd->navigateMotor(1,false);
-                this->lcd->navigateChiller(0,false);
-                this->lcd->navigateChiller(1,false);
+                this->delay[0]-- ;
+                if(this->delay[0]>999){
+                    this->delay[0] = 999;
+                }
+                this->lcd->setProgressBarDelay(1,this->delay[0]);
             }
             else if(this->currentOption == 2){
-                this->lcd->navigateMotor(0,false);
-                this->lcd->navigateMotor(1,false);
-                this->lcd->navigateChiller(0,true);
-                this->lcd->navigateChiller(1,false);
-            }
-            else if(this->currentOption == 3){
-                this->lcd->navigateMotor(0,false);
-                this->lcd->navigateMotor(1,true);
-                this->lcd->navigateChiller(0,false);
-                this->lcd->navigateChiller(1,false);
-            }
-            else if(this->currentOption == 4){
-                this->lcd->navigateMotor(0,false);
-                this->lcd->navigateMotor(1,false);
-                this->lcd->navigateChiller(0,false);
-                this->lcd->navigateChiller(1,true);
+                this->delay[1]-- ;
+                if(this->delay[1]>999){
+                    this->delay[1] = 999;
+                }
+                this->lcd->setProgressBarDelay(2,this->delay[1]);
             }
             break;
-        case 3: // log
-            this->currentOption = 0;
+        case MANUAL:
             break;
     }
-   
+}
+
+void Control::processOption(){   // se procesa los graficos de pantalla cuandop se presiona un cambio de option
+    Serial.printf("Option before process  :  %d \n",this->currentOption);
+    if(!this->optionSelected && this->ScreenSelected){  /// navegando opciones en todas las pantallas
+        switch(this->currentScreen){
+            case HOME: //home
+                this->currentOption = 1;
+                break;
+            case CONFIG: // config
+                if(this->currentOption == 1){
+                    this->lcd->navigateProgressBar(0,true);
+                    this->lcd->navigateProgressBar(1,false);
+                }
+                else if(this->currentOption == 2){
+                    this->lcd->navigateProgressBar(0,false);
+                    this->lcd->navigateProgressBar(1,true);
+                }
+                break;
+            case MANUAL: // manual
+                if(this->currentOption == 1){
+                    this->lcd->navigateMotor(0,true);
+                    this->lcd->navigateMotor(1,false);
+                    this->lcd->navigateChiller(0,false);
+                    this->lcd->navigateChiller(1,false);
+                }
+                else if(this->currentOption == 2){
+                    this->lcd->navigateMotor(0,false);
+                    this->lcd->navigateMotor(1,false);
+                    this->lcd->navigateChiller(0,true);
+                    this->lcd->navigateChiller(1,false);
+                }
+                else if(this->currentOption == 3){
+                    this->lcd->navigateMotor(0,false);
+                    this->lcd->navigateMotor(1,true);
+                    this->lcd->navigateChiller(0,false);
+                    this->lcd->navigateChiller(1,false);
+                }
+                else if(this->currentOption == 4){
+                    this->lcd->navigateMotor(0,false);
+                    this->lcd->navigateMotor(1,false);
+                    this->lcd->navigateChiller(0,false);
+                    this->lcd->navigateChiller(1,true);
+                }
+                break;
+            case LOG: // log
+                this->currentOption = 0;
+                break;
+        }
+    }
+    else if(this->optionSelected && this->ScreenSelected){
+        switch(this->currentScreen){
+            case MANUAL:
+                if(this->currentOption == 1){
+                    this->lcd->selectMotor(0,true);
+                    this->lcd->navigateChiller(0,false);
+                    this->lcd->navigateMotor(1,false);
+                    this->lcd->navigateChiller(1,false);
+                }
+                else if(this->currentOption == 2){
+                    this->lcd->navigateMotor(0,false);
+                    this->lcd->selectChiller(0,true);
+                    this->lcd->navigateMotor(1,false);
+                    this->lcd->navigateChiller(1,false);
+                }
+                else if(this->currentOption == 3){
+                    this->lcd->navigateMotor(0,false);
+                    this->lcd->navigateChiller(0,false);
+                    this->lcd->selectMotor(1,true);
+                    this->lcd->navigateChiller(1,false);
+                }
+                else if(this->currentOption == 4){
+                    this->lcd->navigateMotor(0,false);
+                    this->lcd->navigateChiller(0,false);
+                    this->lcd->navigateMotor(1,false);
+                    this->lcd->selectChiller(1,true);
+                }
+                break;
+            case CONFIG:
+                if(this->currentOption == 1){
+                    this->lcd->navigateProgressBar(0,false);
+                    this->lcd->selectProgressBar(0,true);
+                }
+                else if(this->currentOption == 2){
+                    this->lcd->navigateProgressBar(1,false);
+                    this->lcd->selectProgressBar(1,true);
+                }
+                break;
+        }
+    }
+    else if(!this->ScreenSelected && !this->optionSelected){
+        switch(this->currentScreen){
+            case MANUAL:
+                    this->lcd->navigateMotor(0,false);
+                    this->lcd->navigateMotor(1,false);
+                    this->lcd->navigateChiller(0,false);
+                    this->lcd->navigateChiller(1,false);
+                break;
+            case CONFIG:
+                    this->lcd->navigateProgressBar(0,false);
+                    this->lcd->navigateProgressBar(1,false);
+                break;
+        }
+    }
 }
 
 void Control::nextOption(){
@@ -513,4 +640,52 @@ void Control::turnOffPump(int index){
     this->GPIOA &= ~(1 << this->pumps[index-1]->getPin());
     this->pumps[index-1]->toggle(this->GPIOA);
     this->lcd->setMotorState(index-1, false);
+}
+
+void Control::scanNetwork() {
+    int n = WiFi.scanComplete();
+
+    if (n == WIFI_SCAN_RUNNING) {
+        // El escaneo sigue en curso, no hacer nada
+    } 
+    else if (n == WIFI_SCAN_FAILED) {
+        // Solo consideramos un error real si previamente habíamos iniciado un escaneo.
+        if (this->scanningActive && (millis() - this->lastScanAttempt > retryDelayAfterFail)) {
+            Serial.println("El escaneo falló, reiniciando escaneo...");
+            WiFi.scanDelete();  // Libera la memoria del escaneo fallido
+            this->scanningActive = false; // Indica que el escaneo actual terminó con error
+
+            // Inicia un nuevo escaneo inmediatamente (o espera al próximo intervalo)
+            WiFi.scanNetworks(true);
+            this->scanningActive = true;
+            this->lastScanAttempt = millis();
+        }
+    } 
+    else if (n >= 0) {
+        // Se completó un escaneo exitoso
+        Serial.print("Redes encontradas: ");
+        Serial.println(n);
+
+        wifiCount = (n > MAX_NETWORKS) ? MAX_NETWORKS : n;
+        for (int i = 0; i < wifiCount; i++) {
+            wifiNetworks[i] = WiFi.SSID(i);
+            Serial.print(i + 1);
+            Serial.print(": ");
+            Serial.println(wifiNetworks[i]);
+        }
+        WiFi.scanDelete(); // Libera la memoria usada por el escaneo
+
+        // Marcamos que ya se procesó este escaneo
+        this->scanningActive = false;
+    }
+}
+
+void Control::triggerScan() {
+    // Opcional: Verificar que WiFi esté en modo estación
+    WiFi.mode(WIFI_STA);
+    
+    Serial.println("Escaneo disparado por otra clase.");
+    WiFi.scanNetworks(true);  // Inicia el escaneo asíncrono
+    scanningActive = true;
+    lastScanAttempt = millis();
 }

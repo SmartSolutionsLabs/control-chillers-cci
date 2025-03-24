@@ -132,13 +132,13 @@ void MotorGraphicLCD::drawLabelState(){
     int textWidth;
     this->u8g2->setFont(u8g2_font_6x10_tf);
     if(this->labelState){
-        if(this->selected){
+        if(this->selected && !this->navigated){
             this->u8g2->setDrawColor(1); 
             this->u8g2->drawBox(this->xCenterLabel - 11, this->yCenterLabel - 5, 22, 11);
             this->u8g2->setDrawColor(0); // Texto en negro
             //this->drawImage(this->xCenterLabel - (ICON_BOX_22_11_DATA.width/2), this->yCenterLabel -(ICON_BOX_22_11_DATA.height/2) ,ICON_BOX_22_11_DATA);
         } 
-        else if(this->navigated){
+        else if(this->navigated && !this->selected){
             // Estado "navigated": dibujar solo el contorno del rectángulo en blanco,
             // y luego el texto en blanco
             this->u8g2->setDrawColor(1);
@@ -159,6 +159,7 @@ void MotorGraphicLCD::drawLabelState(){
         else{
             this->drawCenteredText(  this->xCenterLabel  ,  this->yCenterLabel, "OFF");
         }
+        this->u8g2->setDrawColor(1);
     }
 }
 
@@ -224,3 +225,12 @@ void MotorGraphicLCD::update(){
     this->drawIcon();
 }
 
+void MotorGraphicLCD::setSelected(bool isSelected) {
+    this->selected = isSelected;
+    this->navigated = false;
+}
+
+void MotorGraphicLCD::setNavigated(bool isNavigated) {
+    this->navigated = isNavigated;
+    this->selected = false;
+}

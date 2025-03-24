@@ -39,11 +39,16 @@ void GraphicLCD::connect(void *data) {
         this->progressBar[i].setValue(60); // valor de delay inicial
         this->progressBar[i].setPercentage(0);
     }
+    this->wifiIcon = new WifiGraphicLCD(u8g2);
+    this->wifiIcon->setID(1);
+    this->wifiIcon->setRun(false);
+    this->wifiIcon->setState(false);
+    this->wifiIcon->setUpdateTimer(200);
+    this->wifiIcon->setTimer(this->screenTimer);
 
     if (!this->u8g2->begin()) {
         Serial.println("Display initialization failed!");
     } else {
-        Serial.println("Display ok!");
         this->setInitialized(true); 
     }
     this->u8g2->setFont(u8g2_font_6x10_tf);
@@ -108,34 +113,35 @@ void GraphicLCD::drawMenu(){
             this->drawImage(1,49,ICON_LOG_SELECT_DATA); 
             break;
     }
-    //this->drawImage(0,0, IMAGE_HOME_SCREEN_DATA);
 }
 
 void GraphicLCD::drawHomePage() {
     this->drawMenu();
     this->drawBoxes();
-
     // Dibujar motor 1
     motorIcon[0].setPosition(33, 5);
     motorIcon[0].showIcon();
     motorIcon[0].hideLabelState();
     motorIcon[0].setAnimation(true);
     motorIcon[0].animate();
-
+    motorIcon[0].update();
     // Dibujar progressBar 1
     progressBar[0].setPosition(62, 5);
     progressBar[0].showIcon();
     progressBar[0].showLabelState();
+    progressBar[0].setNavigated(false);
+    progressBar[0].setSelected(false);
     //progressBar[0].setAnimation(true);
     progressBar[0].animate();
     progressBar[0].hideTextInput();
-
+    progressBar[0].update();
     // Dibujar chiller 1
     chillerIcon[0].setPosition(90, 5);
     chillerIcon[0].showIcon();
     chillerIcon[0].hideLabelState();
     chillerIcon[0].setAnimation(true);
     chillerIcon[0].animate();
+    chillerIcon[0].update();
     //chillerIcon[0].animate();
 
     // Dibujar motor 2
@@ -144,7 +150,7 @@ void GraphicLCD::drawHomePage() {
     motorIcon[1].hideLabelState();
     motorIcon[1].setAnimation(true);
     motorIcon[1].animate();
-
+    motorIcon[1].update();
     // Dibujar progressBar 2
     progressBar[1].setPosition(62, 37);
     progressBar[1].showIcon();
@@ -152,13 +158,14 @@ void GraphicLCD::drawHomePage() {
     //progressBar[1].setAnimation(true);
     progressBar[1].animate();
     progressBar[1].hideTextInput();
-
+    progressBar[1].update();
     // Dibujar chiller 2
     chillerIcon[1].setPosition(90, 37);
     chillerIcon[1].showIcon();
     chillerIcon[1].hideLabelState();
     chillerIcon[1].setAnimation(true);
     chillerIcon[1].animate();
+    chillerIcon[1].update();
     //chillerIcon[1].animate();
 
     this->u8g2->sendBuffer();
@@ -178,6 +185,7 @@ void GraphicLCD::drawConfigPage() {
     progressBar[0].hideLabelState();
     progressBar[0].showTextInput();
     progressBar[0].showLabelInput();
+    progressBar[0].update();
 
     // Dibujar Progress bar 2
     progressBar[1].setPosition(70, 47);
@@ -185,7 +193,8 @@ void GraphicLCD::drawConfigPage() {
     progressBar[1].hideLabelState();
     progressBar[1].showTextInput();
     progressBar[1].showLabelInput();
-
+    progressBar[1].update();
+    
     this->u8g2->sendBuffer();
 }
 
@@ -204,7 +213,6 @@ void GraphicLCD::drawManualPage(){
     motorIcon[1].showLabelState();
     motorIcon[1].animate();
     motorIcon[1].update();
-
     // Dibujar CHILLER 1
     chillerIcon[0].setPosition(80, 5);
     chillerIcon[0].showIcon();
@@ -212,9 +220,7 @@ void GraphicLCD::drawManualPage(){
     chillerIcon[0].setAnimation(true);
     chillerIcon[0].animate();
     chillerIcon[0].update();
-    
-
-    // Dibujar CHILLER 1
+    // Dibujar CHILLER 2
     chillerIcon[1].setPosition(80, 37);
     chillerIcon[1].showIcon();
     chillerIcon[1].showLabelState();
@@ -227,6 +233,14 @@ void GraphicLCD::drawManualPage(){
 
 void GraphicLCD::drawLogPage(){
     this->drawMenu();
+    // Dibujar icon wifi 
+    this->wifiIcon->setPosition(50, 0);
+    this->wifiIcon->drawIcon();
+    this->wifiIcon->showIcon();
+    this->wifiIcon->hideLabelState();
+    //this->wifiIcon->setAnimation(false);
+    this->wifiIcon->update();
+
     this->u8g2->sendBuffer();
 }
 
@@ -244,7 +258,6 @@ void GraphicLCD::update(){
     if(millis() - this->timerFPS < 100){
         return;
     }
-    //Serial.println("Actualizando LCD...");
 
     this->timerFPS = millis();
 
@@ -280,7 +293,6 @@ void GraphicLCD::update(){
         }
 
         this->u8g2->sendBuffer();
-
         // Actualizar los últimos estados
         lastMotorState[0]   =   this->motorIcon[0].getState();
         lastMotorState[1]   =   this->motorIcon[1].getState();
@@ -306,7 +318,6 @@ void GraphicLCD::drawRotatedImage(int xPos, int yPos, const Bitmap &image, float
     int newCenterY = newSize / 2;
 
     uint8_t bytesPerRow = (oldW + 7) / 8;
-
     for (int y = 0; y < oldH; y++) {
         for (int x = 0; x < oldW; x++) {
             int byteIndex = y * bytesPerRow + (x / 8);
@@ -335,7 +346,6 @@ void GraphicLCD::drawImage(int xPos, int yPos, const Bitmap &image) {
         for (uint8_t x = 0; x < image.width; x++) {
             uint16_t byteIndex = y * bytesPerRow + (x / 8);
             uint8_t bitMask = 1 << (7 - (x % 8));
-
             if (image.data[byteIndex] & bitMask) {
                 this->u8g2->drawPixel(xPos + x, yPos + y);
             }
@@ -409,4 +419,16 @@ void GraphicLCD::navigateMotor(int index,bool mode){
 
 void GraphicLCD::navigateChiller(int index,bool mode){
     this->chillerIcon[index].setNavigated(mode);
+}
+
+void GraphicLCD::setWifiIP(IPAddress newIp){
+    this->wifiIcon->setLabelText(newIp);
+}
+
+void GraphicLCD::selectProgressBar(int index,bool mode){
+    this->progressBar[index].setSelected(mode);
+}
+
+void GraphicLCD::navigateProgressBar(int index,bool mode){
+    this->progressBar[index].setNavigated(mode);
 }

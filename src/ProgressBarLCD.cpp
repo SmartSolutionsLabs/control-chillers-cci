@@ -219,16 +219,18 @@ void progressBarLCD::drawImage(int xPos, int yPos, const Bitmap &image) {
 
 void progressBarLCD::drawTextInput(){
     if(this->showTxtInput){
-        this->textInputDelay->show();
+        this->textInputDelay->draw();
     }
 }
 
 void progressBarLCD::showTextInput(){
     this->showTxtInput = true;
+    this->textInputDelay->show();
 }
 
 void progressBarLCD::hideTextInput(){
     this->showTxtInput = false;
+    this->textInputDelay->hide();
 }
 
 void progressBarLCD::showLabelInput(){
@@ -241,9 +243,9 @@ void progressBarLCD::hideLabelInput(){
 
 void progressBarLCD::setSelected(bool isSelected) {
     this->selected = isSelected;
-    
-    if( this->selected && !this->navigated){
-        // Cambiar el estado a SELECTED
+    this->navigated = false;
+    if(this->selected && !this->navigated){
+        // Cambiar el estado a NAVIGATED
         this->textInputDelay->setState(InputState::SELECTED);
         this->textInputDelay->show();
     }
@@ -260,6 +262,7 @@ bool progressBarLCD::isSelected() const {
 
 void progressBarLCD::setNavigated(bool isNavigated) {
     this->navigated = isNavigated;
+    this->selected = false;
     if(isNavigated && !this->selected){
         // Cambiar el estado a NAVIGATED
         this->textInputDelay->setState(InputState::NAVIGATED);
@@ -274,4 +277,11 @@ void progressBarLCD::setNavigated(bool isNavigated) {
 
 bool progressBarLCD::isNavigated() const {
     return this->navigated;
+}
+
+void progressBarLCD::update(){
+    this->drawIcon();
+    this->drawLabelState();
+    //this->drawTextInput();
+    this->textInputDelay->update();
 }

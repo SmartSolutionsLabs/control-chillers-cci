@@ -7,6 +7,8 @@
 #include "Pump.hpp"
 #include "Network.hpp"
 
+#define MAX_NETWORKS 20
+
 class Control : public Module {
 private:
     Chiller **chillers;  // Control de los chillers
@@ -38,7 +40,7 @@ private:
     Mode currentMode;    // Modo actual (manual o automático)
     uint32_t delayCounter[2];     // Tiempo 1 para modo automático
     uint32_t timerDelayCounter[2];
-    uint8_t delay[2];
+    uint16_t delay[2];
     bool flag_process[2];
 	Screen currentScreen = HOME;
     uint8_t GPIOA = 0x00;
@@ -47,6 +49,16 @@ private:
     bool automaticSecuenceOff[2] = {false,false};
     IPAddress IP;
     bool wifiStatus = false;
+    String wifiNetworks[MAX_NETWORKS];
+    int wifiCount;
+
+    unsigned long lastScanAttempt = 0;
+    const unsigned long scanInterval = 30000; // 30 segundos
+    unsigned long lastFailedScanTime = 0;
+    const unsigned long retryDelayAfterFail = 10000; // 10 segundos después de un fallo
+    unsigned long lastScanTime;
+
+    bool scanningActive; // indica si se inició un escaneo
 
 public:
     Control(const char *name, int taskCore = 1);
@@ -119,6 +131,11 @@ public:
 
     void setWifiIP(IPAddress newIP){ // aqui añadir metodos para impresion de pantalla
         this->IP = newIP;
+        /*String ipString = this->IP.toString();
+        char buffer[20];  // Asegúrate de que el tamaño sea suficiente para la dirección IP y el caracter nulo
+        ipString.toCharArray(buffer, sizeof(buffer));
+        this->lcd->setWifiIP(buffer); */
+        this->lcd->setWifiIP(newIP);
         Serial.print("setWifiIP: ");
         Serial.println(this->IP);
     }
@@ -145,6 +162,8 @@ public:
     void setWifiPSW(String newPSWD){
         Network::PASSWORD = newPSWD;
     }
+    void scanNetwork();
+    void triggerScan();  // Método para iniciar el escaneo desde otra clase
 };
 
 #endif

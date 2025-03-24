@@ -30,4 +30,8 @@ extern const Bitmap ICON_MOTOR_DATA;
 extern const Bitmap ICON_PROGRESS_BAR_DATA;
 extern const Bitmap ICON_CHILLER_DATA;
 extern const Bitmap ICON_BOX_22_11_DATA;
+
+// iconografia para wifi
+extern const Bitmap ICON_WIFI_CONECTED_FULL_DATA;
+extern const Bitmap ICON_WIFI_DISCONECTED_DATA;
 #endif // SCREENS_HPP

@@ -98,6 +98,7 @@ class progressBarLCD {
         void setNavigated(bool isNavigated);
         bool isNavigated() const;
 
+        void update();
 };
 
 #endif
