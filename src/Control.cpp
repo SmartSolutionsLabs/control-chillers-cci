@@ -149,6 +149,7 @@ void Control::proccessEnterKey(){
     else if(this->ScreenSelected && this->optionSelected){
         switch(this->currentScreen){
             case MANUAL:
+                Serial.println("this->manualControlDevice();");
                 this->manualControlDevice();
                 break;
             case CONFIG:
@@ -182,7 +183,7 @@ void Control::proccessUpKey() {
         this->nextOption();
     }
     else if(ScreenSelected && optionSelected ){ // cambiando valor de una opcion
-        this->upValueOption();
+        this->downValueOption();
     }
 }
 
@@ -194,7 +195,7 @@ void Control::proccessDownKey() {
         this->previousOption();
     }
     else if(ScreenSelected && optionSelected ){ // navegando entre opciones
-        this->downValueOption();
+        this->upValueOption();
     }
 }
 
@@ -426,7 +427,13 @@ void Control::manualControlDevice() {
     uint8_t index = this->currentOption;  // 🟢 Crear un índice sin modificar `currentOption`
     if(index == 1){
         if(this->chillers[index-1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
-            this->turnOffAutomaticSecuence(1);
+            this->automaticSecuenceOn[0] = false;
+            this->automaticSecuenceOff[0] = true;
+            this->optionSelected = false;
+            this->currentOption = 1;
+            this->currentScreen = HOME;
+            this->flag_process[0] = false;
+            //this->turnOffAutomaticSecuence(1);
         }
         else{
             if(this->pumps[index-1]->getState()){ // si no ;  y si la bomba esta encendida ; se puede apagar directamente la bomba
@@ -441,14 +448,25 @@ void Control::manualControlDevice() {
         if(this->chillers[0]->getState()){// si el chiller esta encendido
             this->turnOffChiller(1);
         }
-        else{ // si el chiller esta apagado
-            this->turnOnChiller(1);
+        else{                                             // si el chiller esta apagado
+            if(!this->pumps[0]->getState()){              // y la bomba esta apagada ; primero enciende la bomba
+                this->automaticSecuenceOn[0] = true;      // hacemos secuencia de encendido seguro para el chiller
+                this->automaticSecuenceOff[0] = false;
+                this->optionSelected = false;             // y se devuelve a home
+                this->currentOption = 1;
+                this->currentScreen = HOME;
+                this->flag_process[0] = false;
+            }
+            else{                                         // si ya hay bomba encendida ; simplemente encendemos chiller
+                this->turnOnChiller(1);                   
+            }
         }
     }
     
     if(index == 3){
         if(this->chillers[1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
-            this->turnOffAutomaticSecuence(2);
+            this->automaticSecuenceOn[1] = false;
+            this->automaticSecuenceOff[1] = true;
         }
         else{
             if(this->pumps[1]->getState()){ // si no ;  y si la bomba esta encendida ; se puede apagar directamente la bomba
@@ -472,14 +490,18 @@ void Control::manualControlDevice() {
 void Control::processChiller(){
     if(this->automaticSecuenceOn[0]){
         this->turnOnAutomaticSecuence(1);
+        Serial.println("this->turnOnAutomaticSecuence(1);");
     }
     else if(this->automaticSecuenceOn[1]){
+        Serial.println("this->turnOnAutomaticSecuence(2);");
         this->turnOnAutomaticSecuence(2);
     }
     else if(this->automaticSecuenceOff[0]){
+        Serial.println("this->turnOffAutomaticSecuence(1);");
         this->turnOffAutomaticSecuence(1);
     }
     else if(this->automaticSecuenceOff[1]){
+        Serial.println("this->turnOffAutomaticSecuence(2);");
         this->turnOffAutomaticSecuence(2);
     }
 }
