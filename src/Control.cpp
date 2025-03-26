@@ -45,8 +45,8 @@ void Control::run(void *data) {
 
     // ✅ Asegurar que pumps[0] y pumps[1] son objetos diferentes
     if (this->pumps[0] && this->pumps[1]) {
-        this->pumps[0]->setPin(1);
-        this->pumps[1]->setPin(2);
+        this->pumps[0]->setPin(0); // should be 1
+        this->pumps[1]->setPin(1); // should be 2
     }
 
     if (this->chillers[0] && this->chillers[1]) {
@@ -105,7 +105,7 @@ void Control::run(void *data) {
 }
 
 void Control::handleKey(char key) {
-    //Serial.printf("Key pressed: %c\n", key);
+    Serial.printf("Key pressed: %c\n", key);
     switch (key) {
         case 'A':  // Enter
             proccessEnterKey();
@@ -125,10 +125,14 @@ void Control::handleKey(char key) {
         case 'F':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(2);
             break;
-        case 'G':  // Navegar hacia abajo o disminuir valor
+        //case 'G':  // Navegar hacia abajo o disminuir valor
+        //    setProcessChiller(2);
+        //    break;
+        
+        case 'N':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(0);
             break;
-        case 'H':  // Navegar hacia abajo o disminuir valor
+        case 'O':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(0);
             break;
     }
@@ -426,18 +430,25 @@ bool readBit(uint8_t byte, uint8_t pin) {
 void Control::manualControlDevice() {
     uint8_t index = this->currentOption;  // 🟢 Crear un índice sin modificar `currentOption`
     if(index == 1){
-        if(this->chillers[index-1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
+        if(this->chillers[0]->getState()){ // si el chiller esta encendido ; apagar en secuencia
             this->automaticSecuenceOn[0] = false;
             this->automaticSecuenceOff[0] = true;
             this->optionSelected = false;
+            this->ScreenSelected = false;
             this->currentOption = 1;
             this->currentScreen = HOME;
             this->flag_process[0] = false;
+            this->lcd->setScreen(this->currentScreen);
+            this->lcd->selectMotor(0,false);
+            this->lcd->selectMotor(1,false);
+            this->lcd->selectChiller(0,false);
+            this->lcd->selectChiller(1,false);
             //this->turnOffAutomaticSecuence(1);
         }
         else{
-            if(this->pumps[index-1]->getState()){ // si no ;  y si la bomba esta encendida ; se puede apagar directamente la bomba
+            if(this->pumps[0]->getState()){ // si no ;  y si la bomba esta encendida ; se puede apagar directamente la bomba
                 this->turnOffPump(1);
+                Serial.println("this->turnOffPump(1);");
             }
             else{
                 this->turnOnPump(1);  // si la bomba esta apagada ; se enciende.
@@ -454,8 +465,14 @@ void Control::manualControlDevice() {
                 this->automaticSecuenceOff[0] = false;
                 this->optionSelected = false;             // y se devuelve a home
                 this->currentOption = 1;
+                this->ScreenSelected = false;
                 this->currentScreen = HOME;
                 this->flag_process[0] = false;
+                this->lcd->setScreen(this->currentScreen);
+                this->lcd->selectMotor(0,false);
+                this->lcd->selectMotor(1,false);
+                this->lcd->selectChiller(0,false);
+                this->lcd->selectChiller(1,false);
             }
             else{                                         // si ya hay bomba encendida ; simplemente encendemos chiller
                 this->turnOnChiller(1);                   
@@ -467,6 +484,16 @@ void Control::manualControlDevice() {
         if(this->chillers[1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
             this->automaticSecuenceOn[1] = false;
             this->automaticSecuenceOff[1] = true;
+            this->optionSelected = false;
+            this->currentOption = 0;
+            this->currentScreen = HOME;
+            this->ScreenSelected = false;
+            this->flag_process[0] = false;
+            this->lcd->setScreen(this->currentScreen);
+            this->lcd->selectMotor(0,false);
+            this->lcd->selectMotor(1,false);
+            this->lcd->selectChiller(0,false);
+            this->lcd->selectChiller(1,false);
         }
         else{
             if(this->pumps[1]->getState()){ // si no ;  y si la bomba esta encendida ; se puede apagar directamente la bomba
@@ -481,8 +508,23 @@ void Control::manualControlDevice() {
         if(this->chillers[1]->getState()){// si el chiller esta encendido
             this->turnOffChiller(2);
         }
-        else{ // si el chiller esta apagado
-            this->turnOnChiller(2);
+        else{                                             // si el chiller esta apagado
+            if(!this->pumps[1]->getState()){              // y la bomba esta apagada ; primero enciende la bomba
+                this->automaticSecuenceOn[1] = true;      // hacemos secuencia de encendido seguro para el chiller
+                this->automaticSecuenceOff[1] = false;
+                this->optionSelected = false;             // y se devuelve a home
+                this->currentOption = 1;
+                this->currentScreen = HOME;
+                this->flag_process[1] = false;
+                this->lcd->setScreen(this->currentScreen);
+                this->lcd->selectMotor(0,false);
+                this->lcd->selectMotor(1,false);
+                this->lcd->selectChiller(0,false);
+                this->lcd->selectChiller(1,false);
+            }
+            else{                                         // si ya hay bomba encendida ; simplemente encendemos chiller
+                this->turnOnChiller(2);                   
+            }
         }
     }    
 }
@@ -490,18 +532,18 @@ void Control::manualControlDevice() {
 void Control::processChiller(){
     if(this->automaticSecuenceOn[0]){
         this->turnOnAutomaticSecuence(1);
-        Serial.println("this->turnOnAutomaticSecuence(1);");
+        //Serial.println("this->turnOnAutomaticSecuence(1);");
     }
     else if(this->automaticSecuenceOn[1]){
-        Serial.println("this->turnOnAutomaticSecuence(2);");
+        //Serial.println("this->turnOnAutomaticSecuence(2);");
         this->turnOnAutomaticSecuence(2);
     }
     else if(this->automaticSecuenceOff[0]){
-        Serial.println("this->turnOffAutomaticSecuence(1);");
+        //Serial.println("this->turnOffAutomaticSecuence(1);");
         this->turnOffAutomaticSecuence(1);
     }
     else if(this->automaticSecuenceOff[1]){
-        Serial.println("this->turnOffAutomaticSecuence(2);");
+        //Serial.println("this->turnOffAutomaticSecuence(2);");
         this->turnOffAutomaticSecuence(2);
     }
 }
@@ -520,11 +562,13 @@ void Control::setProcessChiller(uint8_t index){
     switch(this->chillerMode){
         case NONE_SELECTED:
             if(this->lastChillerMode == CHILLER_1_SELECTED){
+                Serial.println("set 1 Secuence OFF");
                 this->automaticSecuenceOn[0] = false;
                 this->automaticSecuenceOff[0] = true;
                 this->flag_process[0] = false;
             }
             if(this->lastChillerMode == CHILLER_2_SELECTED){
+                Serial.println("set 2 Secuence OFF");
                 this->automaticSecuenceOn[1] = false;
                 this->automaticSecuenceOff[1] = true;
                 this->flag_process[1] = false;
@@ -533,6 +577,7 @@ void Control::setProcessChiller(uint8_t index){
         
         case CHILLER_1_SELECTED:
             if(this->lastChillerMode == NONE_SELECTED){
+                Serial.println("set 1 Secuence ON");
                 this->automaticSecuenceOn[0] = true;
                 this->flag_process[0] = false;
             }
@@ -540,6 +585,7 @@ void Control::setProcessChiller(uint8_t index){
 
         case CHILLER_2_SELECTED:
             if(this->lastChillerMode == NONE_SELECTED){
+                Serial.println("set 2 Secuence ON");
                 this->automaticSecuenceOn[1] = true;
                 this->flag_process[1] = false;
             }
@@ -571,6 +617,7 @@ void Control::turnOnAutomaticSecuence(int index){
 
 void Control::turnOffAutomaticSecuence(int index){
     if(this->flag_process[index-1] == true){  // incia el contador 
+        this->updateProgressBar(index);
         return;
     }
     

@@ -29,119 +29,61 @@ uint8_t Keypad::readRegister(uint8_t reg) {
 }
 
 void Keypad::connect(void * data) {
-    this->timerAutomatic = millis();    
-    // Escanear el bus I2C para depuración
+    this->timerAutomatic = millis();
+    
     // Habilitar el MCP23017 (pines 15 y 41 como salida)
     pinMode(15, OUTPUT);
     pinMode(41, OUTPUT);
-     // Habilitar el MCP23017, configurar pines, etc.
     digitalWrite(15, HIGH);  // Activar el MCP23017
     digitalWrite(41, HIGH);
-    
-    //scanI2C();
 
-    // Resto de la configuración...
-
-    // Configurar los pines del banco B como entradas (botones)
-    writeRegister(IODIRB, 0xFF);  // Todos los pines del banco B como entradas
-
-    // Habilitar resistencias pull-up en todos los pines del banco B
-    writeRegister(GPPUB, 0xFF);  
-
-    // Habilitar interrupciones solo en los pines 8-11 (mantener 12-15 sin interrupción)
-    writeRegister(GPINTENB, 0x0F);  // 0x0F = 00001111 (interrupciones solo en pines 8, 9, 10, 11)
-
-    // Configurar interrupciones solo para pines 8-11 como FALLING
-    writeRegister(INTCONB, 0x00);   // 0 = comparar con el estado anterior, cambio libre
-    writeRegister(DEFVALB, 0x00);   // No aplica para estos pines en cambio libre
-
-    // Configurar pines de interrupción del MCP23017
-    pinMode(6, INPUT_PULLUP);  // INT A
-    pinMode(7, INPUT_PULLUP);  // INT B
-
-    // Asignar manejadores de interrupción
-    attachInterrupt(digitalPinToInterrupt(6), []() { keypadInstance->handleInterruptA(); }, FALLING);
-    attachInterrupt(digitalPinToInterrupt(7), []() { keypadInstance->handleInterruptB(); }, FALLING);
-
+    writeRegister(IODIRB, 0xFF);   // Todos como entradas
+    writeRegister(GPPUB, 0xFF);    // Habilitar resistencias pull-up
 }
 
-
 void Keypad::run(void* data) {
-    this->iterationDelay = 1 / portTICK_PERIOD_MS;
-
-    Serial.println("Keypad task started...");
-    vTaskDelay(2000* this->iterationDelay);
+    this->iterationDelay = 10 / portTICK_PERIOD_MS;  // Polling cada 10ms
+    
+    Serial.println("Keypad task started (Polling mode)...");
+    uint8_t lastGPIOB = readRegister(GPIOB);  // Estado inicial
+    
     while (1) {
-        if (millis() - this->timerAutomatic > 100) {
-            uint8_t gpioB = readRegister(GPIOB);  // Leer el estado actual del banco B
+        uint8_t currentGPIOB = readRegister(GPIOB);  // Leer estado actual
         
-            for (uint8_t i = 4; i < 8; i++) {  // Pines 12 y 13 corresponden a bits 4 y 5
-                bool wasHigh = lastKeyStates[i];      // Guardar estado anterior
-                bool isHigh = gpioB & (1 << i);       // Leer estado actual
-                lastKeyStates[i] = isHigh;            // Actualizar estado
-        
-                if (wasHigh && !isHigh) {  // FALLING EDGE
-                    lastKeyPressed = 'E' + (i - 4);  // Asignar tecla (E para 12, F para 13)
-        
-                    Serial.print("FALLING detectado en pin ");
-                    Serial.print(12 + (i - 4));
-                    Serial.print(" - Tecla: ");
-                    Serial.println(lastKeyPressed);
-        
-                    if (control != nullptr) {
-                        control->handleKey(lastKeyPressed);  // Enviar evento
-                    }
-                } 
+        // Debug: Mostrar estado binario de los pines (opcional)
+        // Serial.print("GPIOB: 0b");
+        // Serial.println(currentGPIOB, BIN);  // Muestra 6 bits (0-5)
+
+        // Solo procesar si hay cambios
+        if (currentGPIOB != lastGPIOB) {
+            for (int i = 0; i < 8; i++) {  // Procesar 6 botones (bits 0-5)
+                bool lastState = (lastGPIOB >> i) & 1;  // Estado anterior
+                bool currentState = (currentGPIOB >> i) & 1;  // Estado actual
                 
-                else if (!wasHigh && isHigh) {  // RISING EDGE
-                    char keyRising = 'G' + (i - 4);  // Nueva tecla para RISING
-        
-                    Serial.print("RISING detectado en pin ");
-                    Serial.print(12 + (i - 4));
-                    Serial.print(" - Tecla: ");
-                    Serial.println(keyRising);
-        
-                    if (control != nullptr) {
-                        control->handleKey(keyRising);  // Enviar evento
-                    }
+                // Determinar qué tecla corresponde a este bit
+                char key;
+                key = 'A' + i;  // Bits 0-3: A, B, C, D
+                
+                // Detectar FALLING (botón presionado)
+                if (lastState && !currentState) {
+                    Serial.print("PRESSED: ");
+                    Serial.println(key);
+                    if (control) control->handleKey(key);
+                }
+                
+                // Detectar RISING (botón liberado)
+                else if (!lastState && currentState) {
+                    char releasedKey = key + ('J' - 'A');  // A→G, B→H, etc.
+                    Serial.print("RELEASED: ");
+                    Serial.println(releasedKey);
+                    if (control) control->handleKey(releasedKey);
                 }
             }
-        }
-        
-
-        if (interruptFlag) {
-            interruptFlag = false;
-
-            // Leer qué pines activaron la interrupción
-            uint8_t intCap = readRegister(INTCAPB);
-            uint8_t gpioB = readRegister(GPIOB);
-
-            // Detectar pines 8-11 (solo en FALLING)
-            for (uint8_t i = 0; i < 4; i++) {
-                //bool isFalling = (intCap & (1 << i)) && !(gpioB & (1 << i));
-                bool isFalling = lastKeyStates[i] && !(gpioB & (1 << i));  // Antes era HIGH, ahora es LOW
-                lastKeyStates[i] = gpioB & (1 << i);  // Actualizar estado
-
-                if (isFalling) {
-                    lastKeyPressed = 'A' + i;  // Asignar tecla (A, B, C, D)
-                    keyPressed = true;
-                    lastKeyPressTime = millis();
-                    if (control != nullptr) {
-                        Serial.print("Evento enviado: ");
-                        Serial.println(lastKeyPressed);
-                        control->handleKey(lastKeyPressed);  // Enviar evento
-                    }
-                    break;  // Solo procesar un botón a la vez
-                }
-            }
-
-            // Detectar pines 12 y 13 (en cualquier cambio de estado)
-            
+            lastGPIOB = currentGPIOB;  // Actualizar estado anterior
         }
         vTaskDelay(this->iterationDelay);
     }
 }
-
 // ISR para el bloque A
 void IRAM_ATTR Keypad::handleInterruptA() {
     // Este método maneja las interrupciones del bloque A (pines 0-7)
@@ -152,33 +94,4 @@ void IRAM_ATTR Keypad::handleInterruptA() {
 void IRAM_ATTR Keypad::handleInterruptB() {
     // Establecer la bandera de interrupción
     this->interruptFlag = true;
-}
-
-void Keypad::scanI2C(){
-    byte error, address; int nDevices = 0; 
-    Serial.println("Scanning I2C bus...");
-    for (address = 1; address < 127; address++ ) {
-        Wire.beginTransmission(address);
-        error = Wire.endTransmission();
-        
-        if (error == 0) {
-            Serial.print("I2C device found at address 0x");
-            if (address < 16) {
-                Serial.print("0");
-            }
-            Serial.print(address, HEX);
-            Serial.println(" !");
-            nDevices++;
-        } else if (error == 4) {
-            Serial.print("Unknown error at address 0x");
-            if (address < 16) {
-                Serial.print("0");
-            }
-            Serial.println(address, HEX);
-        }
-    }
-    if (nDevices == 0)
-        Serial.println("No I2C devices found\n");
-    else
-        Serial.println("I2C scan complete\n");
 }
