@@ -1,9 +1,9 @@
-#ifndef _INC_ChillerGraphicLCD_
-#define _INC_ChillerGraphicLCD_
+#ifndef _INC_WIFIGRAPHICLCD_
+#define _INC_WIFIGRAPHICLCD_
 #include <U8g2lib.h>
 #include "Screens.hpp"
 
-class ChillerGraphicLCD {
+class WifiGraphicLCD {
     private:
         U8G2_ST7920_128X64_F_SW_SPI *u8g2;
 
@@ -21,20 +21,30 @@ class ChillerGraphicLCD {
 
         uint8_t xPosition,yPosition;
 
+        char *labelText;
+
         bool selected = false;
+
         bool navigated = false;
 
         bool animated = false;
-        
+
         bool labelState = false;
 
         bool iconState = false;
+        
+        IPAddress ip;
+        char *ssid ;
+
+        
+        uint8_t xCenterLabelIp;
+        uint8_t yCenterLabelIp;
 
     public:
 
-        ChillerGraphicLCD();
+        WifiGraphicLCD();
 
-        ChillerGraphicLCD(U8G2_ST7920_128X64_F_SW_SPI *lcd);
+        WifiGraphicLCD(U8G2_ST7920_128X64_F_SW_SPI *lcd);
 
         void drawCenteredText(int xCenter, int y, const char *text);
 
@@ -66,18 +76,21 @@ class ChillerGraphicLCD {
         void showLabelState();
         void hideLabelState();
 
-        void setAnimation(bool newAnimation);
+        void setAnimation( bool newAnimation);
         void animate();
         void deanimate();
 
+        void drawIp();
+        void setIpPosition(uint8_t xpos , uint8_t ypos);
         void setPosition(uint8_t xpos , uint8_t ypos);
 
-        void setSelected();
-        void setUnselected();
+        void setSelected(bool isSelected) {
+            this->selected = isSelected;
+        }
 
-        void setSelected(bool isSelected);
-
-        void setNavigated(bool isNavigated);
+        void setNavigated(bool isNavigated) {
+            this->navigated = isNavigated;
+        }
     
         bool isSelected() const {
             return this->selected;
@@ -87,5 +100,8 @@ class ChillerGraphicLCD {
             return this->navigated;
         }
         void update();
+
+        
+        void setLabelText(IPAddress newIp);
 };
 #endif

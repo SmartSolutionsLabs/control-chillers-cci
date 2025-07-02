@@ -19,6 +19,7 @@ void Chiller::connect(void *data) {
     digitalWrite(15, HIGH);  // Establecer el pin 15 en HIGH
     digitalWrite(41, HIGH);  // Establecer el pin 41 en HIGH
 
+    scanI2C();
     // Configurar todos los pines del banco A como salida
     this->writeRegister(IODIRA, 0x00);  
     vTaskDelay(this->iterationDelay );  // Espera breve para asegurar la configuración
@@ -49,32 +50,31 @@ void Chiller::run(void* data) {
 
 // Función para leer un registro del MCP23017
 uint8_t Chiller::readRegister(uint8_t reg) {
-    Wire.beginTransmission(MCP23017_ADDR);
-    Wire.write(reg);
+    this->wire->beginTransmission(MCP23017_ADDR);
+    this->wire->write(reg);
     
-    if (Wire.endTransmission() != 0) {  
+    if (this->wire->endTransmission() != 0) {  
         Serial.println("Error: Falló la transmisión al MCP23017");
         return 0;  
     }
 
-    Wire.requestFrom(MCP23017_ADDR, 1);
-    if (Wire.available() < 1) {  
+    this->wire->requestFrom(MCP23017_ADDR, 1);
+    if (this->wire->available() < 1) {  
         Serial.println("Error: No hay datos disponibles del MCP23017");
         return 0;
     }
 
-    return Wire.read();
+    return this->wire->read();
 }
 
-// Función para escribir en un pin específico del banco A
 void Chiller::writeRegister(uint8_t reg, uint8_t value) {
-    Wire.beginTransmission(MCP23017_ADDR);
-    Wire.write(reg);
-    Wire.write(value);
-    Wire.endTransmission();
+    this->wire->beginTransmission(MCP23017_ADDR);
+    this->wire->write(reg);
+    this->wire->write(value);
+    this->wire->endTransmission();
 
     if (reg == GPIOA) {
-        estadoGPIOA = value;  // 🟢 Sincroniza el estado en RAM
+        estadoGPIOA = value;  // Sincroniza el estado en RAM
     }
 }
 
@@ -97,7 +97,8 @@ void Chiller::turnOff() {
 // Método para alternar el estado del chiller
 void Chiller::toggle(uint8_t newRegister) {
     this->estadoGPIOA = newRegister ;
-    this->state = !this->state;  // Alternar el estado
+    uint8_t bitValue = (this->estadoGPIOA >> this->pin) & 1;
+    this->state = bitValue;  // Alternar el estado
     writeRegister(GPIOA , newRegister);
     //writePin(this->pin, this->state);  // Actualizar el estado del pin
 }
@@ -113,4 +114,33 @@ bool Chiller::getState() {
 }
 void Chiller::setState(bool newState){
     this->state = newState;
+}
+
+void Chiller::scanI2C(){
+    byte error, address; int nDevices = 0; 
+    Serial.println("Scanning I2C bus...");
+    for (address = 1; address < 127; address++ ) {
+        this->wire->beginTransmission(address);
+        error = this->wire->endTransmission();
+        
+        if (error == 0) {
+            Serial.print("I2C device found at address 0x");
+            if (address < 16) {
+                Serial.print("0");
+            }
+            Serial.print(address, HEX);
+            Serial.println(" !");
+            nDevices++;
+        } else if (error == 4) {
+            Serial.print("Unknown error at address 0x");
+            if (address < 16) {
+                Serial.print("0");
+            }
+            Serial.println(address, HEX);
+        }
+    }
+    if (nDevices == 0)
+        Serial.println("No I2C devices found\n");
+    else
+        Serial.println("I2C scan complete\n");
 }

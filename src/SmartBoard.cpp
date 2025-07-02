@@ -6,6 +6,7 @@
 String ssid = "SmartLabs";
 String password = "20120415H";
 
+Control * globalControl; // to use in lambdas
 
 void SmartBoard::processMessage(unsigned char * message, size_t length, bool printable) { // se define que hayq ue procesar
 	
@@ -17,6 +18,7 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 	this->modulesPointer = new Module*[quantity];
 
 	this->modulesPointer[0] = new Control("ctl");
+	globalControl = static_cast<Control*>(this->modulesPointer[0]);
 	this->modulesPointer[0]->connect(nullptr);
 	
 
@@ -51,6 +53,42 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 	//this->modulesPointer[6]->start();
 
 	this->modulesPointer[0]->start();
+
+	// WiFi events
+	WiFi.onEvent(
+		[](WiFiEvent_t event, WiFiEventInfo_t info) {
+			Serial.print("WiFi connected.\n");
+			globalControl->setWifiStatus(true);
+		},
+		WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED
+	);
+	WiFi.onEvent(
+		[](WiFiEvent_t event, WiFiEventInfo_t info) {
+			Serial.print("Addressed with IP \n");
+			Serial.print(WiFi.localIP());
+			// Ejecutar el método del objeto que controla todo
+			globalControl->setWifiIP(WiFi.localIP());
+		},
+		WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP
+	);
+	WiFi.onEvent(
+		[](WiFiEvent_t event, WiFiEventInfo_t info) {
+			Serial.print("Diconnected.\n");
+			IPAddress disconectedIP(0, 0, 0, 0);
+			globalControl->setWifiIP(disconectedIP);
+			globalControl->setWifiStatus(false);
+		},
+		WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED
+	);
+
+	WiFi.onEvent(
+		[](WiFiEvent_t event, WiFiEventInfo_t info) {
+			Serial.print("WiFi lost IP\n");
+			IPAddress disconectedIP(0, 0, 0, 0);
+			globalControl->setWifiIP(disconectedIP);
+		},
+		WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_LOST_IP
+	);
 }
 
 SmartBoard * smartboard;
@@ -59,8 +97,8 @@ void setup() {
 	Serial.begin(115200);
 	/*Network::SSID = ssid;
 	Network::PASSWORD = password;
-	Network::getInstance()->begin("SC-RAIDI8_CCI_CHILLERS",true);	
-	Network::getInstance()->connect();*/
+	Network::getInstance()->begin("SC-RAIDI8_CCI_CHILLERS",true);
+	Network::getInstance()->connect();
 	Wire.begin(5,4);
 	smartboard = new SmartBoard();
 	//smartboard->beginSerialPort(Serial2);

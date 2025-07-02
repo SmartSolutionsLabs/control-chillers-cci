@@ -1,107 +1,105 @@
-#include "textInputLCD.hpp"
+#include "ListLCD.hpp"
 
 // Constructores
-textInputLCD::textInputLCD() 
+ListLCD::ListLCD() 
     : u8g2(nullptr), ID(0), currentState(InputState::NONE), run(false), updateTimer(0), timer(0),
       xCenterLabel(0), yCenterLabel(0), xPosition(0), yPosition(0), value(0),
       percentage(0), integer(0), width(0), height(0), xLabelPosition(0),
       yLabelPosition(0), labelInput("Delay") {}
 
-textInputLCD::textInputLCD(U8G2_ST7920_128X64_F_SW_SPI *newu8g2) 
+ListLCD::ListLCD(U8G2_ST7920_128X64_F_SW_SPI *newu8g2) 
     : u8g2(newu8g2), ID(0), currentState(InputState::NONE), run(false), updateTimer(0), timer(0),
       xCenterLabel(0), yCenterLabel(0), xPosition(0), yPosition(0), value(0),
       percentage(0), integer(0), width(0), height(0), xLabelPosition(0),
       yLabelPosition(0), labelInput("Delay") {}
 
 // Métodos para gestionar el ID
-void textInputLCD::setID(uint8_t newID) {
+void ListLCD::setID(uint8_t newID) {
     this->ID = newID;
 }
 
-uint8_t textInputLCD::getID() const {
+uint8_t ListLCD::getID() const {
     return this->ID;
 }
 
 // Métodos para gestionar el estado de ejecución
-void textInputLCD::setRun(bool newRun) {
+void ListLCD::setRun(bool newRun) {
     this->run = newRun;
 }
 
-bool textInputLCD::getRun() const {
+bool ListLCD::getRun() const {
     return this->run;
 }
 
 // Métodos para gestionar los temporizadores
-void textInputLCD::setUpdateTimer(uint32_t newUpdateTimer) {
+void ListLCD::setUpdateTimer(uint32_t newUpdateTimer) {
     this->updateTimer = newUpdateTimer;
 }
 
-uint32_t textInputLCD::getUpdateTimer() const {
+uint32_t ListLCD::getUpdateTimer() const {
     return this->updateTimer;
 }
 
-void textInputLCD::setTimer(uint32_t newTimer) {
+void ListLCD::setTimer(uint32_t newTimer) {
     this->timer = newTimer;
 }
 
-uint32_t textInputLCD::getTimer() const {
+uint32_t ListLCD::getTimer() const {
     return this->timer;
 }
 
-// Métodos para gestionar el valor
-void textInputLCD::setValue(uint8_t newValue) {
+void ListLCD::setValue(uint8_t newValue) {
     this->value = newValue;
 }
 
-uint8_t textInputLCD::getValue() const {
+uint8_t ListLCD::getValue() const {
     return this->value;
 }
 
 // Métodos para gestionar la posición
-void textInputLCD::setPosition(uint8_t xpos, uint8_t ypos) {
+void ListLCD::setPosition(uint8_t xpos, uint8_t ypos) {
     this->xPosition = xpos;
     this->yPosition = ypos;
 }
 
-void textInputLCD::setLabelPosition(uint8_t newXlabelPosition, uint8_t newYlabelPosition) {
+void ListLCD::setLabelPosition(uint8_t newXlabelPosition, uint8_t newYlabelPosition) {
     this->xLabelPosition = newXlabelPosition;
     this->yLabelPosition = newYlabelPosition;
 }
 
-// Métodos para gestionar el label
-void textInputLCD::drawLabelInput() {
+void ListLCD::drawLabelInput() {
     if (this->isShowed) {
         this->u8g2->drawStr(xLabelPosition, yLabelPosition, this->labelInput.c_str());  // Usar .c_str()
     }
 }
 
-void textInputLCD::showLabelInput() {
+void ListLCD::showLabelInput() {
     this->isLabelShowed = true;
 }
 
-void textInputLCD::hideLabelInput() {
+void ListLCD::hideLabelInput() {
     this->isLabelShowed = false;
 }
 
-void textInputLCD::setLabelInput(const std::string &newLabelInput) {
+void ListLCD::setLabelInput(const std::string &newLabelInput) {
     this->labelInput = newLabelInput;  // Asignar directamente el std::string
 }
 
-const std::string& textInputLCD::getLabelInput() const {
+const std::string& ListLCD::getLabelInput() const {
     return this->labelInput;  // Devolver una referencia constante
 }
 
 // Métodos para gestionar el estado (InputState)
-void textInputLCD::setState(InputState newState) {
+void ListLCD::setState(InputState newState) {
     this->currentState = newState;
 }
 
-InputState textInputLCD::getState() const {
+InputState ListLCD::getState() const {
     return this->currentState;
 }
 
 // Métodos para dibujar
-void textInputLCD::draw() {
+void ListLCD::draw() {
     if (this->isShowed) {
         char buffer[20];
         snprintf(buffer, sizeof(buffer), "%lu", this->integer);
@@ -143,64 +141,68 @@ void textInputLCD::draw() {
     }
 }
 
-void textInputLCD::show() {
+void ListLCD::show() {
     this->isShowed = true;
 }
 
-void textInputLCD::hide() {
+void ListLCD::hide() {
     this->isShowed = false;
 }
 
 // Métodos para gestionar el valor entero
-void textInputLCD::setInteger(uint32_t newInteger) {
+void ListLCD::setInteger(uint32_t newInteger) {
     this->integer = newInteger;
 }
 
-uint32_t textInputLCD::getInteger() const {
+uint32_t ListLCD::getInteger() const {
     return this->integer;
 }
 
 // Métodos para gestionar el ancho y alto
-void textInputLCD::setWidth(uint8_t newWidth) {
+void ListLCD::setWidth(uint8_t newWidth) {
     this->width = newWidth;
 }
 
-uint8_t textInputLCD::getWidth() const {
+uint8_t ListLCD::getWidth() const {
     return this->width;
 }
 
-void textInputLCD::setHeight(uint8_t newHeight) {
+void ListLCD::setHeight(uint8_t newHeight) {
     this->height = newHeight;
 }
 
-uint8_t textInputLCD::getHeight() const {
+uint8_t ListLCD::getHeight() const {
     return this->height;
 }
 
 // Métodos para gestionar el porcentaje
-void textInputLCD::setPercentage(uint8_t newPercentage) {
+void ListLCD::setPercentage(uint8_t newPercentage) {
     this->percentage = newPercentage;
 }
 
-uint8_t textInputLCD::getPercentage() const {
+uint8_t ListLCD::getPercentage() const {
     return this->percentage;
 }
 
 // Métodos para gestionar el centro del label
-void textInputLCD::setCenterLabel(uint8_t xCenter, uint8_t yCenter) {
+void ListLCD::setCenterLabel(uint8_t xCenter, uint8_t yCenter) {
     this->xCenterLabel = xCenter;
     this->yCenterLabel = yCenter;
 }
 
-uint8_t textInputLCD::getXCenterLabel() const {
+uint8_t ListLCD::getXCenterLabel() const {
     return this->xCenterLabel;
 }
 
-uint8_t textInputLCD::getYCenterLabel() const {
+uint8_t ListLCD::getYCenterLabel() const {
     return this->yCenterLabel;
 }
 
-void textInputLCD::update(){
+void ListLCD::update(){
     this->draw();
     this->drawLabelInput();
+}
+
+void ListLCD::setListValue(int index , String name){
+    
 }

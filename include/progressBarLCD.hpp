@@ -30,7 +30,9 @@ class progressBarLCD {
 
         uint32_t counter;
 
-        bool selected,navigated;
+        bool selected,navigated,iconState;
+
+        bool showLblState,showTxtInput;
 
     public:
 
@@ -72,22 +74,20 @@ class progressBarLCD {
         void setTimer(uint32_t newTimer);
         uint32_t getTimer();
 
-        void drawIcon(bool show);
+        void drawIcon();
         void showIcon();
         void hideIcon();
 
         void setLabelPosition(uint8_t xCenter , uint8_t yCenter);
-        void drawLabelState(bool show);
+        void drawLabelState();
         void showLabelState();
         void hideLabelState();
 
         void animate();
-        void deanimate();
 
         void setPosition(uint8_t xpos , uint8_t ypos);
-        void show();
 
-        void drawTextInput(bool show);
+        void drawTextInput();
         void showTextInput();
         void hideTextInput();
         void showLabelInput();
@@ -98,6 +98,7 @@ class progressBarLCD {
         void setNavigated(bool isNavigated);
         bool isNavigated() const;
 
+        void update();
 };
 
 #endif

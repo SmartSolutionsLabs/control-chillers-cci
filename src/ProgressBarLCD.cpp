@@ -103,18 +103,18 @@ void progressBarLCD::setPosition(uint8_t xpos , uint8_t ypos){
     this->textInputDelay->setPosition(xPosition,yPosition);
 }
 
-void progressBarLCD::drawIcon(bool show){
-    if(show){
+void progressBarLCD::drawIcon(){
+    if(this->iconState){
         this->drawImage(this->xPosition,this->yPosition,ICON_PROGRESS_BAR_DATA);
     }
 }
 
 void progressBarLCD::showIcon(){
-    this->drawIcon(1);
+    this->iconState = true;
 }
 
 void progressBarLCD::hideIcon(){
-    this->drawIcon(0);
+    this->iconState = false;
 }
 /////////////////////
 void progressBarLCD::setLabelPosition(uint8_t xCenter , uint8_t yCenter){
@@ -122,11 +122,11 @@ void progressBarLCD::setLabelPosition(uint8_t xCenter , uint8_t yCenter){
     this->yCenterLabel = yCenter;
 }
 
-void progressBarLCD::drawLabelState(bool show){
+void progressBarLCD::drawLabelState(){
     int textWidth;
     this-> width  = 10;
     this->u8g2->setFont(u8g2_font_6x10_tf);
-    if (show) {
+    if (this->showLblState) {
         char buffer[10];
         snprintf(buffer, sizeof(buffer), "%d", this->counter);  // Convertir el delay a cadena
 
@@ -140,11 +140,11 @@ void progressBarLCD::drawLabelState(bool show){
 }
 
 void progressBarLCD::showLabelState(){  
-    drawLabelState(1);
+    this->showLblState = true ;
 }
 
 void progressBarLCD::hideLabelState(){
-    drawLabelState(0);
+    this->showLblState = false ;
 }
 
 void progressBarLCD::animate(){
@@ -217,18 +217,20 @@ void progressBarLCD::drawImage(int xPos, int yPos, const Bitmap &image) {
     }
 }
 
-void progressBarLCD::drawTextInput(bool show){
-    if(show){
-        this->textInputDelay->show();
+void progressBarLCD::drawTextInput(){
+    if(this->showTxtInput){
+        this->textInputDelay->draw();
     }
 }
 
 void progressBarLCD::showTextInput(){
-    this->drawTextInput(1);
+    this->showTxtInput = true;
+    this->textInputDelay->show();
 }
 
 void progressBarLCD::hideTextInput(){
-    this->drawTextInput(0);
+    this->showTxtInput = false;
+    this->textInputDelay->hide();
 }
 
 void progressBarLCD::showLabelInput(){
@@ -241,9 +243,9 @@ void progressBarLCD::hideLabelInput(){
 
 void progressBarLCD::setSelected(bool isSelected) {
     this->selected = isSelected;
-    
-    if( this->selected && !this->navigated){
-        // Cambiar el estado a SELECTED
+    this->navigated = false;
+    if(this->selected && !this->navigated){
+        // Cambiar el estado a NAVIGATED
         this->textInputDelay->setState(InputState::SELECTED);
         this->textInputDelay->show();
     }
@@ -252,7 +254,6 @@ void progressBarLCD::setSelected(bool isSelected) {
         this->textInputDelay->setState(InputState::NONE);
         this->textInputDelay->show();
     }
-    
 }
 
 bool progressBarLCD::isSelected() const {
@@ -261,6 +262,7 @@ bool progressBarLCD::isSelected() const {
 
 void progressBarLCD::setNavigated(bool isNavigated) {
     this->navigated = isNavigated;
+    this->selected = false;
     if(isNavigated && !this->selected){
         // Cambiar el estado a NAVIGATED
         this->textInputDelay->setState(InputState::NAVIGATED);
@@ -275,4 +277,11 @@ void progressBarLCD::setNavigated(bool isNavigated) {
 
 bool progressBarLCD::isNavigated() const {
     return this->navigated;
+}
+
+void progressBarLCD::update(){
+    this->drawIcon();
+    this->drawLabelState();
+    //this->drawTextInput();
+    this->textInputDelay->update();
 }

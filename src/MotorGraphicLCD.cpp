@@ -111,16 +111,16 @@ void MotorGraphicLCD::drawImage(int xPos, int yPos, const Bitmap &image) {
 
 ////////////////////////
 
-void MotorGraphicLCD::drawIcon(bool show){
-    if(show){
+void MotorGraphicLCD::drawIcon(){
+    if(this->iconState){
         this->drawImage(this->xPosition,this->yPosition,ICON_MOTOR_DATA);
     }
 }
 void MotorGraphicLCD::showIcon(){
-    this->drawIcon(1);
+    this->iconState = true;
 }
 void MotorGraphicLCD::hideIcon(){
-    this->drawIcon(0);
+    this->iconState = false;
 }
 /////////////////////
 void MotorGraphicLCD::setLabelPosition(uint8_t xCenter , uint8_t yCenter){
@@ -128,28 +128,46 @@ void MotorGraphicLCD::setLabelPosition(uint8_t xCenter , uint8_t yCenter){
     this->yCenterLabel = yCenter;
 }
 
-void MotorGraphicLCD::drawLabelState(bool show){
+void MotorGraphicLCD::drawLabelState(){
     int textWidth;
     this->u8g2->setFont(u8g2_font_6x10_tf);
-    if(show){
+    if(this->labelState){
+        if(this->selected && !this->navigated){
+            this->u8g2->setDrawColor(1); 
+            this->u8g2->drawBox(this->xCenterLabel - 11, this->yCenterLabel - 5, 22, 11);
+            this->u8g2->setDrawColor(0); // Texto en negro
+            //this->drawImage(this->xCenterLabel - (ICON_BOX_22_11_DATA.width/2), this->yCenterLabel -(ICON_BOX_22_11_DATA.height/2) ,ICON_BOX_22_11_DATA);
+        } 
+        else if(this->navigated && !this->selected){
+            // Estado "navigated": dibujar solo el contorno del rectángulo en blanco,
+            // y luego el texto en blanco
+            this->u8g2->setDrawColor(1);
+            this->u8g2->drawFrame(this->xCenterLabel - 11, this->yCenterLabel - 5, 22, 11);
+            this->u8g2->setDrawColor(1); // Texto en blanco
+            //this->drawImage(this->xCenterLabel - (ICON_BOX_22_11_DATA.width/2), this->yCenterLabel -(ICON_BOX_22_11_DATA.height/2) ,ICON_BOX_22_11_DATA);
+        }
+
+        else{
+            // Caso por defecto: simplemente dibuja el texto (podrías ajustar según tu necesidad)
+            // Aquí se podría elegir un color predeterminado
+            this->u8g2->setDrawColor(1);
+        }
+        
         if(this->run){
             this->drawCenteredText(this->xCenterLabel,   this->yCenterLabel, "ON");
-            textWidth = this->u8g2->getStrWidth("ON");
         }
         else{
             this->drawCenteredText(  this->xCenterLabel  ,  this->yCenterLabel, "OFF");
-            textWidth= this->u8g2->getStrWidth("OFF");
         }
-        this->u8g2->setDrawColor(show); 
-        this->drawImage(this->xCenterLabel - (ICON_BOX_22_11_DATA.width/2), this->yCenterLabel -(ICON_BOX_22_11_DATA.height/2) ,ICON_BOX_22_11_DATA); 
+        this->u8g2->setDrawColor(1);
     }
 }
 
 void MotorGraphicLCD::showLabelState(){  
-    drawLabelState(1);
+    this->labelState = true;
 }
 void MotorGraphicLCD::hideLabelState(){
-    drawLabelState(0);
+    this->labelState = false;
 }
 ///////////////
 void MotorGraphicLCD::setAnimation( bool newAnimation){
@@ -202,6 +220,17 @@ void MotorGraphicLCD::setPosition(uint8_t xpos , uint8_t ypos){
     this->setLabelPosition(xpos+32, ypos + 11);
 }
 
-void MotorGraphicLCD::show(){
-    
+void MotorGraphicLCD::update(){
+    this->drawLabelState();
+    this->drawIcon();
+}
+
+void MotorGraphicLCD::setSelected(bool isSelected) {
+    this->selected = isSelected;
+    this->navigated = false;
+}
+
+void MotorGraphicLCD::setNavigated(bool isNavigated) {
+    this->navigated = isNavigated;
+    this->selected = false;
 }

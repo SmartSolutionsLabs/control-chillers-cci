@@ -5,6 +5,9 @@
 #include "GraphicLcd.hpp"
 #include "Chiller.hpp"
 #include "Pump.hpp"
+#include "Network.hpp"
+
+#define MAX_NETWORKS 20
 
 class Control : public Module {
 private:
@@ -13,7 +16,7 @@ private:
 
     GraphicLCD *lcd;   // Pantalla gráfica
 
-    Screen newScreen = HOME;  // Pantalla actual
+    Screen newScreen = MANUAL;  // Pantalla actual
     bool enter;               // Indica si se ha presionado "Enter"
     uint8_t currentOption;           // Opción seleccionada en el menú
     uint8_t *maxOptions;
@@ -33,13 +36,29 @@ private:
     };
 
     ChillerMode chillerMode;
+    ChillerMode lastChillerMode = NONE_SELECTED;
     Mode currentMode;    // Modo actual (manual o automático)
     uint32_t delayCounter[2];     // Tiempo 1 para modo automático
     uint32_t timerDelayCounter[2];
-    uint8_t delay[2];
+    uint16_t delay[2];
     bool flag_process[2];
 	Screen currentScreen = HOME;
     uint8_t GPIOA = 0x00;
+
+    bool automaticSecuenceOn[2] = {false,false};
+    bool automaticSecuenceOff[2] = {false,false};
+    IPAddress IP;
+    bool wifiStatus = false;
+    String wifiNetworks[MAX_NETWORKS];
+    int wifiCount;
+
+    unsigned long lastScanAttempt = 0;
+    const unsigned long scanInterval = 30000; // 30 segundos
+    unsigned long lastFailedScanTime = 0;
+    const unsigned long retryDelayAfterFail = 10000; // 10 segundos después de un fallo
+    unsigned long lastScanTime;
+
+    bool scanningActive; // indica si se inició un escaneo
 
 public:
     Control(const char *name, int taskCore = 1);
@@ -85,13 +104,66 @@ public:
 
 	Screen getScreen();
 
-    void manual();
+    void manualControlDevice();
 
     void processChiller();
 
     void setProcessChiller(uint8_t index);
 
-    void automaticSecuence(int index);
+    void turnOnAutomaticSecuence(int index);
+    void turnOffAutomaticSecuence(int index);
+
+    void turnOnChiller(int index);
+    void turnOffChiller(int index);
+    
+    void turnOnPump(int index);
+    void turnOffPump(int index);
+
+    void updateProgressBar(int index);
+
+    void nextOption();
+    void previousOption();
+
+    void upValueOption();
+    void downValueOption();
+    
+    void processOption();
+
+    void setWifiIP(IPAddress newIP){ // aqui añadir metodos para impresion de pantalla
+        this->IP = newIP;
+        /*String ipString = this->IP.toString();
+        char buffer[20];  // Asegúrate de que el tamaño sea suficiente para la dirección IP y el caracter nulo
+        ipString.toCharArray(buffer, sizeof(buffer));
+        this->lcd->setWifiIP(buffer); */
+        this->lcd->setWifiIP(newIP);
+        Serial.print("setWifiIP: ");
+        Serial.println(this->IP);
+    }
+
+    void setWifiStatus(bool newWifiStatus){
+        this->wifiStatus = newWifiStatus;
+        Serial.print("setWifiStatus: ");
+        Serial.println(this->wifiStatus);
+    }
+
+    void connectWifi(){
+        Network::getInstance()->connect();
+    }
+
+    void disconectWifi(){
+        //Network::getInstance()->disconnect(); // como george no lo incluyo en la clase
+        WiFi.disconnect(true);
+    }
+
+    void setWifiSSID(String newSSID){
+        Network::SSID = newSSID;
+    }
+
+    void setWifiPSW(String newPSWD){
+        Network::PASSWORD = newPSWD;
+    }
+    void scanNetwork();
+    void triggerScan();  // Método para iniciar el escaneo desde otra clase
 };
 
 #endif

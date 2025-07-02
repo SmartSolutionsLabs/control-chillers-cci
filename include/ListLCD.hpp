@@ -1,5 +1,5 @@
-#ifndef _INC_TEXTINPUTLCD_
-#define _INC_TEXTINPUTLCD_
+#ifndef _INC_LISTLCD_
+#define _INC_LISTLCD_
 
 #include <U8g2lib.h>
 #include <string>  // Para usar std::string
@@ -9,7 +9,7 @@ enum class InputState {
     SELECTED    // Seleccionado (activo para edición)
 };
 
-class textInputLCD {
+class ListLCD {
 private:
     U8G2_ST7920_128X64_F_SW_SPI *u8g2;  // Puntero al objeto LCD
 
@@ -29,10 +29,12 @@ private:
     InputState currentState;
     bool isShowed = false;
     bool isLabelShowed = false;
+
+    String listValue[20];
 public:
     // Constructores
-    textInputLCD();
-    textInputLCD(U8G2_ST7920_128X64_F_SW_SPI *lcd);
+    ListLCD();
+    ListLCD(U8G2_ST7920_128X64_F_SW_SPI *lcd);
 
     // Métodos para dibujar texto e imágenes
     void drawCenteredText(int xCenter, int y, const char *text);
@@ -95,6 +97,8 @@ public:
     uint8_t getYCenterLabel() const;
 
     void update();
+
+    void setListValue(int index , String name);
 };
 
 #endif
