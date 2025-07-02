@@ -21,6 +21,10 @@ class MotorGraphicLCD {
 
         uint8_t xPosition,yPosition;
 
+        bool selected = false;
+
+        bool animated = false;
+
     public:
 
         MotorGraphicLCD();
@@ -57,10 +61,19 @@ class MotorGraphicLCD {
         void showLabelState();
         void hideLabelState();
 
-        void animate(uint32_t externalTimer);
+        void setAnimation( bool newAnimation);
+        void animate();
         void deanimate();
 
         void setPosition(uint8_t xpos , uint8_t ypos);
         void show();
+
+        void setSelected(bool isSelected) {
+            this->selected = isSelected;
+        }
+    
+        bool isSelected() const {
+            return this->selected;
+        }
 };
 #endif

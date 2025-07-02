@@ -22,6 +22,7 @@ extern const Bitmap ICON_MOTOR_FAN_0_DATA;
 extern const Bitmap ICON_MOTOR_FAN_1_DATA;
 
 extern const Bitmap ICON_CHILLER_0_DATA;
+extern const Bitmap ICON_CHILLER_1_DATA;
 extern const Bitmap ICON_FAN_11_11_DATA;
 
 extern const Bitmap ICON_MOTOR_DATA;

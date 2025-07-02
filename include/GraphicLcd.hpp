@@ -5,7 +5,9 @@
 #include <U8g2lib.h>
 #include "Screens.hpp"
 #include "MotorGraphicLcd.hpp"
+#include "ChillerGraphicLcd.hpp"
 #include "progressBarLCD.hpp"
+#include "textInputLCD.hpp"
 
 struct ChillerIcon {
     uint8_t number;
@@ -36,17 +38,35 @@ class GraphicLCD : public Module {
 
 		progressBarLCD *progressBar;
 
-		ChillerIcon chillerIcon[2];
+		ChillerGraphicLCD *chillerIcon;
 
 		uint16_t splashScreenTimer = 2500;
 
 		uint32_t screenTimer;
 		
-		Screen currentScreen = HOME;
+		Screen currentScreen = HOME; // memoria cache
 
 		bool newScreen;
+
+		uint32_t timerFPS ;
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
+		
+		~GraphicLCD() {
+            delete[] progressBar;  // Liberar la memoria del arreglo
+        }
+    
+        // Método para obtener una referencia a un progressBarLCD
+        progressBarLCD& getProgressBar(uint8_t index) {
+            if (index < 2) {  // Asegurarse de que el índice esté dentro del rango
+                return progressBar[index];
+            }
+            // Manejar el caso de índice inválido (opcional)
+            static progressBarLCD dummy;  // Objeto dummy para evitar errores
+            return dummy;
+        }
+		
+		textInputLCD* getTextInput(uint8_t index) ;
 
 		void connect(void * data) override;
 
@@ -60,11 +80,11 @@ class GraphicLCD : public Module {
 
 		void drawImage(int xPos, int yPos, const Bitmap &image);
 
-		void drawPage(uint8_t page);
+		void drawMenu();
 
-		void setMotorState(uint8_t motorNumber , bool state);
+		void setMotorState(int motorNumber , bool state);
 
-		void setChillerState(uint8_t chillerNumber , bool state);
+		void setChillerState(int chillerNumber , bool state);
 
 		void drawHomePage();
 
@@ -86,12 +106,6 @@ class GraphicLCD : public Module {
 
 		void drawProgressBar(uint8_t number , uint8_t posX , uint8_t posY, const Bitmap &image);
 
-		void nextScreen();
-
-		void previousScreen();
-
-		Screen getScreen();
-
 		void drawBoxes();
 
 		void textInput(uint8_t posX , uint8_t posY, uint8_t size, char *text);
@@ -99,6 +113,11 @@ class GraphicLCD : public Module {
 		void drawCenteredText(int xCenter, int y, const char *text);
 
 		void setNewScreen();
+
+		void setProgressBarDelay(uint8_t index , uint8_t newDelay);
+		
+		uint8_t getProgressBarDelay(uint8_t index);
+
 	};
 
 #endif

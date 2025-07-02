@@ -1,14 +1,11 @@
-#ifndef _INC_PROGRESSBAR_
-#define _INC_PROGRESSBAR_
+#ifndef _INC_ChillerGraphicLCD_
+#define _INC_ChillerGraphicLCD_
 #include <U8g2lib.h>
 #include "Screens.hpp"
-#include "textInputLCD.hpp"
 
-class progressBarLCD {
+class ChillerGraphicLCD {
     private:
         U8G2_ST7920_128X64_F_SW_SPI *u8g2;
-
-        textInputLCD *textInputDelay;
 
         uint8_t ID;
         
@@ -16,8 +13,6 @@ class progressBarLCD {
         
         bool run;
         
-        uint8_t width;
-
         uint32_t updateTimer;
         
         uint32_t timer;
@@ -26,20 +21,16 @@ class progressBarLCD {
 
         uint8_t xPosition,yPosition;
 
-        uint16_t value,percentage;
+        bool selected = false;
 
-        uint32_t counter;
-
-        bool selected,navigated;
-
+        bool animated = false;
+        
     public:
 
-        progressBarLCD();
+        ChillerGraphicLCD();
 
-        progressBarLCD(U8G2_ST7920_128X64_F_SW_SPI *lcd);
+        ChillerGraphicLCD(U8G2_ST7920_128X64_F_SW_SPI *lcd);
 
-        textInputLCD* getTextInput() { return this->textInputDelay; }
-        
         void drawCenteredText(int xCenter, int y, const char *text);
 
         void drawRotatedImage(int xPos, int yPos, const Bitmap &image, float angle);
@@ -54,17 +45,6 @@ class progressBarLCD {
 
         void setRun(bool newState);
         bool getRun();
-
-        void setValue(uint16_t newValue);
-        uint16_t getValue();
-
-        void incrementCounter();
-        void resetCounter() ;
-        uint32_t getCounter() const ;
-        void setCounter(uint32_t newCounter);
-
-        void setPercentage(uint8_t newPercentage);
-        uint8_t getPercentage();
 
         void setUpdateTimer(uint32_t newUpdateTimer);
         uint32_t getUpdateTimer();
@@ -81,23 +61,19 @@ class progressBarLCD {
         void showLabelState();
         void hideLabelState();
 
+        void setAnimation( bool newAnimation);
         void animate();
         void deanimate();
 
         void setPosition(uint8_t xpos , uint8_t ypos);
         void show();
 
-        void drawTextInput(bool show);
-        void showTextInput();
-        void hideTextInput();
-        void showLabelInput();
-        void hideLabelInput();
-
-        void setSelected(bool isSelected);
-        bool isSelected() const;
-        void setNavigated(bool isNavigated);
-        bool isNavigated() const;
-
+        void setSelected(bool isSelected) {
+            this->selected = isSelected;
+        }
+    
+        bool isSelected() const {
+            return this->selected;
+        }
 };
-
 #endif

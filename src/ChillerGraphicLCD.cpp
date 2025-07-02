@@ -1,55 +1,55 @@
-#include "MotorGraphicLCD.hpp"
+#include "ChillerGraphicLCD.hpp"
 
-MotorGraphicLCD::MotorGraphicLCD()  {
+ChillerGraphicLCD::ChillerGraphicLCD()  {
 }
 
-MotorGraphicLCD::MotorGraphicLCD(U8G2_ST7920_128X64_F_SW_SPI *newu8g2)  {
+ChillerGraphicLCD::ChillerGraphicLCD(U8G2_ST7920_128X64_F_SW_SPI *newu8g2)  {
     this->u8g2 = newu8g2;
     this->timer = 0 ;
     this->state = false;
 }
 
-void MotorGraphicLCD::setID(uint8_t newID){
+void ChillerGraphicLCD::setID(uint8_t newID){
     this->ID = newID;
 }
 
-uint8_t MotorGraphicLCD::getID(){
+uint8_t ChillerGraphicLCD::getID(){
     return this->ID;
 }
 
-void MotorGraphicLCD::setState(bool newState){
+void ChillerGraphicLCD::setState(bool newState){
     this->state = newState;
 }
 
-bool MotorGraphicLCD::getState(){
+bool ChillerGraphicLCD::getState(){
     return this->state;
 }
 
-void MotorGraphicLCD::setRun(bool newRun){
+void ChillerGraphicLCD::setRun(bool newRun){
     this->run = newRun;
 }
 
-bool MotorGraphicLCD::getRun(){
+bool ChillerGraphicLCD::getRun(){
     return this->run;
 }
 
-void MotorGraphicLCD::setUpdateTimer(uint32_t newUpdateTimer){
+void ChillerGraphicLCD::setUpdateTimer(uint32_t newUpdateTimer){
     this->updateTimer = newUpdateTimer;
 }
 
-uint32_t MotorGraphicLCD::getUpdateTimer(){
+uint32_t ChillerGraphicLCD::getUpdateTimer(){
     return this->updateTimer;
 }
 
-void MotorGraphicLCD::setTimer(uint32_t newTimer){
+void ChillerGraphicLCD::setTimer(uint32_t newTimer){
     this->timer = newTimer;
 }
 
-uint32_t MotorGraphicLCD::getTimer(){
+uint32_t ChillerGraphicLCD::getTimer(){
     return this->timer;
 }
 
-void MotorGraphicLCD::drawCenteredText(int xCenter, int yCenter, const char *text) {
+void ChillerGraphicLCD::drawCenteredText(int xCenter, int yCenter, const char *text) {
     int textWidth = this->u8g2->getStrWidth(text);
     int textHeight = this->u8g2->getMaxCharHeight();
     int xPos = xCenter - (textWidth  / 2);  // Centra el texto
@@ -57,7 +57,7 @@ void MotorGraphicLCD::drawCenteredText(int xCenter, int yCenter, const char *tex
     this->u8g2->drawStr(xPos, yPos, text);
 }
 
-void MotorGraphicLCD::drawRotatedImage(int xPos, int yPos, const Bitmap &image, float angle) {
+void ChillerGraphicLCD::drawRotatedImage(int xPos, int yPos, const Bitmap &image, float angle) {
     float radians = angle * M_PI / 180.0;
     float cosA = cos(radians);
     float sinA = sin(radians);
@@ -94,7 +94,7 @@ void MotorGraphicLCD::drawRotatedImage(int xPos, int yPos, const Bitmap &image, 
     }
 }
 
-void MotorGraphicLCD::drawImage(int xPos, int yPos, const Bitmap &image) {
+void ChillerGraphicLCD::drawImage(int xPos, int yPos, const Bitmap &image) {
     uint8_t bytesPerRow = (image.width + 7) / 8; // Bytes por fila
 
     for (uint8_t y = 0; y < image.height; y++) {
@@ -111,24 +111,24 @@ void MotorGraphicLCD::drawImage(int xPos, int yPos, const Bitmap &image) {
 
 ////////////////////////
 
-void MotorGraphicLCD::drawIcon(bool show){
+void ChillerGraphicLCD::drawIcon(bool show){
     if(show){
-        this->drawImage(this->xPosition,this->yPosition,ICON_MOTOR_DATA);
+        this->drawImage(this->xPosition,this->yPosition,ICON_CHILLER_DATA);
     }
 }
-void MotorGraphicLCD::showIcon(){
+void ChillerGraphicLCD::showIcon(){
     this->drawIcon(1);
 }
-void MotorGraphicLCD::hideIcon(){
+void ChillerGraphicLCD::hideIcon(){
     this->drawIcon(0);
 }
 /////////////////////
-void MotorGraphicLCD::setLabelPosition(uint8_t xCenter , uint8_t yCenter){
+void ChillerGraphicLCD::setLabelPosition(uint8_t xCenter , uint8_t yCenter){
     this->xCenterLabel = xCenter;
     this->yCenterLabel = yCenter;
 }
 
-void MotorGraphicLCD::drawLabelState(bool show){
+void ChillerGraphicLCD::drawLabelState(bool show){
     int textWidth;
     this->u8g2->setFont(u8g2_font_6x10_tf);
     if(show){
@@ -145,20 +145,23 @@ void MotorGraphicLCD::drawLabelState(bool show){
     }
 }
 
-void MotorGraphicLCD::showLabelState(){  
+void ChillerGraphicLCD::showLabelState(){  
     drawLabelState(1);
 }
-void MotorGraphicLCD::hideLabelState(){
+void ChillerGraphicLCD::hideLabelState(){
     drawLabelState(0);
 }
-///////////////
-void MotorGraphicLCD::setAnimation( bool newAnimation){
+
+void ChillerGraphicLCD::setAnimation( bool newAnimation){
     this->animated = newAnimation;
 }
-void MotorGraphicLCD::animate(){
+
+///////////////
+void ChillerGraphicLCD::animate(){
     if(!this->animated){
         return;
     }
+    
     uint32_t externalTimer = millis();
     if(externalTimer - this->timer > this->updateTimer ) {
         this->setTimer(externalTimer);
@@ -171,37 +174,29 @@ void MotorGraphicLCD::animate(){
         //MOTOR 2
         if(this->state == false){
             this->u8g2->setDrawColor(0);
-            this->u8g2->drawBox(this->xPosition,this->yPosition,ICON_MOTOR_DATA.width,ICON_MOTOR_DATA.height);
+            this->u8g2->drawBox(this->xPosition,this->yPosition,ICON_CHILLER_0_DATA.width,ICON_CHILLER_0_DATA.height);
             this->u8g2->setDrawColor(1);
-            this->drawImage(this->xPosition,this->yPosition,ICON_MOTOR_DATA);
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawDisc(this->xPosition + 8 ,this->yPosition + 9 , 6);
-            this->u8g2->setDrawColor(1);
-            this->drawRotatedImage(this->xPosition,this->yPosition + 1 ,ICON_FAN_11_11_DATA , 0);
+            this->drawImage(this->xPosition,this->yPosition,ICON_CHILLER_0_DATA);
         }
         else{
             this->u8g2->setDrawColor(0);
-            this->u8g2->drawBox(this->xPosition,this->yPosition,ICON_MOTOR_DATA.width,ICON_MOTOR_DATA.height);
+            this->u8g2->drawBox(this->xPosition,this->yPosition,ICON_CHILLER_1_DATA.width,ICON_CHILLER_1_DATA.height);
             this->u8g2->setDrawColor(1);
-            this->drawImage(this->xPosition,this->yPosition,ICON_MOTOR_DATA);
-            this->u8g2->setDrawColor(0);
-            this->u8g2->drawDisc(this->xPosition + 8 ,this->yPosition + 9 , 6);
-            this->u8g2->setDrawColor(1);
-            this->drawRotatedImage(this->xPosition,this->yPosition + 1 ,ICON_FAN_11_11_DATA , 45);
+            this->drawImage(this->xPosition,this->yPosition,ICON_CHILLER_1_DATA);
         }
     }
 }
 
-void MotorGraphicLCD::deanimate(){
-    this->animated = false;
+void ChillerGraphicLCD::deanimate(){
+
 }
 
-void MotorGraphicLCD::setPosition(uint8_t xpos , uint8_t ypos){
+void ChillerGraphicLCD::setPosition(uint8_t xpos , uint8_t ypos){
     this->xPosition = xpos;
     this->yPosition = ypos;
     this->setLabelPosition(xpos+32, ypos + 11);
 }
 
-void MotorGraphicLCD::show(){
+void ChillerGraphicLCD::show(){
     
 }
