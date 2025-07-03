@@ -9,7 +9,7 @@ String password = "20120415H";
 Control * globalControl; // to use in lambdas
 
 void SmartBoard::processMessage(unsigned char * message, size_t length, bool printable) { // se define que hayq ue procesar
-	
+
 }
 
 void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
@@ -20,7 +20,7 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 	this->modulesPointer[0] = new Control("ctl");
 	globalControl = static_cast<Control*>(this->modulesPointer[0]);
 	this->modulesPointer[0]->connect(nullptr);
-	
+
 
 	this->modulesPointer[1] = new Keypad("keypad");
 	this->modulesPointer[1]->connect(&Wire);
@@ -95,7 +95,7 @@ SmartBoard * smartboard;
 
 void setup() {
 	Serial.begin(115200);
-	/*Network::SSID = ssid;
+	Network::SSID = ssid;
 	Network::PASSWORD = password;
 	Network::getInstance()->begin("SC-RAIDI8_CCI_CHILLERS",true);
 	Network::getInstance()->connect();
