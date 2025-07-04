@@ -46,7 +46,7 @@ class GraphicLCD : public Module {
 		uint16_t splashScreenTimer = 2500;
 
 		uint32_t screenTimer;
-		
+
 		Screen currentScreen = HOME; // memoria cache
 
 		bool newScreen;
@@ -54,16 +54,18 @@ class GraphicLCD : public Module {
 		uint32_t timerFPS ;
 
 		bool initialized = false;
-	
+
 		textInputLCD SSID,PSWD;
-		
+
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
-		
+
 		~GraphicLCD() {
             delete[] progressBar;  // Liberar la memoria del arreglo
         }
-    
+
+		static uint32_t getTickCount(void);
+
         // Método para obtener una referencia a un progressBarLCD
         progressBarLCD& getProgressBar(uint8_t index) {
             if (index < 2) {  // Asegurarse de que el índice esté dentro del rango
@@ -73,7 +75,7 @@ class GraphicLCD : public Module {
             static progressBarLCD dummy;  // Objeto dummy para evitar errores
             return dummy;
         }
-		
+
 		textInputLCD* getTextInput(uint8_t index) ;
 
 		void connect(void * data) override;
@@ -121,9 +123,9 @@ class GraphicLCD : public Module {
 		void setNewScreen();
 
 		void setProgressBarDelay(uint8_t index , uint8_t newDelay);
-		
+
 		uint8_t getProgressBarDelay(uint8_t index);
-		
+
 
 		bool isInitialized() const { return initialized; }
 		void setInitialized(bool value) { initialized = value; }
