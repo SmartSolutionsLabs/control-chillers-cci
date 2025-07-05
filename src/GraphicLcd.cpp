@@ -58,19 +58,24 @@ void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t
 
 	int32_t width = area->x2 - area->x1 + 1;
 	int32_t height = area->y2 - area->y1 + 1;
+	int32_t stride = (width + 7) >> 3; // bytes por fila (horizontal mapping)
+
+	const int32_t screen_width = 128; // ajustar si tu pantalla es diferente
 
 	for (int32_t y = 0; y < height; y++) {
 		for (int32_t x = 0; x < width; x++) {
-			int32_t abs_x = area->x1 + x;
+			// calcular nueva X real desplazada desde la mitad de la pantalla
+			int32_t shifted_x = (area->x1 + x + (screen_width >> 1)) % screen_width;
 			int32_t abs_y = area->y1 + y;
 
 			// Calcular posición del bit en el búfer (horizontal mapping)
-			int32_t byte_index = (y * width + x) >> 3;
-			int8_t bit_index = 7 - (x & 0x07); // MSB a LSB (por convención LVGL)
+			int32_t byte_index = y * stride + (x >> 3);
+			int8_t bit_index = 7 - (x & 0x07);
 
-			bool pixel_on = (px_map[byte_index] >> bit_index) & 0x01;
+			bool pixel_on = ~(px_map[byte_index] >> bit_index) & 0x01;
+
 			if (pixel_on) {
-				u8g2->drawPixel(abs_x, abs_y);
+				u8g2->drawPixel(shifted_x, abs_y);
 			}
 		}
 	}
