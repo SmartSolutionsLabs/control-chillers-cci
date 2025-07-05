@@ -87,8 +87,6 @@ class GraphicLCD : public Module {
 
 		void print(int x, int y,  char *text);
 
-		void splashScreen();
-
 		void drawImage(int xPos, int yPos, const Bitmap &image);
 
 		void drawMenu();

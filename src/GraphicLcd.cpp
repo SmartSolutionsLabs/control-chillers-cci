@@ -88,12 +88,6 @@ void GraphicLCD::print(int x, int y, char *text){
 	this->u8g2->print(text);
 }
 
-void GraphicLCD::splashScreen(){
-	this->u8g2->clearBuffer();
-	this->drawImage(17,5, IMAGE_SSL_LOGO_DATA);
-	this->u8g2->sendBuffer();
-}
-
 void GraphicLCD::drawMenu(){
 	this->u8g2->drawLine(16, 0, 16, 64);
 	this->u8g2->drawLine(0, 16, 16, 16);
