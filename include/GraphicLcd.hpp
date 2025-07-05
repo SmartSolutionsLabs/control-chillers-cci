@@ -3,6 +3,7 @@
 #define _INC_GRAPHICLCD_
 #include <Module.hpp>
 #include <U8g2lib.h>
+#include <lvgl.h>
 #include "Screens.hpp"
 #include "MotorGraphicLCD.hpp"
 #include "ChillerGraphicLCD.hpp"
@@ -34,6 +35,8 @@ enum Screen {
 class GraphicLCD : public Module {
 	private:
         U8G2_ST7920_128X64_F_SW_SPI *u8g2; //(U8G2_R0, 27, 26, 25, 14);
+
+		lv_display_t *display;
 
 		MotorGraphicLCD *motorIcon;
 
@@ -138,6 +141,8 @@ class GraphicLCD : public Module {
 		void navigateChiller(int index,bool mode);
 		void navigateProgressBar(int index,bool mode);
 		void setWifiIP(IPAddress newIp);
+
+		static void displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
 	};
 
 #endif

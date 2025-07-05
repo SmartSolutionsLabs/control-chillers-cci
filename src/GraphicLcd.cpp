@@ -22,41 +22,15 @@ void GraphicLCD::connect(void *data) {
 	static lv_color_t buf[128 * 64 / 8];
 
 	// Crear display LVGL y asignar callbacks
-	lv_display_t *disp = lv_display_create(128, 64);
-	lv_display_set_color_format(disp, LV_COLOR_FORMAT_I1);
-	Serial.print("displaying\n");
-	lv_display_set_flush_cb(disp, [](lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
-		U8G2 *u8g2 = static_cast<U8G2 *>(lv_display_get_user_data(disp));
-		Serial.print("flush\n");
-
-		int32_t width = area->x2 - area->x1 + 1;
-		int32_t height = area->y2 - area->y1 + 1;
-
-		for (int32_t y = 0; y < height; y++) {
-			for (int32_t x = 0; x < width; x++) {
-				int32_t abs_x = area->x1 + x;
-				int32_t abs_y = area->y1 + y;
-
-				// Calcular posición del bit en el búfer (horizontal mapping)
-				int32_t byte_index = (y * width + x) >> 3;
-				int8_t bit_index = 7 - (x & 0x07); // MSB a LSB (por convención LVGL)
-
-				bool pixel_on = (px_map[byte_index] >> bit_index) & 0x01;
-				if (pixel_on) {
-					u8g2->drawPixel(abs_x, abs_y);
-				}
-			}
-		}
-
-		u8g2->sendBuffer();
-		lv_display_flush_ready(disp);
-	});
+	this->display = lv_display_create(128, 64);
+	lv_display_set_color_format(this->display, LV_COLOR_FORMAT_I1);
+	lv_display_set_flush_cb(this->display, GraphicLCD::displayFlush);
 
 	// Asignar framebuffer y backend (modo directo)
-	lv_display_set_buffers(disp, buf, nullptr, sizeof(buf), LV_DISPLAY_RENDER_MODE_PARTIAL);
+	lv_display_set_buffers(this->display, buf, nullptr, sizeof(buf), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
 	// Guardar puntero u8g2 como user_data
-	lv_display_set_user_data(disp, this->u8g2);
+	lv_display_set_user_data(this->display, this->u8g2);
 
 	this->setInitialized(true); // Marca como inicializado
 }
@@ -74,6 +48,32 @@ void GraphicLCD::run(void* data) {
 		lv_timer_handler();                 // Procesa eventos de LVGL
 		vTaskDelay(5 / portTICK_PERIOD_MS); // Pequeño retardo
 	}
+}
+
+void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
+	U8G2 *u8g2 = static_cast<U8G2 *>(lv_display_get_user_data(disp));
+
+	int32_t width = area->x2 - area->x1 + 1;
+	int32_t height = area->y2 - area->y1 + 1;
+
+	for (int32_t y = 0; y < height; y++) {
+		for (int32_t x = 0; x < width; x++) {
+			int32_t abs_x = area->x1 + x;
+			int32_t abs_y = area->y1 + y;
+
+			// Calcular posición del bit en el búfer (horizontal mapping)
+			int32_t byte_index = (y * width + x) >> 3;
+			int8_t bit_index = 7 - (x & 0x07); // MSB a LSB (por convención LVGL)
+
+			bool pixel_on = (px_map[byte_index] >> bit_index) & 0x01;
+			if (pixel_on) {
+				u8g2->drawPixel(abs_x, abs_y);
+			}
+		}
+	}
+
+	u8g2->sendBuffer();
+	lv_display_flush_ready(disp);
 }
 
 uint32_t GraphicLCD::getTickCount() {
