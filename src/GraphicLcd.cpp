@@ -1,5 +1,8 @@
 #include "lvgl.h"
 #include "GraphicLcd.hpp"
+#include "images/Logo.h"
+
+LV_IMAGE_DECLARE(imageLogo);
 
 GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore) {
 }
@@ -37,11 +40,11 @@ void GraphicLCD::connect(void *data) {
 
 void GraphicLCD::run(void* data) {
 	Serial.print("GraphicLCD::run\n");
-	// Crear un label con texto
-	lv_obj_t *label = lv_label_create(lv_screen_active());
-	lv_label_set_text(label, "Miguenaro de la re...");
-	lv_obj_set_pos(label, 0, 0);
-	lv_obj_set_style_text_font(label, &lv_font_montserrat_12, 0);
+
+	// Splash screen
+	lv_obj_t * splashScreen = lv_img_create(lv_screen_active());
+	lv_image_set_src(splashScreen, &imageLogo);
+	lv_obj_set_pos(splashScreen, 0, 0);
 
 	// Bucle de refresco (FreeRTOS task)
 	while (1) {
