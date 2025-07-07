@@ -51,17 +51,13 @@ class GraphicLCD : public Module {
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
 
-		~GraphicLCD() {
-            delete[] progressBar;  // Liberar la memoria del arreglo
-        }
+		~GraphicLCD();
 
 		static uint32_t getTickCount(void);
 
 		void connect(void * data) override;
 
 		void run(void* data) override;
-
-		void print(int x, int y,  char *text);
 
 		/**
 		 * Create widgets of splash screen and show them.
@@ -73,14 +69,8 @@ class GraphicLCD : public Module {
 		 */
 		void clearSplashScreen();
 
-		void drawImage(int xPos, int yPos, const Bitmap &image);
-
 		void initMenu();
 		void clearMenu();
-
-		void setMotorState(int motorNumber , bool state);
-
-		void setChillerState(int chillerNumber , bool state);
 
 		void initHomePage();
 		void clearHomePage();
@@ -96,40 +86,12 @@ class GraphicLCD : public Module {
 
 		void update();
 
-		void drawRotatedImage(int xPos, int yPos, const Bitmap &image, float angle);
-
 		void setScreen(Screen newScreen);
-
-		void setProgressBarValue(uint8_t index ,uint16_t newValue);
-
-		void setProgressBarPercentage(uint8_t index ,uint8_t newPercentage);
-
-		void drawProgressBar(uint8_t number , uint8_t posX , uint8_t posY, const Bitmap &image);
-
-		void drawBoxes();
-
-		void textInput(uint8_t posX , uint8_t posY, uint8_t size, char *text);
-
-		void drawCenteredText(int xCenter, int y, const char *text);
 
 		void setNewScreen();
 
-		void setProgressBarDelay(uint8_t index , uint8_t newDelay);
-
-		uint8_t getProgressBarDelay(uint8_t index);
-
-
 		bool isInitialized() const { return initialized; }
 		void setInitialized(bool value) { initialized = value; }
-
-		void selectMotor(int index,bool mode);
-		void selectChiller(int index,bool mode);
-		void selectProgressBar(int index,bool mode);
-
-		void navigateMotor(int index,bool mode);
-		void navigateChiller(int index,bool mode);
-		void navigateProgressBar(int index,bool mode);
-		void setWifiIP(IPAddress newIp);
 
 		static void displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
 	};

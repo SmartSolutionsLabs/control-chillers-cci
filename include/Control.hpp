@@ -115,30 +115,17 @@ public:
 
     void turnOnChiller(int index);
     void turnOffChiller(int index);
-    
+
     void turnOnPump(int index);
     void turnOffPump(int index);
-
-    void updateProgressBar(int index);
 
     void nextOption();
     void previousOption();
 
     void upValueOption();
     void downValueOption();
-    
-    void processOption();
 
-    void setWifiIP(IPAddress newIP){ // aqui añadir metodos para impresion de pantalla
-        this->IP = newIP;
-        /*String ipString = this->IP.toString();
-        char buffer[20];  // Asegúrate de que el tamaño sea suficiente para la dirección IP y el caracter nulo
-        ipString.toCharArray(buffer, sizeof(buffer));
-        this->lcd->setWifiIP(buffer); */
-        this->lcd->setWifiIP(newIP);
-        Serial.print("setWifiIP: ");
-        Serial.println(this->IP);
-    }
+    void processOption();
 
     void setWifiStatus(bool newWifiStatus){
         this->wifiStatus = newWifiStatus;

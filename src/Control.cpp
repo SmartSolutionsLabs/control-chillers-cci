@@ -17,7 +17,7 @@ void Control::connect(void *data) {
     this->ScreenSelected = false;
     this->optionSelected = false;
     this->currentOption = 1;
-    this->maxOptions = new uint8_t[4]; // delay 1, delay 2, 
+    this->maxOptions = new uint8_t[4]; // delay 1, delay 2,
     this->lcd = (GraphicLCD *)data;    // Asignar el puntero a la pantalla LCD
 
     // ✅ CREAR NUEVAS INSTANCIAS DE Pump[]
@@ -56,27 +56,27 @@ void Control::run(void *data) {
 
     while(this->lcd == nullptr || !this->lcd->isInitialized()) {
         vTaskDelay(50 / portTICK_PERIOD_MS);
-    } 
+    }
 
     this->turnOffPump(1);
     this->turnOffPump(2);
     this->turnOffChiller(1);
     this->turnOffChiller(2);
 
-    this->lcd->setProgressBarValue(1,0);
-    this->lcd->setProgressBarValue(2,0);
+    //~ this->lcd->setProgressBarValue(1,0);
+    //~ this->lcd->setProgressBarValue(2,0);
 
-    this->lcd->setProgressBarDelay(1,this->delay[0]);
-    this->lcd->setProgressBarDelay(2,this->delay[1]);
+    //~ this->lcd->setProgressBarDelay(1,this->delay[0]);
+    //~ this->lcd->setProgressBarDelay(2,this->delay[1]);
 
-    this->lcd->getProgressBar(0).setCounter(this->delayCounter[0]/1000);
-    this->lcd->getProgressBar(1).setCounter(this->delayCounter[1]/1000);
+    //~ this->lcd->getProgressBar(0).setCounter(this->delayCounter[0]/1000);
+    //~ this->lcd->getProgressBar(1).setCounter(this->delayCounter[1]/1000);
 
     bool flag = false;
     this->flag_process[0] = true;
     this->flag_process[1] = true;
-    this->lcd->getProgressBar(0).setCounter(0);
-    this->lcd->getProgressBar(1).setCounter(0);
+    //~ this->lcd->getProgressBar(0).setCounter(0);
+    //~ this->lcd->getProgressBar(1).setCounter(0);
     this->lcd->setScreen(HOME);
     WiFi.disconnect();
 
@@ -93,7 +93,7 @@ void Control::run(void *data) {
         }
 
         this->scanNetwork();
-        
+
         // Si ha pasado el intervalo de tiempo, inicia un nuevo escaneo
         /*if (!this->scanningActive && (millis() - this->lastScanAttempt > scanInterval)) {
             Serial.println("Iniciando un nuevo escaneo...");
@@ -128,7 +128,7 @@ void Control::handleKey(char key) {
         //case 'G':  // Navegar hacia abajo o disminuir valor
         //    setProcessChiller(2);
         //    break;
-        
+
         case 'N':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(0);
             break;
@@ -136,7 +136,7 @@ void Control::handleKey(char key) {
             setProcessChiller(0);
             break;
     }
-    Serial.printf("currentScreen : %d, ScreenSelected: %d, currentOption: %d, optionSelected: %d\n", 
+    Serial.printf("currentScreen : %d, ScreenSelected: %d, currentOption: %d, optionSelected: %d\n",
                   this->currentScreen, this->ScreenSelected, this->currentOption, this->optionSelected);
 }
 
@@ -168,15 +168,15 @@ void Control::proccessEnterKey(){
     }
 }
 
-void Control::proccessBackKey() { 
+void Control::proccessBackKey() {
     if(this->ScreenSelected && !this->optionSelected){
         this->ScreenSelected = false;
         this->processOption();
-    }   
+    }
     else if(this->ScreenSelected && this->optionSelected){
         this->optionSelected = false;
         this->processOption();
-    }  
+    }
 }
 
 void Control::proccessUpKey() {
@@ -213,14 +213,14 @@ void Control::upValueOption(){
                 if(this->delay[0]>999){
                     this->delay[0] = 1;
                 }
-                this->lcd->setProgressBarDelay(1,this->delay[0]);
+                //~ this->lcd->setProgressBarDelay(1,this->delay[0]);
             }
             else if(this->currentOption == 2){
                 this->delay[1]++ ;
                 if(this->delay[1]>999){
                     this->delay[1] = 1;
                 }
-                this->lcd->setProgressBarDelay(2,this->delay[1]);
+                //~ this->lcd->setProgressBarDelay(2,this->delay[1]);
             }
             break;
         case MANUAL:
@@ -238,14 +238,14 @@ void Control::downValueOption(){
                 if(this->delay[0]>999){
                     this->delay[0] = 999;
                 }
-                this->lcd->setProgressBarDelay(1,this->delay[0]);
+                //~ this->lcd->setProgressBarDelay(1,this->delay[0]);
             }
             else if(this->currentOption == 2){
                 this->delay[1]-- ;
                 if(this->delay[1]>999){
                     this->delay[1] = 999;
                 }
-                this->lcd->setProgressBarDelay(2,this->delay[1]);
+                //~ this->lcd->setProgressBarDelay(2,this->delay[1]);
             }
             break;
         case MANUAL:
@@ -262,38 +262,38 @@ void Control::processOption(){   // se procesa los graficos de pantalla cuandop 
                 break;
             case CONFIG: // config
                 if(this->currentOption == 1){
-                    this->lcd->navigateProgressBar(0,true);
-                    this->lcd->navigateProgressBar(1,false);
+                    //~ this->lcd->navigateProgressBar(0,true);
+                    //~ this->lcd->navigateProgressBar(1,false);
                 }
                 else if(this->currentOption == 2){
-                    this->lcd->navigateProgressBar(0,false);
-                    this->lcd->navigateProgressBar(1,true);
+                    //~ this->lcd->navigateProgressBar(0,false);
+                    //~ this->lcd->navigateProgressBar(1,true);
                 }
                 break;
             case MANUAL: // manual
                 if(this->currentOption == 1){
-                    this->lcd->navigateMotor(0,true);
-                    this->lcd->navigateMotor(1,false);
-                    this->lcd->navigateChiller(0,false);
-                    this->lcd->navigateChiller(1,false);
+                    //~ this->lcd->navigateMotor(0,true);
+                    //~ this->lcd->navigateMotor(1,false);
+                    //~ this->lcd->navigateChiller(0,false);
+                    //~ this->lcd->navigateChiller(1,false);
                 }
                 else if(this->currentOption == 2){
-                    this->lcd->navigateMotor(0,false);
-                    this->lcd->navigateMotor(1,false);
-                    this->lcd->navigateChiller(0,true);
-                    this->lcd->navigateChiller(1,false);
+                    //~ this->lcd->navigateMotor(0,false);
+                    //~ this->lcd->navigateMotor(1,false);
+                    //~ this->lcd->navigateChiller(0,true);
+                    //~ this->lcd->navigateChiller(1,false);
                 }
                 else if(this->currentOption == 3){
-                    this->lcd->navigateMotor(0,false);
-                    this->lcd->navigateMotor(1,true);
-                    this->lcd->navigateChiller(0,false);
-                    this->lcd->navigateChiller(1,false);
+                    //~ this->lcd->navigateMotor(0,false);
+                    //~ this->lcd->navigateMotor(1,true);
+                    //~ this->lcd->navigateChiller(0,false);
+                    //~ this->lcd->navigateChiller(1,false);
                 }
                 else if(this->currentOption == 4){
-                    this->lcd->navigateMotor(0,false);
-                    this->lcd->navigateMotor(1,false);
-                    this->lcd->navigateChiller(0,false);
-                    this->lcd->navigateChiller(1,true);
+                    //~ this->lcd->navigateMotor(0,false);
+                    //~ this->lcd->navigateMotor(1,false);
+                    //~ this->lcd->navigateChiller(0,false);
+                    //~ this->lcd->navigateChiller(1,true);
                 }
                 break;
             case LOG: // log
@@ -305,38 +305,38 @@ void Control::processOption(){   // se procesa los graficos de pantalla cuandop 
         switch(this->currentScreen){
             case MANUAL:
                 if(this->currentOption == 1){
-                    this->lcd->selectMotor(0,true);
-                    this->lcd->navigateChiller(0,false);
-                    this->lcd->navigateMotor(1,false);
-                    this->lcd->navigateChiller(1,false);
+                    //~ this->lcd->selectMotor(0,true);
+                    //~ this->lcd->navigateChiller(0,false);
+                    //~ this->lcd->navigateMotor(1,false);
+                    //~ this->lcd->navigateChiller(1,false);
                 }
                 else if(this->currentOption == 2){
-                    this->lcd->navigateMotor(0,false);
-                    this->lcd->selectChiller(0,true);
-                    this->lcd->navigateMotor(1,false);
-                    this->lcd->navigateChiller(1,false);
+                    //~ this->lcd->navigateMotor(0,false);
+                    //~ this->lcd->selectChiller(0,true);
+                    //~ this->lcd->navigateMotor(1,false);
+                    //~ this->lcd->navigateChiller(1,false);
                 }
                 else if(this->currentOption == 3){
-                    this->lcd->navigateMotor(0,false);
-                    this->lcd->navigateChiller(0,false);
-                    this->lcd->selectMotor(1,true);
-                    this->lcd->navigateChiller(1,false);
+                    //~ this->lcd->navigateMotor(0,false);
+                    //~ this->lcd->navigateChiller(0,false);
+                    //~ this->lcd->selectMotor(1,true);
+                    //~ this->lcd->navigateChiller(1,false);
                 }
                 else if(this->currentOption == 4){
-                    this->lcd->navigateMotor(0,false);
-                    this->lcd->navigateChiller(0,false);
-                    this->lcd->navigateMotor(1,false);
-                    this->lcd->selectChiller(1,true);
+                    //~ this->lcd->navigateMotor(0,false);
+                    //~ this->lcd->navigateChiller(0,false);
+                    //~ this->lcd->navigateMotor(1,false);
+                    //~ this->lcd->selectChiller(1,true);
                 }
                 break;
             case CONFIG:
                 if(this->currentOption == 1){
-                    this->lcd->navigateProgressBar(0,false);
-                    this->lcd->selectProgressBar(0,true);
+                    //~ this->lcd->navigateProgressBar(0,false);
+                    //~ this->lcd->selectProgressBar(0,true);
                 }
                 else if(this->currentOption == 2){
-                    this->lcd->navigateProgressBar(1,false);
-                    this->lcd->selectProgressBar(1,true);
+                    //~ this->lcd->navigateProgressBar(1,false);
+                    //~ this->lcd->selectProgressBar(1,true);
                 }
                 break;
         }
@@ -344,14 +344,14 @@ void Control::processOption(){   // se procesa los graficos de pantalla cuandop 
     else if(!this->ScreenSelected && !this->optionSelected){
         switch(this->currentScreen){
             case MANUAL:
-                    this->lcd->navigateMotor(0,false);
-                    this->lcd->navigateMotor(1,false);
-                    this->lcd->navigateChiller(0,false);
-                    this->lcd->navigateChiller(1,false);
+                    //~ this->lcd->navigateMotor(0,false);
+                    //~ this->lcd->navigateMotor(1,false);
+                    //~ this->lcd->navigateChiller(0,false);
+                    //~ this->lcd->navigateChiller(1,false);
                 break;
             case CONFIG:
-                    this->lcd->navigateProgressBar(0,false);
-                    this->lcd->navigateProgressBar(1,false);
+                    //~ this->lcd->navigateProgressBar(0,false);
+                    //~ this->lcd->navigateProgressBar(1,false);
                 break;
         }
     }
@@ -439,10 +439,10 @@ void Control::manualControlDevice() {
             this->currentScreen = HOME;
             this->flag_process[0] = false;
             this->lcd->setScreen(this->currentScreen);
-            this->lcd->selectMotor(0,false);
-            this->lcd->selectMotor(1,false);
-            this->lcd->selectChiller(0,false);
-            this->lcd->selectChiller(1,false);
+            //~ this->lcd->selectMotor(0,false);
+            //~ this->lcd->selectMotor(1,false);
+            //~ this->lcd->selectChiller(0,false);
+            //~ this->lcd->selectChiller(1,false);
             //this->turnOffAutomaticSecuence(1);
         }
         else{
@@ -455,7 +455,7 @@ void Control::manualControlDevice() {
             }
         }
     }
-    if(index == 2){    
+    if(index == 2){
         if(this->chillers[0]->getState()){// si el chiller esta encendido
             this->turnOffChiller(1);
         }
@@ -469,17 +469,17 @@ void Control::manualControlDevice() {
                 this->currentScreen = HOME;
                 this->flag_process[0] = false;
                 this->lcd->setScreen(this->currentScreen);
-                this->lcd->selectMotor(0,false);
-                this->lcd->selectMotor(1,false);
-                this->lcd->selectChiller(0,false);
-                this->lcd->selectChiller(1,false);
+                //~ this->lcd->selectMotor(0,false);
+                //~ this->lcd->selectMotor(1,false);
+                //~ this->lcd->selectChiller(0,false);
+                //~ this->lcd->selectChiller(1,false);
             }
             else{                                         // si ya hay bomba encendida ; simplemente encendemos chiller
-                this->turnOnChiller(1);                   
+                this->turnOnChiller(1);
             }
         }
     }
-    
+
     if(index == 3){
         if(this->chillers[1]->getState()){ // si el chiller esta encendido ; apagar en secuencia
             this->automaticSecuenceOn[1] = false;
@@ -490,10 +490,10 @@ void Control::manualControlDevice() {
             this->ScreenSelected = false;
             this->flag_process[0] = false;
             this->lcd->setScreen(this->currentScreen);
-            this->lcd->selectMotor(0,false);
-            this->lcd->selectMotor(1,false);
-            this->lcd->selectChiller(0,false);
-            this->lcd->selectChiller(1,false);
+            //~ this->lcd->selectMotor(0,false);
+            //~ this->lcd->selectMotor(1,false);
+            //~ this->lcd->selectChiller(0,false);
+            //~ this->lcd->selectChiller(1,false);
         }
         else{
             if(this->pumps[1]->getState()){ // si no ;  y si la bomba esta encendida ; se puede apagar directamente la bomba
@@ -516,17 +516,17 @@ void Control::manualControlDevice() {
                 this->currentOption = 1;
                 this->currentScreen = HOME;
                 this->flag_process[1] = false;
-                this->lcd->setScreen(this->currentScreen);
-                this->lcd->selectMotor(0,false);
-                this->lcd->selectMotor(1,false);
-                this->lcd->selectChiller(0,false);
-                this->lcd->selectChiller(1,false);
+                //~ this->lcd->setScreen(this->currentScreen);
+                //~ this->lcd->selectMotor(0,false);
+                //~ this->lcd->selectMotor(1,false);
+                //~ this->lcd->selectChiller(0,false);
+                //~ this->lcd->selectChiller(1,false);
             }
             else{                                         // si ya hay bomba encendida ; simplemente encendemos chiller
-                this->turnOnChiller(2);                   
+                this->turnOnChiller(2);
             }
         }
-    }    
+    }
 }
 
 void Control::processChiller(){
@@ -558,7 +558,7 @@ void Control::setProcessChiller(uint8_t index){
     else{
         this->chillerMode = NONE_SELECTED;
     }
-    
+
     switch(this->chillerMode){
         case NONE_SELECTED:
             if(this->lastChillerMode == CHILLER_1_SELECTED){
@@ -574,7 +574,7 @@ void Control::setProcessChiller(uint8_t index){
                 this->flag_process[1] = false;
             }
             break;
-        
+
         case CHILLER_1_SELECTED:
             if(this->lastChillerMode == NONE_SELECTED){
                 Serial.println("set 1 Secuence ON");
@@ -596,17 +596,17 @@ void Control::setProcessChiller(uint8_t index){
 }
 
 void Control::turnOnAutomaticSecuence(int index){
-    if(this->flag_process[index-1] == true){  // incia el contador 
+    if(this->flag_process[index-1] == true){  // incia el contador
         return;
     }
-    
+
     if(!this->pumps[index-1]->getState()){ //  verifica el estado del motor
         this->turnOnPump(index);           /// enciende el motor por primera vez
         this->timerDelayCounter[index-1] = millis(); //incia el timer contador del delay entre motor y chiller
     }
 
     this->delayCounter[index-1] = millis() - timerDelayCounter[index-1];
-    this->updateProgressBar(index);
+    //~ this->updateProgressBar(index);
 
     if(this->delayCounter[index-1] > this->delay[index-1] * 1000 ){  // se espera el tiempo para encender el chiller
         this->turnOnChiller(index);  // se enciende el chiller;
@@ -616,53 +616,22 @@ void Control::turnOnAutomaticSecuence(int index){
 }
 
 void Control::turnOffAutomaticSecuence(int index){
-    if(this->flag_process[index-1] == true){  // incia el contador 
-        this->updateProgressBar(index);
+    if(this->flag_process[index-1] == true){  // incia el contador
+        //~ this->updateProgressBar(index);
         return;
     }
-    
+
     if(this->chillers[index-1]->getState()){ //  verifica el estado del motor
         this->turnOffChiller(index);           /// enciende el motor por primera vez
         this->timerDelayCounter[index-1] = millis(); //incia el timer contador del delay entre motor y chiller
     }
 
     this->delayCounter[index-1] = millis() - timerDelayCounter[index-1];
-    this->updateProgressBar(index);
+    //~ this->updateProgressBar(index);
 
     if(this->delayCounter[index-1] > this->delay[index-1] * 1000 ){  // se espera el tiempo para encender el chiller
         this->turnOffPump(index);  // se enciende el chiller;
         this->flag_process[index-1] = true;
-    }
-}
-
-void Control::updateProgressBar(int index){
-    static unsigned long lastUpdateTime[8] = {0};  // Suponiendo hasta 8 chillers
-            
-    if (millis() - lastUpdateTime[index-1] >= 1000) {  // Se actualiza cada 1 segundo
-        lastUpdateTime[index-1] = millis();
-
-        uint8_t percentage = (100 * this->delayCounter[index-1]) / (1000 * this->delay[index-1]);
-        if(percentage > 100) {
-            percentage = 100;
-        }
-
-        this->lcd->getProgressBar(index-1).setPercentage(percentage);
-        uint32_t secondsElapsed = this->delayCounter[index-1] / 1000;
-        if (secondsElapsed > this->delay[index-1]) {
-            secondsElapsed = this->delay[index-1]; // Evita overflow
-        }
-        this->lcd->getProgressBar(index-1).setCounter(secondsElapsed);
-        
-        Serial.printf("\rProgress Bar : |");  // Retorno de carro para sobrescribir
-        for (int i = 0; i < 20; i++) {
-            if (i < percentage / 5) {
-                Serial.printf("█");  // Bloques llenos
-            } else {
-                Serial.printf(" ");  // Espacios vacíos
-            }
-        }
-        Serial.printf("| %d% %", percentage);  // Espacios extras para borrar residuos
-        Serial.flush();  // Asegurar que se imprima en la terminal en tiempo real
     }
 }
 
@@ -678,7 +647,7 @@ void Control::turnOnChiller(int index){
         Serial.printf("Error: Índice de chiller fuera de rango: %d\n", index);
         return;
     }
-    this->lcd->setChillerState(index-1, true);
+    //~ this->lcd->setChillerState(index-1, true);
 }
 
 void Control::turnOffChiller(int index){
@@ -686,7 +655,7 @@ void Control::turnOffChiller(int index){
 
     if (this->chillers[index-1] != nullptr) {
         this->chillers[index-1]->toggle(this->GPIOA);
-    } 
+    }
     else {
         Serial.printf("Error: chiller %d es nullptr\n", index-1);
     }
@@ -695,20 +664,20 @@ void Control::turnOffChiller(int index){
         Serial.printf("Error: Índice de chiller fuera de rango: %d\n", index);
         return;
     }
-    
-    this->lcd->setChillerState(index-1, false);
+
+    //~ this->lcd->setChillerState(index-1, false);
 }
 
 void Control::turnOnPump(int index){
     this->GPIOA |= (1 << this->pumps[index-1]->getPin());
     this->pumps[index-1]->toggle(this->GPIOA);
-    this->lcd->setMotorState(index-1, true);
+    //~ this->lcd->setMotorState(index-1, true);
 }
 
 void Control::turnOffPump(int index){
     this->GPIOA &= ~(1 << this->pumps[index-1]->getPin());
     this->pumps[index-1]->toggle(this->GPIOA);
-    this->lcd->setMotorState(index-1, false);
+    //~ this->lcd->setMotorState(index-1, false);
 }
 
 void Control::scanNetwork() {
@@ -716,7 +685,7 @@ void Control::scanNetwork() {
 
     if (n == WIFI_SCAN_RUNNING) {
         // El escaneo sigue en curso, no hacer nada
-    } 
+    }
     else if (n == WIFI_SCAN_FAILED) {
         // Solo consideramos un error real si previamente habíamos iniciado un escaneo.
         if (this->scanningActive && (millis() - this->lastScanAttempt > retryDelayAfterFail)) {
@@ -729,7 +698,7 @@ void Control::scanNetwork() {
             this->scanningActive = true;
             this->lastScanAttempt = millis();
         }
-    } 
+    }
     else if (n >= 0) {
         // Se completó un escaneo exitoso
         Serial.print("Redes encontradas: ");
@@ -752,7 +721,7 @@ void Control::scanNetwork() {
 void Control::triggerScan() {
     // Opcional: Verificar que WiFi esté en modo estación
     WiFi.mode(WIFI_STA);
-    
+
     Serial.println("Escaneo disparado por otra clase.");
     WiFi.scanNetworks(true);  // Inicia el escaneo asíncrono
     scanningActive = true;
