@@ -41,6 +41,8 @@ void GraphicLCD::connect(void *data) {
 void GraphicLCD::run(void* data) {
 	Serial.print("GraphicLCD::run\n");
 
+	this->initSplashScreen();
+
 	// Bucle de refresco (FreeRTOS task)
 	while (1) {
 		lv_timer_handler();                 // Procesa eventos de LVGL
