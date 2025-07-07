@@ -80,19 +80,24 @@ class GraphicLCD : public Module {
 
 		void drawImage(int xPos, int yPos, const Bitmap &image);
 
-		void drawMenu();
+		void initMenu();
+		void clearMenu();
 
 		void setMotorState(int motorNumber , bool state);
 
 		void setChillerState(int chillerNumber , bool state);
 
-		void drawHomePage();
+		void initHomePage();
+		void clearHomePage();
 
-		void drawConfigPage();
+		void initConfigPage();
+		void clearConfigPage();
 
-		void drawManualPage();
+		void initManualPage();
+		void clearManualPage();
 
-		void drawLogPage();
+		void initLogPage();
+		void clearLogPage();
 
 		void update();
 
