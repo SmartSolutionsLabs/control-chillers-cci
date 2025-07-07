@@ -38,14 +38,6 @@ class GraphicLCD : public Module {
 
 		lv_display_t *display;
 
-		MotorGraphicLCD *motorIcon;
-
-		progressBarLCD *progressBar;
-
-		ChillerGraphicLCD *chillerIcon;
-
-		WifiGraphicLCD *wifiIcon;
-
 		uint16_t splashScreenTimer = 2500;
 
 		uint32_t screenTimer;
@@ -58,8 +50,6 @@ class GraphicLCD : public Module {
 
 		bool initialized = false;
 
-		textInputLCD SSID,PSWD;
-
 		// all widgets for manipulation in real time. Don't forget allocate and free.
 		lv_obj_t * splashScreen;
 
@@ -71,18 +61,6 @@ class GraphicLCD : public Module {
         }
 
 		static uint32_t getTickCount(void);
-
-        // Método para obtener una referencia a un progressBarLCD
-        progressBarLCD& getProgressBar(uint8_t index) {
-            if (index < 2) {  // Asegurarse de que el índice esté dentro del rango
-                return progressBar[index];
-            }
-            // Manejar el caso de índice inválido (opcional)
-            static progressBarLCD dummy;  // Objeto dummy para evitar errores
-            return dummy;
-        }
-
-		textInputLCD* getTextInput(uint8_t index) ;
 
 		void connect(void * data) override;
 
