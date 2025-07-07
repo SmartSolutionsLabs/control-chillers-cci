@@ -48,7 +48,7 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 	static_cast<Control*>(this->modulesPointer[0])->setPump(1,static_cast<Pump*>(this->modulesPointer[5]));
 	this->modulesPointer[6]->connect(&Wire);
 
-	//~ this->modulesPointer[0]->start();
+	this->modulesPointer[0]->start();
 
 	// WiFi events
 	//~ WiFi.onEvent(
