@@ -84,7 +84,16 @@ void Control::run(void *data) {
     this->scanningActive = true;
     this->lastScanAttempt = millis();
     this->connectWifi();
+
+    this->lcd->setScreenTimer(millis());
+
     while (1) {
+		if (this->lcd->getSplashScreenTime()) { // flag changed from uint to 0
+			if (millis() - this->lcd->getScreenTimer() > this->lcd->getSplashScreenTime()) {
+				this->lcd->clearSplashScreenTime();
+				this->lcd->clearSplashScreen();
+			}
+		}
         vTaskDelay(this->iterationDelay);
 
         // Lógica para el modo automático

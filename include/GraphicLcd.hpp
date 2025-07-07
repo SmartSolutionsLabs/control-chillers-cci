@@ -33,7 +33,7 @@ class GraphicLCD : public Module {
 
 		lv_display_t *display;
 
-		uint16_t splashScreenTimer = 2500;
+		uint16_t splashScreenTime = 2500;
 
 		uint32_t screenTimer;
 
@@ -92,6 +92,22 @@ class GraphicLCD : public Module {
 
 		bool isInitialized() const { return initialized; }
 		void setInitialized(bool value) { initialized = value; }
+
+		uint16_t inline getSplashScreenTime() {
+			return splashScreenTime;
+		}
+
+		void clearSplashScreenTime() {
+			splashScreenTime = 0;
+		}
+
+		uint32_t inline getScreenTimer() {
+			return screenTimer;
+		}
+
+		inline void setScreenTimer(uint32_t newTimer) {
+			screenTimer = newTimer;
+		}
 
 		static void displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
 	};
