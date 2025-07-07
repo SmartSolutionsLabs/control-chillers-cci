@@ -53,6 +53,9 @@ void GraphicLCD::run(void* data) {
 void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
 	U8G2 *u8g2 = static_cast<U8G2 *>(lv_display_get_user_data(disp));
 
+	// Always clear whole screen
+	u8g2->clearBuffer();
+
 	int32_t width = area->x2 - area->x1 + 1;
 	int32_t height = area->y2 - area->y1 + 1;
 	int32_t stride = (width + 7) >> 3; // bytes por fila (horizontal mapping)
