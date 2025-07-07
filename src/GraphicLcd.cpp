@@ -41,11 +41,6 @@ void GraphicLCD::connect(void *data) {
 void GraphicLCD::run(void* data) {
 	Serial.print("GraphicLCD::run\n");
 
-	// Splash screen
-	lv_obj_t * splashScreen = lv_img_create(lv_screen_active());
-	lv_image_set_src(splashScreen, &imageLogo);
-	lv_obj_set_pos(splashScreen, 0, 0);
-
 	// Bucle de refresco (FreeRTOS task)
 	while (1) {
 		lv_timer_handler();                 // Procesa eventos de LVGL
@@ -91,6 +86,16 @@ uint32_t GraphicLCD::getTickCount() {
 void GraphicLCD::print(int x, int y, char *text){
 	this->u8g2->setCursor(x,y);
 	this->u8g2->print(text);
+}
+
+void GraphicLCD::initSplashScreen() {
+	this->splashScreen = lv_img_create(lv_screen_active());
+	lv_image_set_src(this->splashScreen, &imageLogo);
+	lv_obj_set_pos(this->splashScreen, 0, 0);
+}
+
+void GraphicLCD::clearSplashScreen() {
+	lv_obj_del(this->splashScreen);
 }
 
 void GraphicLCD::drawMenu(){

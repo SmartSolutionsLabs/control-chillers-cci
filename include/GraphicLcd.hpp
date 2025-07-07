@@ -60,6 +60,9 @@ class GraphicLCD : public Module {
 
 		textInputLCD SSID,PSWD;
 
+		// all widgets for manipulation in real time. Don't forget allocate and free.
+		lv_obj_t * splashScreen;
+
 	public:
         GraphicLCD(const char * name, int taskCore = 1);
 
@@ -86,6 +89,16 @@ class GraphicLCD : public Module {
 		void run(void* data) override;
 
 		void print(int x, int y,  char *text);
+
+		/**
+		 * Create widgets of splash screen and show them.
+		 */
+		void initSplashScreen();
+
+		/**
+		 * Free all widgets of splash screen.
+		 */
+		void clearSplashScreen();
 
 		void drawImage(int xPos, int yPos, const Bitmap &image);
 
