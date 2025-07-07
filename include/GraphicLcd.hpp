@@ -5,11 +5,6 @@
 #include <U8g2lib.h>
 #include <lvgl.h>
 #include "Screens.hpp"
-#include "MotorGraphicLCD.hpp"
-#include "ChillerGraphicLCD.hpp"
-#include "progressBarLCD.hpp"
-#include "textInputLCD.hpp"
-#include "WifiGraphicLCD.hpp"
 
 struct ChillerIcon {
     uint8_t number;
