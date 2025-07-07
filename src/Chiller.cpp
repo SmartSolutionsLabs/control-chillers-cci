@@ -19,7 +19,6 @@ void Chiller::connect(void *data) {
     digitalWrite(15, HIGH);  // Establecer el pin 15 en HIGH
     digitalWrite(41, HIGH);  // Establecer el pin 41 en HIGH
 
-    scanI2C();
     // Configurar todos los pines del banco A como salida
     this->writeRegister(IODIRA, 0x00);  
     vTaskDelay(this->iterationDelay );  // Espera breve para asegurar la configuración
@@ -114,33 +113,4 @@ bool Chiller::getState() {
 }
 void Chiller::setState(bool newState){
     this->state = newState;
-}
-
-void Chiller::scanI2C(){
-    byte error, address; int nDevices = 0; 
-    Serial.println("Scanning I2C bus...");
-    for (address = 1; address < 127; address++ ) {
-        this->wire->beginTransmission(address);
-        error = this->wire->endTransmission();
-        
-        if (error == 0) {
-            Serial.print("I2C device found at address 0x");
-            if (address < 16) {
-                Serial.print("0");
-            }
-            Serial.print(address, HEX);
-            Serial.println(" !");
-            nDevices++;
-        } else if (error == 4) {
-            Serial.print("Unknown error at address 0x");
-            if (address < 16) {
-                Serial.print("0");
-            }
-            Serial.println(address, HEX);
-        }
-    }
-    if (nDevices == 0)
-        Serial.println("No I2C devices found\n");
-    else
-        Serial.println("I2C scan complete\n");
 }

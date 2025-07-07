@@ -42,8 +42,6 @@ class Chiller : public Module {
 		void toggle(uint8_t newRegister);
 
 		void setGPIOA(uint8_t newState);
-
-		void scanI2C();
 };
 
 #endif
