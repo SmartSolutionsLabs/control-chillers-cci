@@ -30,7 +30,7 @@ void GraphicLCD::connect(void *data) {
 	lv_display_set_flush_cb(this->display, GraphicLCD::displayFlush);
 
 	// Asignar framebuffer y backend (modo directo)
-	lv_display_set_buffers(this->display, buf, nullptr, sizeof(buf), LV_DISPLAY_RENDER_MODE_DIRECT);
+	lv_display_set_buffers(this->display, buf, nullptr, sizeof(buf), LV_DISPLAY_RENDER_MODE_FULL);
 
 	// Guardar puntero u8g2 como user_data
 	lv_display_set_user_data(this->display, this->u8g2);
