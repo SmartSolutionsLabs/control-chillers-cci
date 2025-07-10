@@ -5,6 +5,14 @@
 LV_IMAGE_DECLARE(imageLogo);
 
 GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore) {
+	for (int i = 255; i >= 0; --i) {
+		uint8_t b = static_cast<uint8_t>(i);
+		b = (b & 0xF0) >> 4 | (b & 0x0F) << 4; // intercambia mitades
+		b = (b & 0xCC) >> 2 | (b & 0x33) << 2; // intercambia pares
+		b = (b & 0xAA) >> 1 | (b & 0x55) << 1; // intercambia bits individuales
+
+		GraphicLCD::bitReverseTable[i] = b;
+	}
 }
 
 void GraphicLCD::connect(void *data) {
