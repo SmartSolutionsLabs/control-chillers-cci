@@ -46,7 +46,7 @@ void GraphicLCD::run(void* data) {
 	// Bucle de refresco (FreeRTOS task)
 	while (1) {
 		lv_timer_handler();                 // Procesa eventos de LVGL
-		vTaskDelay(5 / portTICK_PERIOD_MS); // Pequeño retardo
+		vTaskDelay(48 / portTICK_PERIOD_MS); // Pequeño retardo
 	}
 }
 
