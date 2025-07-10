@@ -49,7 +49,7 @@ class GraphicLCD : public Module {
 		lv_obj_t * splashScreen;
 
 	public:
-		static uint8_t bitReverseTable[256];
+		static uint8_t bitReverseTable[256]; // but must be precomputed to make it constant
 
         GraphicLCD(const char * name, int taskCore = 1);
 
