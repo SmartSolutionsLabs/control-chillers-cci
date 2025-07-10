@@ -15,6 +15,7 @@ void GraphicLCD::connect(void *data) {
 	// Inicializar hardware (pantalla)
 	this->u8g2->begin();
 	this->u8g2->clearBuffer();
+	this->u8g2->setDrawColor(0);
 
 	// Inicializar LVGL
 	lv_init();
