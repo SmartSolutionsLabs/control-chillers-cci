@@ -6,19 +6,6 @@
 #include <lvgl.h>
 #include "Screens.hpp"
 
-struct ChillerIcon {
-    uint8_t number;
-    bool state;
-	bool run;
-	uint32_t updateTimer;
-	uint32_t timer;
-};
-
-struct ProgressBarIcon{
-	uint16_t value;
-	uint8_t percentage;
-};
-
 enum Screen {
 	HOME,       // Pantalla principal
 	CONFIG,   // Configuración
