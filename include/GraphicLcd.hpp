@@ -86,7 +86,7 @@ class GraphicLCD : public Module {
 			return splashScreenTime;
 		}
 
-		void clearSplashScreenTime() {
+		inline void clearSplashScreenTime() {
 			splashScreenTime = 0;
 		}
 
