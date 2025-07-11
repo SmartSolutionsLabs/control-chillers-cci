@@ -4,7 +4,6 @@
 #include <Module.hpp>
 #include <U8g2lib.h>
 #include <lvgl.h>
-#include "Screens.hpp"
 
 enum Screen {
 	HOME,       // Pantalla principal
