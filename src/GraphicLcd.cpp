@@ -4,6 +4,8 @@
 
 LV_IMAGE_DECLARE(imageLogo);
 
+uint8_t GraphicLCD::bitReverseTable[256] = {};
+
 GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore) {
 	for (unsigned int i = 255; i > 0; --i) {
 		uint8_t b = static_cast<uint8_t>(i);
