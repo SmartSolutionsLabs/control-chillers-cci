@@ -72,7 +72,7 @@ void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t
 	// Crear buffer temporal con bits invertidos
 	static uint8_t flippedBuffer[bufferSize];
 	for (int i = 0; i < bufferSize; ++i) {
-		flippedBuffer[i] = bitReverseTable[px_map[i]];
+		flippedBuffer[i] = bitReverseTable[px_map[i + 8]];
 	}
 
 	// Draw over display
