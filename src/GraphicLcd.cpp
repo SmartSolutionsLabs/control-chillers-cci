@@ -63,6 +63,31 @@ void GraphicLCD::run(void* data) {
 	}
 }
 
+void GraphicLCD::initMenu() {
+	/*Create a list*/
+	list1 = lv_list_create(lv_screen_active());
+	lv_obj_set_pos(list1, 0, 0);
+	lv_obj_set_size(list1, 24, lv_pct(100));
+	lv_obj_set_style_pad_row(list1, 5, 0);
+	lv_obj_set_style_pad_left(list1, 0, 0);  // Quitar padding izquierdo
+	lv_obj_set_style_pad_column(list1, 0, 0);
+	lv_obj_set_style_margin_left(list1, 0, 0);
+
+	/*Add buttons to the list*/
+	lv_obj_t * btn;
+	int i;
+	for(i = 0; i < 15; i++) {
+		btn = lv_button_create(list1);
+		lv_obj_set_size(btn, 20, 20);
+
+		//~ lv_obj_t * lab = lv_label_create(btn);
+		//~ lv_label_set_text_fmt(lab, "%d", i);
+	}
+
+	lastItemButton = lv_button_create(list1);
+	lv_obj_set_size(lastItemButton, 18, 18);
+}
+
 void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
 	U8G2 *u8g2 = static_cast<U8G2 *>(lv_display_get_user_data(disp));
 

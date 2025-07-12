@@ -33,8 +33,10 @@ class GraphicLCD : public Module {
 
 		// all widgets for manipulation in real time. Don't forget allocate and free.
 		lv_obj_t * splashScreen;
+		lv_obj_t * lastItemButton;
 
 	public:
+		lv_obj_t * list1;
 		static uint8_t bitReverseTable[256]; // but must be precomputed to make it constant
 
         GraphicLCD(const char * name, int taskCore = 1);
