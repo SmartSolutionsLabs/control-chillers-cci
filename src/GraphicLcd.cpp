@@ -66,13 +66,16 @@ void GraphicLCD::run(void* data) {
 void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
 	U8G2 *u8g2 = static_cast<U8G2 *>(lv_display_get_user_data(disp));
 
+	// cleaning offseting with garbage
+	px_map += 8;
+
 	// Cantidad total de bytes (128 x 64 / 8 bits)
 	constexpr int bufferSize = 1024;
 
 	// Crear buffer temporal con bits invertidos
 	static uint8_t flippedBuffer[bufferSize];
 	for (int i = 0; i < bufferSize; ++i) {
-		flippedBuffer[i] = bitReverseTable[px_map[i + 8]];
+		flippedBuffer[i] = bitReverseTable[px_map[i]];
 	}
 
 	// Draw over display
