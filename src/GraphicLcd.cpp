@@ -6,7 +6,7 @@ LV_IMAGE_DECLARE(imageLogo);
 
 uint8_t GraphicLCD::bitReverseTable[256] = {};
 
-GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore) {
+GraphicLCD::GraphicLCD() {
 	for (unsigned int i = 255; i > 0; --i) {
 		uint8_t b = static_cast<uint8_t>(i);
 		b = (b & 0xF0) >> 4 | (b & 0x0F) << 4; // intercambia mitades
@@ -19,8 +19,7 @@ GraphicLCD::GraphicLCD(const char * name, int taskCore) : Module(name, taskCore)
 	GraphicLCD::bitReverseTable[0] = 0; // Zero = Zero outside loop
 }
 
-void GraphicLCD::connect(void *data) {
-	Serial.print("GraphicLCD::connect\n");
+void GraphicLCD::init() {
 	// Crear instancia de U8G2 (SPI software)
 	this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 47, 21, 14, 38); // SCLK=47, MOSI=21, CS=14, RESET=38
 
@@ -49,18 +48,9 @@ void GraphicLCD::connect(void *data) {
 	lv_display_set_user_data(this->display, this->u8g2);
 
 	this->setInitialized(true); // Marca como inicializado
-}
 
-void GraphicLCD::run(void* data) {
-	Serial.print("GraphicLCD::run\n");
-
+	Serial.print("GraphicLCD::init\n");
 	this->initSplashScreen();
-
-	// Bucle de refresco (FreeRTOS task)
-	while (1) {
-		lv_timer_handler();                 // Procesa eventos de LVGL
-		vTaskDelay(48 / portTICK_PERIOD_MS); // Pequeño retardo
-	}
 }
 
 void GraphicLCD::initMenu() {

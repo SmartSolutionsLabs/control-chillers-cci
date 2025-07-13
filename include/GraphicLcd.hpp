@@ -1,7 +1,7 @@
 //george lo sugirio
 #ifndef _INC_GRAPHICLCD_
 #define _INC_GRAPHICLCD_
-#include <Module.hpp>
+
 #include <U8g2lib.h>
 #include <lvgl.h>
 
@@ -13,7 +13,10 @@ enum Screen {
 	SCREEN_ABOUT       // Información sobre el sistema
 };
 
-class GraphicLCD : public Module {
+/**
+ * Via to draw and control display.
+ */
+class GraphicLCD {
 	private:
         U8G2_ST7920_128X64_F_SW_SPI *u8g2; //(U8G2_R0, 27, 26, 25, 14);
 
@@ -39,15 +42,13 @@ class GraphicLCD : public Module {
 		lv_obj_t * list1;
 		static uint8_t bitReverseTable[256]; // but must be precomputed to make it constant
 
-        GraphicLCD(const char * name, int taskCore = 1);
+		GraphicLCD();
 
 		~GraphicLCD();
 
 		static uint32_t getTickCount(void);
 
-		void connect(void * data) override;
-
-		void run(void* data) override;
+		void init();
 
 		/**
 		 * Create widgets of splash screen and show them.
