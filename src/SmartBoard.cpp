@@ -27,10 +27,7 @@ void SmartBoard::initializeModulesPointerArray(unsigned int quantity) {
 	static_cast<Keypad*>(this->modulesPointer[1])->setControl(static_cast<Control*>(this->modulesPointer[0])); //cochina zoo
 	this->modulesPointer[1]->start();
 
-	this->modulesPointer[2] = new GraphicLCD("lcd");
-	static_cast<Control*>(this->modulesPointer[0])->setGraphicLCD(static_cast<GraphicLCD*>(this->modulesPointer[2])); //cochina zoo
-	this->modulesPointer[2]->connect(nullptr);
-	this->modulesPointer[2]->start();
+	// Pointer 2 was Graphic LCD and now is an empty slot
 
 	this->modulesPointer[3] = new Chiller("chiller1");
 	static_cast<Control*>(this->modulesPointer[0])->setChiller(0,static_cast<Chiller*>(this->modulesPointer[3])); //cochina zoo
