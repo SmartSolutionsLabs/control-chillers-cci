@@ -70,7 +70,7 @@ void GraphicLCD::initMenu() {
 	lv_obj_set_style_pad_all(this->menuBox, 0, 0);
 	lv_obj_set_size(this->menuBox, 20, DSP_VER_RES);  // 20px de ancho, 64px de alto
 	lv_obj_align(this->menuBox, LV_ALIGN_TOP_LEFT, 0, 0);  // pegado a la izquierda
-
+	lv_obj_set_scrollbar_mode(this->menuBox, LV_SCROLLBAR_MODE_OFF); // hide scroll bar
 	lv_obj_set_scroll_snap_y(this->menuBox, LV_SCROLL_SNAP_CENTER);  // snap en Y
 	lv_obj_add_flag(this->menuBox, LV_OBJ_FLAG_SCROLL_ONE);  // passing each one
 	lv_obj_set_flex_flow(this->menuBox, LV_FLEX_FLOW_COLUMN);         // apilado vertical
