@@ -66,31 +66,33 @@ void GraphicLCD::init() {
 }
 
 void GraphicLCD::initMenu() {
-	/*Create a list*/
-	list1 = lv_list_create(lv_screen_active());
-	lv_obj_set_pos(list1, 0, 0);
-	lv_obj_set_size(list1, 24, lv_pct(100));
-	lv_obj_set_style_pad_row(list1, 5, 0);
-	lv_obj_set_style_pad_left(list1, 0, 0);  // Quitar padding izquierdo
-	lv_obj_set_style_pad_column(list1, 0, 0);
-	lv_obj_set_style_margin_left(list1, 0, 0);
+	this->menuBox = lv_obj_create(lv_screen_active());
+	lv_obj_set_style_pad_all(this->menuBox, 0, 0);
+	lv_obj_set_size(this->menuBox, 20, DSP_VER_RES);  // 20px de ancho, 64px de alto
+	lv_obj_align(this->menuBox, LV_ALIGN_TOP_LEFT, 0, 0);  // pegado a la izquierda
 
-	/*Add buttons to the list*/
-	lv_obj_t * btn;
-	int i;
-	for(i = 0; i < 15; i++) {
-		btn = lv_button_create(list1);
-		lv_obj_set_size(btn, 20, 20);
+	lv_obj_set_scroll_snap_y(this->menuBox, LV_SCROLL_SNAP_CENTER);  // snap en Y
+	lv_obj_add_flag(this->menuBox, LV_OBJ_FLAG_SCROLL_ONE);  // passing each one
+	lv_obj_set_flex_flow(this->menuBox, LV_FLEX_FLOW_COLUMN);         // apilado vertical
 
-		//~ lv_obj_t * lab = lv_label_create(btn);
-		//~ lv_label_set_text_fmt(lab, "%d", i);
+	for (uint32_t i = 0; i < 8; i++) {  // puedes variar la cantidad según el tamaño del botón
+		lv_obj_t * btn = lv_button_create(this->menuBox);
+		lv_obj_set_size(btn, lv_pct(100), 20);  // ancho = 100% del panel (20px), alto = 20px
+
+		// Opcionalmente hacer los botones más compactos visualmente
+		lv_obj_set_style_pad_all(btn, 0, 0);  // sin relleno
+
+		lv_obj_t * label = lv_label_create(btn);
+		lv_label_set_text_fmt(label, "%" LV_PRIu32, i + 1);
+		lv_obj_center(label);
 	}
 
-	lastItemButton = lv_button_create(list1);
-	lv_obj_set_size(lastItemButton, 18, 18);
+	lv_obj_update_snap(this->menuBox, LV_ANIM_ON);
 }
 
 void GraphicLCD::createMainScreen() {
+	this->initMenu();
+
 	this->logo = lv_img_create(lv_screen_active());
 	lv_image_set_src(this->logo, &imageLogo);
 	lv_obj_set_pos(this->logo, 0, 0);

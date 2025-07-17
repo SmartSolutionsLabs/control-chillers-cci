@@ -51,6 +51,7 @@ class GraphicLCD {
 
 		// all widgets for manipulation in real time. Don't forget allocate and free.
 		lv_obj_t * logo;
+		lv_obj_t * menuBox;
 		lv_obj_t * lastItemButton;
 
 	public:
