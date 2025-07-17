@@ -32,7 +32,7 @@ uint8_t Keypad::readRegister(uint8_t reg) {
 
 void Keypad::connect(void * data) {
     this->timerAutomatic = millis();
-    
+
     // Habilitar el MCP23017 (pines 15 y 41 como salida)
     pinMode(15, OUTPUT);
     pinMode(41, OUTPUT);
@@ -45,13 +45,13 @@ void Keypad::connect(void * data) {
 
 void Keypad::run(void* data) {
     this->iterationDelay = 10 / portTICK_PERIOD_MS;  // Polling cada 10ms
-    
+
     Serial.println("Keypad task started (Polling mode)...");
     uint8_t lastGPIOB = readRegister(GPIOB);  // Estado inicial
-    
+
     while (1) {
         uint8_t currentGPIOB = readRegister(GPIOB);  // Leer estado actual
-        
+
         // Debug: Mostrar estado binario de los pines (opcional)
         // Serial.print("GPIOB: 0b");
         // Serial.println(currentGPIOB, BIN);  // Muestra 6 bits (0-5)
@@ -61,18 +61,18 @@ void Keypad::run(void* data) {
             for (int i = 0; i < 8; i++) {  // Procesar 6 botones (bits 0-5)
                 bool lastState = (lastGPIOB >> i) & 1;  // Estado anterior
                 bool currentState = (currentGPIOB >> i) & 1;  // Estado actual
-                
+
                 // Determinar qué tecla corresponde a este bit
                 char key;
                 key = 'A' + i;  // Bits 0-3: A, B, C, D
-                
+
                 // Detectar FALLING (botón presionado)
                 if (lastState && !currentState) {
                     Serial.print("PRESSED: ");
                     Serial.println(key);
                     if (control) control->handleKey(key);
                 }
-                
+
                 // Detectar RISING (botón liberado)
                 else if (!lastState && currentState) {
                     char releasedKey = key + ('J' - 'A');  // A→G, B→H, etc.

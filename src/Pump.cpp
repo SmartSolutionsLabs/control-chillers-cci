@@ -22,9 +22,9 @@ void Pump::connect(void *data) {
     digitalWrite(41, HIGH);  // Establecer el pin 41 en HIGH
 
     // Configurar todos los pines del banco A como salida
-    this->writeRegister(IODIRA, 0x00);  
+    this->writeRegister(IODIRA, 0x00);
     vTaskDelay(this->iterationDelay );  // Espera breve para asegurar la configuración
-    
+
     // Verificar que se configuró correctamente
     uint8_t iodir = this->readRegister(IODIRA);
     Serial.print("IODIRA configurado como: 0x");
@@ -49,14 +49,14 @@ void Pump::run(void* data) {
 uint8_t Pump::readRegister(uint8_t reg) {
     Wire.beginTransmission(MCP23017_ADDR);
     Wire.write(reg);
-    
-    if (Wire.endTransmission() != 0) {  
+
+    if (Wire.endTransmission() != 0) {
         Serial.println("Error: Falló la transmisión al MCP23017");
-        return 0;  
+        return 0;
     }
 
     Wire.requestFrom(MCP23017_ADDR, 1);
-    if (Wire.available() < 1) {  
+    if (Wire.available() < 1) {
         Serial.println("Error: No hay datos disponibles del MCP23017");
         return 0;
     }

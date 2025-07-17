@@ -11,11 +11,11 @@ class Chiller : public Module {
 		TwoWire *wire;  // Referencia a la instancia de Wire
 		uint8_t pin;
 		bool state;
-		uint8_t estadoGPIOA = 0x00;  
+		uint8_t estadoGPIOA = 0x00;
 
 	public:
 		Chiller();
-		
+
 		Chiller(const char * name, int taskCore = 1);
 
 		void connect(void * data) override;

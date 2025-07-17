@@ -38,7 +38,7 @@ class Pump : public Module {
 		uint8_t getPin(){
 			return this->pin;
 		}
-		
+
 		bool getState();
 		void setState(bool newState);
 

@@ -22,9 +22,9 @@ void Chiller::connect(void *data) {
     digitalWrite(41, HIGH);  // Establecer el pin 41 en HIGH
 
     // Configurar todos los pines del banco A como salida
-    this->writeRegister(IODIRA, 0x00);  
+    this->writeRegister(IODIRA, 0x00);
     vTaskDelay(this->iterationDelay );  // Espera breve para asegurar la configuración
-    
+
     // Verificar que se configuró correctamente
     uint8_t iodir = this->readRegister(IODIRA);
     Serial.print("IODIRA configurado como: 0x");
@@ -53,14 +53,14 @@ void Chiller::run(void* data) {
 uint8_t Chiller::readRegister(uint8_t reg) {
     this->wire->beginTransmission(MCP23017_ADDR);
     this->wire->write(reg);
-    
-    if (this->wire->endTransmission() != 0) {  
+
+    if (this->wire->endTransmission() != 0) {
         Serial.println("Error: Falló la transmisión al MCP23017");
-        return 0;  
+        return 0;
     }
 
     this->wire->requestFrom(MCP23017_ADDR, 1);
-    if (this->wire->available() < 1) {  
+    if (this->wire->available() < 1) {
         Serial.println("Error: No hay datos disponibles del MCP23017");
         return 0;
     }
