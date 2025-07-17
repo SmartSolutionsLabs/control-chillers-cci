@@ -112,7 +112,7 @@
 		GraphicLCD lcd;
 
 		lcd.init();
-		lcd.clearSplashScreen();
+		lcd.initSplashScreen();
 
 		Uint32 lastTick = SDL_GetTicks();
 		while (1) {
