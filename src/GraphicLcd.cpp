@@ -37,10 +37,10 @@ void GraphicLCD::init() {
 	lv_tick_set_cb(GraphicLCD::getTickCount);
 
 	// Crear framebuffer de 1 bit para 128x64
-	static lv_color_t buf[128 * 64 / 8];
+	static lv_color_t buf[DSP_HOR_RES * DSP_VER_RES >> 3];
 
 	// Crear display LVGL y asignar callbacks
-	this->display = lv_display_create(128, 64);
+	this->display = lv_display_create(DSP_HOR_RES, DSP_VER_RES);
 	lv_display_set_color_format(this->display, LV_COLOR_FORMAT_I1);
 	lv_display_set_flush_cb(this->display, GraphicLCD::displayFlush);
 
@@ -117,7 +117,7 @@ void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t
 	px_map += 8;
 
 	// Cantidad total de bytes (128 x 64 / 8 bits)
-	constexpr int bufferSize = 1024;
+	constexpr int bufferSize = DSP_HOR_RES * DSP_VER_RES >> 3;
 
 	// Crear buffer temporal con bits invertidos
 	static uint8_t flippedBuffer[bufferSize];
@@ -127,7 +127,7 @@ void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t
 
 	// Draw over display
 	u8g2->clearBuffer(); // clear whole screen
-	u8g2->drawXBMP(0, 0, 128, 64, flippedBuffer);
+	u8g2->drawXBMP(0, 0, DSP_HOR_RES, DSP_VER_RES, flippedBuffer);
 	u8g2->sendBuffer();
 
 	lv_display_flush_ready(disp);
