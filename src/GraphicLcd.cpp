@@ -1,10 +1,13 @@
-#include "lvgl.h"
 #include "GraphicLcd.hpp"
 #include "images/Logo.h"
 
 LV_IMAGE_DECLARE(imageLogo);
 
 uint8_t GraphicLCD::bitReverseTable[256] = {};
+
+GraphicLCD::~GraphicLCD() {
+	// Cleanup resources if necessary
+}
 
 GraphicLCD::GraphicLCD() {
 	for (unsigned int i = 255; i > 0; --i) {
@@ -20,16 +23,16 @@ GraphicLCD::GraphicLCD() {
 }
 
 void GraphicLCD::init() {
-	// Crear instancia de U8G2 (SPI software)
-	this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 47, 21, 14, 38); // SCLK=47, MOSI=21, CS=14, RESET=38
+	// Inicializar LVGL
+	lv_init();
 
+#ifndef USING_EMULATOR
+	// Crear instancia de U8G2 (via SPI)
+	this->u8g2 = new U8G2_ST7920_128X64_F_SW_SPI(U8G2_R0, 47, 21, 14, 38); // SCLK=47, MOSI=21, CS=14, RESET=38
 	// Inicializar hardware (pantalla)
 	this->u8g2->begin();
 	this->u8g2->clearBuffer();
 	this->u8g2->setDrawColor(0);
-
-	// Inicializar LVGL
-	lv_init();
 
 	lv_tick_set_cb(GraphicLCD::getTickCount);
 
@@ -48,9 +51,18 @@ void GraphicLCD::init() {
 	lv_display_set_user_data(this->display, this->u8g2);
 
 	this->setInitialized(true); // Marca como inicializado
+#else
+	#ifndef WIN32
+		setenv("DBUS_FATAL_WARNINGS", "0", 1);
+	#endif
 
-	Serial.print("GraphicLCD::init\n");
-	this->initSplashScreen();
+	this->display = lv_sdl_window_create(DSP_HOR_RES, DSP_VER_RES);
+	this->lvMouse = lv_sdl_mouse_create();
+	this->lvMouseWheel = lv_sdl_mousewheel_create();
+	this->lvKeyboard = lv_sdl_keyboard_create();
+
+	lv_sdl_window_set_title(this->display, "SSL chiller emulator");
+#endif
 }
 
 void GraphicLCD::initMenu() {
@@ -78,6 +90,26 @@ void GraphicLCD::initMenu() {
 	lv_obj_set_size(lastItemButton, 18, 18);
 }
 
+void GraphicLCD::initSplashScreen() {
+	this->splashScreen = lv_img_create(lv_screen_active());
+	lv_image_set_src(this->splashScreen, &imageLogo);
+	lv_obj_set_pos(this->splashScreen, 0, 0);
+}
+
+void GraphicLCD::clearSplashScreen() {
+	lv_obj_del(this->splashScreen);
+}
+
+void GraphicLCD::setScreen(Screen newScreen){
+	this->currentScreen = newScreen;
+	this->setNewScreen();
+}
+
+void GraphicLCD::setNewScreen(){
+	this->newScreen = true;
+}
+
+#ifndef USING_EMULATOR
 void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
 	U8G2 *u8g2 = static_cast<U8G2 *>(lv_display_get_user_data(disp));
 
@@ -104,68 +136,4 @@ void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t
 uint32_t GraphicLCD::getTickCount() {
 	return esp_timer_get_time() / 1000;
 }
-
-void GraphicLCD::initSplashScreen() {
-	this->splashScreen = lv_img_create(lv_screen_active());
-	lv_image_set_src(this->splashScreen, &imageLogo);
-	lv_obj_set_pos(this->splashScreen, 0, 0);
-}
-
-void GraphicLCD::clearSplashScreen() {
-	lv_obj_del(this->splashScreen);
-}
-
-void GraphicLCD::update(){
-	if(millis() - this->timerFPS < 100){
-		return;
-	}
-
-	this->timerFPS = millis();
-
-	//~ static bool lastMotorState[2] = {false, false};  // Guardar el último estado de los motores
-	//~ static bool lastChillerState[2] = {false, false};  // Guardar el último estado de los chillers
-	//~ static uint16_t lastDelay1 = progressBar[0].getValue();  // Guardar el último valor de delay1
-	//~ static uint16_t lastDelay2 = progressBar[1].getValue();  // Guardar el último valor de delay2
-
-	//~ bool motorStateChanged = (this->motorIcon[0].getState() != lastMotorState[0]) ||
-							 //~ (this->motorIcon[1].getState() != lastMotorState[1]);
-	//~ bool chillerStateChanged = (this->chillerIcon[0].getState() != lastChillerState[0]) ||
-							   //~ (this->chillerIcon[1].getState() != lastChillerState[1]);
-	//~ bool delayChanged = (progressBar[0].getValue() != lastDelay1) ||
-						//~ (progressBar[1].getValue() != lastDelay2);
-
-	//if (this->newScreen || motorStateChanged || chillerStateChanged || delayChanged ) {
-	if (true){
-		switch (this->currentScreen) {
-			case HOME:
-				//~ this->drawHomePage();
-				break;
-			case CONFIG:
-				//~ this->drawConfigPage();
-				break;
-			case MANUAL:
-				//~ this->drawManualPage();
-				break;
-			case LOG:
-				//~ this->drawLogPage();
-				break;
-		}
-
-		// Actualizar los últimos estados
-		//~ lastMotorState[0]   =   this->motorIcon[0].getState();
-		//~ lastMotorState[1]   =   this->motorIcon[1].getState();
-		//~ lastChillerState[0] = this->chillerIcon[0].getState();
-		//~ lastChillerState[1] = this->chillerIcon[1].getState();
-		//~ lastDelay1 = progressBar[0].getValue();
-		//~ lastDelay2 = progressBar[1].getValue();
-	}
-}
-
-void GraphicLCD::setScreen(Screen newScreen){
-	this->currentScreen = newScreen;
-	this->setNewScreen();
-}
-
-void GraphicLCD::setNewScreen(){
-	this->newScreen = true;
-}
+#endif // Using real hardware

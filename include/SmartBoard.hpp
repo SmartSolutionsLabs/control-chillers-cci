@@ -1,6 +1,8 @@
 #ifndef _INC_SCB_
 #define _INC_SCB_
 
+#ifndef USING_EMULATOR
+
 #include <Application.hpp>
 
 class SmartBoard : public Application {
@@ -10,3 +12,5 @@ class SmartBoard : public Application {
 };
 
 #endif
+
+#endif // ifndef USING_EMULATOR

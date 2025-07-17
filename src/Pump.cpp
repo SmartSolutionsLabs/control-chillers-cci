@@ -1,3 +1,5 @@
+#ifndef USING_EMULATOR
+
 #include "Pump.hpp"
 
 #define MCP23017_ADDR 0x27  // Dirección I2C del MCP23017 (ajústala si es necesario)
@@ -112,3 +114,5 @@ bool Pump::getState() {
 void Pump::setState(bool newState){
     this->state = newState;
 }
+
+#endif // ifndef USING_EMULATOR

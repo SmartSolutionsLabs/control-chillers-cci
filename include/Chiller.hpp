@@ -1,6 +1,8 @@
 #ifndef _INC_CHILLER_
 #define _INC_CHILLER_
 
+#ifndef USING_EMULATOR
+
 #include <Module.hpp>
 #include <Wire.h>
 
@@ -45,3 +47,5 @@ class Chiller : public Module {
 };
 
 #endif
+
+#endif // ifndef USING_EMULATOR

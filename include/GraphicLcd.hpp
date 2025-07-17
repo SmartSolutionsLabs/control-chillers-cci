@@ -2,8 +2,16 @@
 #ifndef _INC_GRAPHICLCD_
 #define _INC_GRAPHICLCD_
 
-#include <U8g2lib.h>
 #include <lvgl.h>
+
+#ifdef USING_EMULATOR
+	#include <SDL2/SDL.h>
+	#include "drivers/sdl/lv_sdl_mouse.h"
+	#include "drivers/sdl/lv_sdl_mousewheel.h"
+	#include "drivers/sdl/lv_sdl_keyboard.h"
+#else // real hardware
+	#include <U8g2lib.h>
+#endif
 
 enum Screen {
 	HOME,       // Pantalla principal
@@ -18,9 +26,16 @@ enum Screen {
  */
 class GraphicLCD {
 	private:
-        U8G2_ST7920_128X64_F_SW_SPI *u8g2; //(U8G2_R0, 27, 26, 25, 14);
-
 		lv_display_t *display;
+
+		#ifdef USING_EMULATOR
+			lv_indev_t* lvTouch;
+			lv_indev_t* lvMouse;
+			lv_indev_t* lvMouseWheel;
+			lv_indev_t* lvKeyboard;
+		#else
+			U8G2_ST7920_128X64_F_SW_SPI* u8g2; //(U8G2_R0, 27, 26, 25, 14);
+		#endif
 
 		uint16_t splashScreenTime = 2500;
 
@@ -45,8 +60,6 @@ class GraphicLCD {
 		GraphicLCD();
 
 		~GraphicLCD();
-
-		static uint32_t getTickCount(void);
 
 		void init();
 
@@ -75,8 +88,6 @@ class GraphicLCD {
 		void initLogPage();
 		void clearLogPage();
 
-		void update();
-
 		void setScreen(Screen newScreen);
 
 		void setNewScreen();
@@ -100,7 +111,10 @@ class GraphicLCD {
 			screenTimer = newTimer;
 		}
 
-		static void displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
+		#ifndef USING_EMULATOR
+			static uint32_t getTickCount(void);
+			static void displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
+		#endif
 	};
 
 #endif

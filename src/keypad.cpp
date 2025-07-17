@@ -1,3 +1,5 @@
+#ifndef USING_EMULATOR
+
 #include "Keypad.hpp"
 #include <Wire.h>
 
@@ -95,3 +97,5 @@ void IRAM_ATTR Keypad::handleInterruptB() {
     // Establecer la bandera de interrupción
     this->interruptFlag = true;
 }
+
+#endif // ifndef USING_EMULATOR

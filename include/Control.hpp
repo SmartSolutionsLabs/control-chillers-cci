@@ -1,6 +1,8 @@
 #ifndef _INC_CONTROL_
 #define _INC_CONTROL_
 
+#ifndef USING_EMULATOR
+
 #include <Module.hpp>
 #include "GraphicLcd.hpp"
 #include "Chiller.hpp"
@@ -154,3 +156,5 @@ public:
 };
 
 #endif
+
+#endif // ifndef USING_EMULATOR

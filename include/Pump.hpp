@@ -1,6 +1,8 @@
 #ifndef _INC_PUMP_
 #define _INC_PUMP_
 
+#ifndef USING_EMULATOR
+
 #include <Module.hpp>
 #include <Wire.h>
 
@@ -46,3 +48,5 @@ class Pump : public Module {
 };
 
 #endif
+
+#endif // ifndef USING_EMULATOR

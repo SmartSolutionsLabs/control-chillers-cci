@@ -1,3 +1,5 @@
+#ifndef USING_EMULATOR
+
 #include "Control.hpp"
 
 Control::Control(const char *name, int taskCore) : Module(name, taskCore) {
@@ -742,3 +744,5 @@ void Control::triggerScan() {
     scanningActive = true;
     lastScanAttempt = millis();
 }
+
+#endif // ifndef USING_EMULATOR

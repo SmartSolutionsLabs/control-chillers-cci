@@ -1,6 +1,8 @@
 #ifndef _INC_KEYPAD_
 #define _INC_KEYPAD_
 
+#ifndef USING_EMULATOR
+
 #include <Module.hpp>
 #include "Control.hpp"
 #include <Wire.h>
@@ -49,3 +51,5 @@ public:
 };
 
 #endif
+
+#endif // ifndef USING_EMULATOR
