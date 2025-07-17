@@ -50,7 +50,7 @@ class GraphicLCD {
 		bool initialized = false;
 
 		// all widgets for manipulation in real time. Don't forget allocate and free.
-		lv_obj_t * splashScreen;
+		lv_obj_t * logo;
 		lv_obj_t * lastItemButton;
 
 	public:
@@ -64,9 +64,9 @@ class GraphicLCD {
 		void init();
 
 		/**
-		 * Create widgets of splash screen and show them.
+		 * Create widgets for everything including splash.
 		 */
-		void initSplashScreen();
+		void createMainScreen();
 
 		/**
 		 * Free all widgets of splash screen.

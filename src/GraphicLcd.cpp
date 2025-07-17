@@ -90,14 +90,25 @@ void GraphicLCD::initMenu() {
 	lv_obj_set_size(lastItemButton, 18, 18);
 }
 
-void GraphicLCD::initSplashScreen() {
-	this->splashScreen = lv_img_create(lv_screen_active());
-	lv_image_set_src(this->splashScreen, &imageLogo);
-	lv_obj_set_pos(this->splashScreen, 0, 0);
+void GraphicLCD::createMainScreen() {
+	this->logo = lv_img_create(lv_screen_active());
+	lv_image_set_src(this->logo, &imageLogo);
+	lv_obj_set_pos(this->logo, 0, 0);
+
+	/*Animate in the content after the intro time*/
+	lv_anim_t a;
+	lv_anim_init(&a);
+	lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
+	lv_anim_set_var(&a, this->logo);
+	lv_anim_set_duration(&a, 500);
+	lv_anim_set_delay(&a, 4000);
+	lv_anim_set_values(&a, LV_SCALE_NONE, 10);
+	lv_anim_set_completed_cb(&a, lv_obj_delete_anim_completed_cb);
+	lv_anim_start(&a);
 }
 
 void GraphicLCD::clearSplashScreen() {
-	lv_obj_del(this->splashScreen);
+	lv_obj_del(this->logo);
 }
 
 void GraphicLCD::setScreen(Screen newScreen){
