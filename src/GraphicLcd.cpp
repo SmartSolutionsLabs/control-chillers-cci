@@ -88,6 +88,7 @@ void GraphicLCD::initMenu() {
 	}
 
 	lv_obj_update_snap(this->menuBox, LV_ANIM_ON);
+	lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, 0), LV_ANIM_OFF); // center first element vertically
 }
 
 void GraphicLCD::createMainScreen() {
