@@ -49,8 +49,6 @@ void GraphicLCD::init() {
 
 	// Guardar puntero u8g2 como user_data
 	lv_display_set_user_data(this->display, this->u8g2);
-
-	this->setInitialized(true); // Marca como inicializado
 #else
 	#ifndef WIN32
 		setenv("DBUS_FATAL_WARNINGS", "0", 1);

@@ -37,17 +37,9 @@ class GraphicLCD {
 			U8G2_ST7920_128X64_F_SW_SPI* u8g2; //(U8G2_R0, 27, 26, 25, 14);
 		#endif
 
-		uint16_t splashScreenTime = 2500;
-
-		uint32_t screenTimer;
-
 		Screen currentScreen = HOME; // memoria cache
 
 		bool newScreen;
-
-		uint32_t timerFPS ;
-
-		bool initialized = false;
 
 		// all widgets for manipulation in real time. Don't forget allocate and free.
 		lv_obj_t * logo;
@@ -59,7 +51,6 @@ class GraphicLCD {
 		lv_obj_t* contentBox;
 
 	public:
-		lv_obj_t * list1;
 		static uint8_t bitReverseTable[256]; // but must be precomputed to make it constant
 
 		GraphicLCD();
@@ -94,25 +85,6 @@ class GraphicLCD {
 		void setScreen(Screen newScreen);
 
 		void setNewScreen();
-
-		bool isInitialized() const { return initialized; }
-		void setInitialized(bool value) { initialized = value; }
-
-		uint16_t inline getSplashScreenTime() {
-			return splashScreenTime;
-		}
-
-		inline void clearSplashScreenTime() {
-			splashScreenTime = 0;
-		}
-
-		uint32_t inline getScreenTimer() {
-			return screenTimer;
-		}
-
-		inline void setScreenTimer(uint32_t newTimer) {
-			screenTimer = newTimer;
-		}
 
 		#ifdef USING_EMULATOR
 			static void keyboardEventHandler(lv_event_t *e);

@@ -56,10 +56,6 @@ void Control::run(void *data) {
         this->chillers[1]->setPin(4);
     }
 
-    while(this->lcd == nullptr || !this->lcd->isInitialized()) {
-        vTaskDelay(50 / portTICK_PERIOD_MS);
-    }
-
     this->turnOffPump(1);
     this->turnOffPump(2);
     this->turnOffChiller(1);
@@ -87,17 +83,7 @@ void Control::run(void *data) {
     this->lastScanAttempt = millis();
     this->connectWifi();
 
-    this->lcd->setScreenTimer(millis());
-
     while (1) {
-		if (this->lcd->getSplashScreenTime()) { // flag changed from uint to 0
-			if (millis() - this->lcd->getScreenTimer() > this->lcd->getSplashScreenTime()) {
-				this->lcd->clearSplashScreenTime();
-				this->lcd->clearSplashScreen();
-
-				this->lcd->initMenu();
-			}
-		}
         vTaskDelay(this->iterationDelay);
 
         // Lógica para el modo automático
