@@ -112,7 +112,9 @@ class GraphicLCD {
 			screenTimer = newTimer;
 		}
 
-		#ifndef USING_EMULATOR
+		#ifdef USING_EMULATOR
+			static void keyboardEventHandler(lv_event_t *e);
+		#else
 			static uint32_t getTickCount(void);
 			static void displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
 		#endif

@@ -62,6 +62,21 @@ void GraphicLCD::init() {
 	this->lvKeyboard = lv_sdl_keyboard_create();
 
 	lv_sdl_window_set_title(this->display, "SSL chiller emulator");
+
+	// Listener of keyboard
+
+	// Crear un grupo y asignar la pantalla activa
+	lv_group_t* group = lv_group_create();
+	lv_group_add_obj(group, lv_scr_act());
+
+	// Asignar grupo al input device (teclado)
+	lv_indev_set_group(this->lvKeyboard, group);
+
+	// Enfocar pantalla principal
+	lv_group_focus_obj(lv_scr_act());
+
+	// Agregar callback de evento de teclado
+	lv_obj_add_event_cb(lv_scr_act(), GraphicLCD::keyboardEventHandler, LV_EVENT_KEY, this);
 #endif
 }
 
@@ -126,7 +141,26 @@ void GraphicLCD::setNewScreen(){
 	this->newScreen = true;
 }
 
-#ifndef USING_EMULATOR
+#ifdef USING_EMULATOR
+void GraphicLCD::keyboardEventHandler(lv_event_t *e) {
+	uint32_t key = lv_event_get_key(e);
+	GraphicLCD* lcd = static_cast<GraphicLCD*>(lv_event_get_user_data(e));
+
+	switch (key) {
+		case LV_KEY_UP:
+			lv_obj_scroll_to_view(lv_obj_get_child(lcd->menuBox, 2), LV_ANIM_ON);
+			break;
+		case LV_KEY_DOWN:
+			lv_obj_scroll_to_view(lv_obj_get_child(lcd->menuBox, 4), LV_ANIM_ON);
+			break;
+		case LV_KEY_ENTER:
+			break;
+		default:
+			break;
+	}
+}
+
+#else
 void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
 	U8G2 *u8g2 = static_cast<U8G2 *>(lv_display_get_user_data(disp));
 
