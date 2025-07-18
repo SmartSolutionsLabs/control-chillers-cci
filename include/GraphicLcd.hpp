@@ -69,13 +69,7 @@ class GraphicLCD {
 		 */
 		void createMainScreen();
 
-		/**
-		 * Free all widgets of splash screen.
-		 */
-		void clearSplashScreen();
-
-		void initMenu();
-		void clearMenu();
+		void createMenuBox();
 
 		void initHomePage();
 		void clearHomePage();

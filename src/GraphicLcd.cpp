@@ -80,7 +80,7 @@ void GraphicLCD::init() {
 #endif
 }
 
-void GraphicLCD::initMenu() {
+void GraphicLCD::createMenuBox() {
 	this->menuBox = lv_obj_create(lv_screen_active());
 	lv_obj_set_style_radius(this->menuBox, 0, 0); // Sin esquinas redondeadas
 	lv_obj_set_style_shadow_width(this->menuBox, 0, 0); // Sin sombra
@@ -110,7 +110,7 @@ void GraphicLCD::initMenu() {
 }
 
 void GraphicLCD::createMainScreen() {
-	this->initMenu();
+	this->createMenuBox();
 
 	this->logo = lv_img_create(lv_screen_active());
 	lv_image_set_src(this->logo, &imageLogo);
@@ -129,10 +129,6 @@ void GraphicLCD::createMainScreen() {
 		lv_image_set_scale((lv_obj_t *)obj, v);
 	});
 	lv_anim_start(&a);
-}
-
-void GraphicLCD::clearSplashScreen() {
-	lv_obj_del(this->logo);
 }
 
 void GraphicLCD::setScreen(Screen newScreen){
