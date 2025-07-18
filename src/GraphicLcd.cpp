@@ -109,8 +109,42 @@ void GraphicLCD::createMenuBox() {
 	lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, 0), LV_ANIM_OFF); // center first element vertically
 }
 
+void GraphicLCD::createTitleBox() {
+	this->titleBox = lv_obj_create(lv_screen_active());
+
+	// Ancho: lo que sobra después del menú lateral (20 px)
+	lv_obj_set_size(this->titleBox, LV_HOR_RES - 20, 12);
+
+	// Alinear al tope derecho
+	lv_obj_align(this->titleBox, LV_ALIGN_TOP_RIGHT, 0, 0);
+
+	// Eliminar bordes, sombra, redondeado
+	lv_obj_set_style_radius(this->titleBox, 0, 0);
+	lv_obj_set_style_shadow_width(this->titleBox, 0, 0);
+	lv_obj_set_style_border_width(this->titleBox, 0, 0);
+	lv_obj_set_style_pad_all(this->titleBox, 0, 0);
+
+	// Fondo opaco (puedes usar TRANSP si solo quieres la línea)
+	lv_obj_set_style_bg_opa(this->titleBox, LV_OPA_TRANSP, 0);
+
+	// Dibujar una línea inferior de 1 px (borde inferior)
+	lv_obj_set_style_border_side(this->titleBox, LV_BORDER_SIDE_BOTTOM, 0);
+	lv_obj_set_style_border_width(this->titleBox, 1, 0);
+	lv_obj_set_style_border_color(this->titleBox, lv_color_black(), 0);
+
+	// No scroll
+	lv_obj_clear_flag(this->titleBox, LV_OBJ_FLAG_SCROLLABLE);
+
+	// Etiqueta centrada vertical y alineada izquierda
+	this->titleLabel = lv_label_create(this->titleBox);
+	lv_label_set_text(this->titleLabel, "General");
+	lv_obj_align(this->titleLabel, LV_ALIGN_CENTER, 0, 0);
+}
+
 void GraphicLCD::createMainScreen() {
 	this->createMenuBox();
+
+	this->createTitleBox();
 
 	this->logo = lv_img_create(lv_screen_active());
 	lv_image_set_src(this->logo, &imageLogo);
@@ -160,6 +194,7 @@ void GraphicLCD::keyboardEventHandler(lv_event_t *e) {
 			}
 			break;
 		case LV_KEY_ENTER:
+			lv_label_set_text(lcd->titleLabel, "About");
 			break;
 		default:
 			break;
