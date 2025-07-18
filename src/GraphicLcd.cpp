@@ -103,10 +103,13 @@ void GraphicLCD::createMainScreen() {
 	lv_anim_init(&a);
 	lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
 	lv_anim_set_var(&a, this->logo);
-	lv_anim_set_duration(&a, 500);
-	lv_anim_set_delay(&a, 4000);
+	lv_anim_set_duration(&a, 2000);
+	lv_anim_set_delay(&a, 1000);
 	lv_anim_set_values(&a, LV_SCALE_NONE, 10);
 	lv_anim_set_completed_cb(&a, lv_obj_delete_anim_completed_cb);
+	lv_anim_set_exec_cb(&a, [](void *obj, int32_t v) {
+		lv_image_set_scale((lv_obj_t *)obj, v);
+	});
 	lv_anim_start(&a);
 }
 
