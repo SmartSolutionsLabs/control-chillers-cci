@@ -83,6 +83,7 @@ void GraphicLCD::init() {
 void GraphicLCD::createMenuBox() {
 	this->menuBox = lv_obj_create(lv_screen_active());
 	lv_obj_set_style_radius(this->menuBox, 0, 0); // Sin esquinas redondeadas
+	lv_obj_set_style_bg_opa(this->menuBox, LV_OPA_TRANSP, 0); // Full transparency
 	lv_obj_set_style_shadow_width(this->menuBox, 0, 0); // Sin sombra
 	lv_obj_set_style_border_width(this->menuBox, 0, 0); // Sin borde
 	lv_obj_set_style_pad_all(this->menuBox, 0, 0);
