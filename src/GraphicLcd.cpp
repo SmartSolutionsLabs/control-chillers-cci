@@ -143,15 +143,22 @@ void GraphicLCD::setNewScreen(){
 
 #ifdef USING_EMULATOR
 void GraphicLCD::keyboardEventHandler(lv_event_t *e) {
+	static uint8_t cursorIndex = 0;
 	uint32_t key = lv_event_get_key(e);
 	GraphicLCD* lcd = static_cast<GraphicLCD*>(lv_event_get_user_data(e));
 
 	switch (key) {
 		case LV_KEY_UP:
-			lv_obj_scroll_to_view(lv_obj_get_child(lcd->menuBox, 2), LV_ANIM_ON);
+			if (cursorIndex > 0) {
+				--cursorIndex;
+				lv_obj_scroll_to_view(lv_obj_get_child(lcd->menuBox, cursorIndex), LV_ANIM_ON);
+			}
 			break;
 		case LV_KEY_DOWN:
-			lv_obj_scroll_to_view(lv_obj_get_child(lcd->menuBox, 4), LV_ANIM_ON);
+			if (cursorIndex < 7) {  // suponiendo que hay 8 botones
+				++cursorIndex;
+				lv_obj_scroll_to_view(lv_obj_get_child(lcd->menuBox, cursorIndex), LV_ANIM_ON);
+			}
 			break;
 		case LV_KEY_ENTER:
 			break;
