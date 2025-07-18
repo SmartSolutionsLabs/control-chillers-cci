@@ -56,6 +56,8 @@ class GraphicLCD {
 		lv_obj_t* titleBox;
 		lv_obj_t* titleLabel;
 
+		lv_obj_t* contentBox;
+
 	public:
 		lv_obj_t * list1;
 		static uint8_t bitReverseTable[256]; // but must be precomputed to make it constant
@@ -74,6 +76,8 @@ class GraphicLCD {
 		void createMenuBox();
 
 		void createTitleBox();
+
+		void createContentBox();
 
 		void initHomePage();
 		void clearHomePage();

@@ -148,6 +148,8 @@ void GraphicLCD::createMainScreen() {
 
 	this->createTitleBox();
 
+	this->createContentBox();
+
 	this->logo = lv_img_create(lv_screen_active());
 	lv_image_set_src(this->logo, &imageLogo);
 	lv_obj_set_pos(this->logo, 0, 0);
@@ -165,6 +167,34 @@ void GraphicLCD::createMainScreen() {
 		lv_image_set_scale((lv_obj_t *)obj, v);
 	});
 	lv_anim_start(&a);
+}
+
+void GraphicLCD::createContentBox() {
+	// Crear el contenedor principal del contenido
+	this->contentBox = lv_obj_create(lv_screen_active());
+
+	// Tamaño: ocupar el resto del área (ancho - 20px, alto - 12px)
+	lv_coord_t contentWidth = DSP_HOR_RES - 20;
+	lv_coord_t contentHeight = DSP_VER_RES - 12;
+
+	lv_obj_set_size(this->contentBox, contentWidth, contentHeight);
+
+	// Posicionar justo a la derecha del menú lateral y debajo del título
+	lv_obj_set_pos(this->contentBox, 20, 12);
+
+	// Estilo: sin borde, sin sombra, sin radio
+	lv_obj_set_style_radius(this->contentBox, 0, 0);
+	lv_obj_set_style_border_width(this->contentBox, 0, 0);
+	lv_obj_set_style_shadow_width(this->contentBox, 0, 0);
+	lv_obj_set_style_pad_all(this->contentBox, 0, 0);
+
+	// Eliminar el scroll si no es necesario aún
+	lv_obj_clear_flag(this->contentBox, LV_OBJ_FLAG_SCROLLABLE);
+
+	// Crear una etiqueta centrada en el contenedor
+	lv_obj_t * label = lv_label_create(this->contentBox);
+	lv_label_set_text(label, "Contenido");
+	lv_obj_center(label);
 }
 
 void GraphicLCD::setScreen(Screen newScreen){
