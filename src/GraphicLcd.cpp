@@ -100,16 +100,14 @@ void GraphicLCD::createMenuBox() {
 	lv_obj_add_flag(this->menuBox, LV_OBJ_FLAG_SCROLL_ONE);  // passing each one
 	lv_obj_set_flex_flow(this->menuBox, LV_FLEX_FLOW_COLUMN);         // apilado vertical
 
-	for (unsigned int i = 0; i < 5 /*length of menu options*/; ++i) {
-		lv_obj_t * btn = lv_button_create(this->menuBox);
-		lv_obj_set_size(btn, lv_pct(100), 20);  // ancho = 100% del panel (20px), alto = 20px
-
-		// Opcionalmente hacer los botones más compactos visualmente
-		lv_obj_set_style_pad_all(btn, 0, 0);  // sin relleno
-
-		lv_obj_t * label = lv_label_create(btn);
+	for (unsigned int i = 0; i < (ABOUT + 1); ++i) {
+		lv_obj_t* label = lv_label_create(this->menuBox);
+		lv_obj_set_size(label, lv_pct(100), 20); // ancho = 100% del panel (20px), alto = 20px
 		lv_label_set_text(label, GraphicLCD::menuOptions[i].icon);
 		lv_obj_set_style_text_font(label, &lv_font_montserrat_12, 0);
+		lv_obj_set_style_text_color(label, lv_color_black(), 0);
+		lv_obj_set_style_pad_all(label, 0, 0);
+		lv_obj_set_style_bg_opa(label, LV_OPA_TRANSP, 0); // por si acaso
 		lv_obj_center(label);
 	}
 
