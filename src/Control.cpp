@@ -179,8 +179,6 @@ void Control::proccessBackKey() {
 }
 
 void Control::proccessUpKey() {
-	lv_obj_scroll_by(this->lcd->list1, 0, 20, LV_ANIM_ON);
-
     if(!ScreenSelected  && !optionSelected){   // navegando entre pantallas
         this->nextScreen();
     }
@@ -193,8 +191,6 @@ void Control::proccessUpKey() {
 }
 
 void Control::proccessDownKey() {
-	lv_obj_scroll_by(this->lcd->list1, 0, -20, LV_ANIM_ON);
-
     if(!ScreenSelected){
         this->previousScreen();
     }
