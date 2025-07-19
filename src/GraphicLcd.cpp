@@ -3,7 +3,7 @@
 
 LV_IMAGE_DECLARE(imageLogo);
 
-MenuOption GraphicLCD::menuOptions[SCREEN_ABOUT + 1] = {
+MenuOption GraphicLCD::menuOptions[ABOUT + 1] = {
 	{"DASHBOARD", LV_SYMBOL_HOME},
 	{"SETUP", LV_SYMBOL_SETTINGS},
 	{"HAND-OPERATED", LV_SYMBOL_PLAY},
@@ -198,9 +198,57 @@ void GraphicLCD::createContentBox() {
 	// Eliminar el scroll si no es necesario aún
 	lv_obj_clear_flag(this->contentBox, LV_OBJ_FLAG_SCROLLABLE);
 
+	switch (this->currentScreen) {
+		case HOME:
+			this->createHomePage();
+			break;
+		case CONFIG:
+			this->createConfigPage();
+			break;
+		case MANUAL:
+			this->createManualPage();
+			break;
+		case LOG:
+			this->createLogPage();
+			break;
+		case ABOUT:
+			this->createAboutPage();
+			break;
+	}
+}
+
+void GraphicLCD::createHomePage() {
 	// Crear una etiqueta centrada en el contenedor
 	lv_obj_t * label = lv_label_create(this->contentBox);
-	lv_label_set_text(label, "Contenido");
+	lv_label_set_text(label, "Home Content");
+	lv_obj_center(label);
+}
+
+void GraphicLCD::createConfigPage() {
+	// Crear una etiqueta centrada en el contenedor
+	lv_obj_t * label = lv_label_create(this->contentBox);
+	lv_label_set_text(label, "Config Content");
+	lv_obj_center(label);
+}
+
+void GraphicLCD::createManualPage() {
+	// Crear una etiqueta centrada en el contenedor
+	lv_obj_t * label = lv_label_create(this->contentBox);
+	lv_label_set_text(label, "Manual Content");
+	lv_obj_center(label);
+}
+
+void GraphicLCD::createLogPage() {
+	// Crear una etiqueta centrada en el contenedor
+	lv_obj_t * label = lv_label_create(this->contentBox);
+	lv_label_set_text(label, "Log Content");
+	lv_obj_center(label);
+}
+
+void GraphicLCD::createAboutPage() {
+	// Crear una etiqueta centrada en el contenedor
+	lv_obj_t * label = lv_label_create(this->contentBox);
+	lv_label_set_text(label, "About Content");
 	lv_obj_center(label);
 }
 
@@ -215,7 +263,7 @@ void GraphicLCD::setNewScreen(){
 
 void GraphicLCD::moveNextContent(bool next) {
 	if (next) {
-		if (this->currentScreen < SCREEN_ABOUT) {  // Within range
+		if (this->currentScreen < ABOUT) {  // Within range
 			this->currentScreen = static_cast<Screen>(this->currentScreen + 1);
 			lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, this->currentScreen), LV_ANIM_ON);
 			lv_label_set_text(titleLabel, GraphicLCD::menuOptions[this->currentScreen].name);

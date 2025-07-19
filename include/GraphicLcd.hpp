@@ -18,7 +18,7 @@ enum Screen {
 	CONFIG,   // Configuración
 	MANUAL,     // Estado del sistema
 	LOG,    // Control manual
-	SCREEN_ABOUT       // Información sobre el sistema
+	ABOUT   // Información sobre el sistema
 };
 
 struct MenuOption {
