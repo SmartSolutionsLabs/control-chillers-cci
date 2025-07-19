@@ -114,7 +114,7 @@ void GraphicLCD::createMenuBox() {
 	}
 
 	lv_obj_update_snap(this->menuBox, LV_ANIM_ON);
-	lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, 0), LV_ANIM_OFF); // center first element vertically
+	lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, this->currentScreen), LV_ANIM_OFF); // center first element vertically
 }
 
 void GraphicLCD::createTitleBox() {
@@ -145,7 +145,7 @@ void GraphicLCD::createTitleBox() {
 
 	// Etiqueta centrada vertical y alineada izquierda
 	this->titleLabel = lv_label_create(this->titleBox);
-	lv_label_set_text(this->titleLabel, GraphicLCD::menuOptions[0].name);
+	lv_label_set_text(this->titleLabel, GraphicLCD::menuOptions[this->currentScreen].name);
 	lv_obj_set_style_text_font(this->titleLabel, &lv_font_montserrat_8, 0);
 	lv_obj_align(this->titleLabel, LV_ALIGN_CENTER, 0, 0);
 }
@@ -214,20 +214,18 @@ void GraphicLCD::setNewScreen(){
 }
 
 void GraphicLCD::moveNextContent(bool next) {
-	static uint8_t cursorIndex = 0;
-
 	if (next) {
-		if (cursorIndex < 4) {  // suponiendo que hay 5 botones
-			++cursorIndex;
-			lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, cursorIndex), LV_ANIM_ON);
-			lv_label_set_text(titleLabel, GraphicLCD::menuOptions[cursorIndex].name);
+		if (this->currentScreen < SCREEN_ABOUT) {  // Within range
+			this->currentScreen = static_cast<Screen>(this->currentScreen + 1);
+			lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, this->currentScreen), LV_ANIM_ON);
+			lv_label_set_text(titleLabel, GraphicLCD::menuOptions[this->currentScreen].name);
 		}
 	}
 	else {
-		if (cursorIndex > 0) {
-			--cursorIndex;
-			lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, cursorIndex), LV_ANIM_ON);
-			lv_label_set_text(titleLabel, GraphicLCD::menuOptions[cursorIndex].name);
+		if (this->currentScreen > HOME) {
+			this->currentScreen = static_cast<Screen>(this->currentScreen - 1);
+			lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, this->currentScreen), LV_ANIM_ON);
+			lv_label_set_text(titleLabel, GraphicLCD::menuOptions[this->currentScreen].name);
 		}
 	}
 }
