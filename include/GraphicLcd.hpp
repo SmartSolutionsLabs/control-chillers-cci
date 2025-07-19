@@ -82,7 +82,7 @@ class GraphicLCD {
 
 		void createTitleBox();
 
-		void createContentBox();
+		void createContentBox(int yOffset);
 
 		void setScreen(Screen newScreen);
 

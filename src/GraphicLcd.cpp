@@ -155,7 +155,7 @@ void GraphicLCD::createMainScreen() {
 
 	this->createTitleBox();
 
-	this->createContentBox();
+	this->createContentBox(0); // craeting without offset, I mean centered
 
 	this->logo = lv_img_create(lv_screen_active());
 	lv_image_set_src(this->logo, &imageLogo);
@@ -176,7 +176,7 @@ void GraphicLCD::createMainScreen() {
 	lv_anim_start(&a);
 }
 
-void GraphicLCD::createContentBox() {
+void GraphicLCD::createContentBox(int yOffset) {
 	// Crear el contenedor principal del contenido
 	this->contentBox = lv_obj_create(lv_screen_active());
 
@@ -186,8 +186,9 @@ void GraphicLCD::createContentBox() {
 
 	lv_obj_set_size(this->contentBox, contentWidth, contentHeight);
 
-	// Posicionar justo a la derecha del menú lateral y debajo del título
-	lv_obj_set_pos(this->contentBox, 20, 12);
+	// Posicionar considerando desplazamiento vertical
+	// x fijo en 20, y es 12 + yOffset
+	lv_obj_set_pos(this->contentBox, 20, 12 + yOffset);
 
 	// Estilo: sin borde, sin sombra, sin radio
 	lv_obj_set_style_radius(this->contentBox, 0, 0);
@@ -198,6 +199,7 @@ void GraphicLCD::createContentBox() {
 	// Eliminar el scroll si no es necesario aún
 	lv_obj_clear_flag(this->contentBox, LV_OBJ_FLAG_SCROLLABLE);
 
+	// Crear contenido según pantalla actual
 	switch (this->currentScreen) {
 		case HOME:
 			this->createHomePage();
@@ -262,20 +264,65 @@ void GraphicLCD::setNewScreen(){
 }
 
 void GraphicLCD::moveNextContent(bool next) {
+	// flag to decide creation of new content
+	bool notMoved = true;
+
 	if (next) {
 		if (this->currentScreen < ABOUT) {  // Within range
 			this->currentScreen = static_cast<Screen>(this->currentScreen + 1);
-			lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, this->currentScreen), LV_ANIM_ON);
-			lv_label_set_text(titleLabel, GraphicLCD::menuOptions[this->currentScreen].name);
+
+			notMoved = false;
 		}
 	}
 	else {
 		if (this->currentScreen > HOME) {
 			this->currentScreen = static_cast<Screen>(this->currentScreen - 1);
-			lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, this->currentScreen), LV_ANIM_ON);
-			lv_label_set_text(titleLabel, GraphicLCD::menuOptions[this->currentScreen].name);
+			notMoved = false;
 		}
 	}
+
+	if (notMoved) {
+		// nothing else to make
+		return;
+	}
+
+	// Update title and position of menu item
+	lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, this->currentScreen), LV_ANIM_ON);
+	lv_label_set_text(this->titleLabel, GraphicLCD::menuOptions[this->currentScreen].name);
+
+	// Guardar contentBox anterior
+	lv_obj_t* oldContent = this->contentBox;
+
+	// Calcular desplazamiento
+	int yOffset = lv_obj_get_height(oldContent);
+
+	// Crear el nuevo contentBox ya desplazado fuera de vista
+	this->createContentBox(next ? yOffset : -yOffset);
+
+	// Animar el nuevo contentBox para deslizarlo a su posición
+	lv_anim_t a_new;
+	lv_anim_init(&a_new);
+	lv_anim_set_var(&a_new, this->contentBox);
+	lv_anim_set_exec_cb(&a_new, [](void* obj, int32_t v) {
+		lv_obj_set_y(static_cast<lv_obj_t*>(obj), v);
+	});
+	lv_anim_set_values(&a_new, next ? yOffset : -yOffset, 12);  // 12 es la posición final visible
+	lv_anim_set_time(&a_new, 300);
+	lv_anim_set_path_cb(&a_new, lv_anim_path_ease_out);
+	lv_anim_start(&a_new);
+
+	// Animar y eliminar el antiguo contentBox
+	lv_anim_t a_old;
+	lv_anim_init(&a_old);
+	lv_anim_set_var(&a_old, oldContent);
+	lv_anim_set_exec_cb(&a_old, [](void* obj, int32_t v) {
+		lv_obj_set_y(static_cast<lv_obj_t*>(obj), v);
+	});
+	lv_anim_set_values(&a_old, 12, next ? -yOffset : yOffset);
+	lv_anim_set_time(&a_old, 300);
+	lv_anim_set_path_cb(&a_old, lv_anim_path_ease_in);
+	lv_anim_set_deleted_cb(&a_old, lv_obj_delete_anim_completed_cb);
+	lv_anim_start(&a_old);
 }
 
 #ifdef USING_EMULATOR
