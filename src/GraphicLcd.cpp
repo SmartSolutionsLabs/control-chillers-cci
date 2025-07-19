@@ -319,7 +319,7 @@ void GraphicLCD::moveNextContent(bool next) {
 		lv_obj_set_y(static_cast<lv_obj_t*>(obj), v);
 	});
 	lv_anim_set_values(&a_new, next ? yOffset : -yOffset, 12);  // 12 es la posición final visible
-	lv_anim_set_time(&a_new, 300);
+	lv_anim_set_time(&a_new, 400); // same for old
 	lv_anim_set_path_cb(&a_new, lv_anim_path_ease_out);
 	lv_anim_start(&a_new);
 
@@ -331,7 +331,7 @@ void GraphicLCD::moveNextContent(bool next) {
 		lv_obj_set_y(static_cast<lv_obj_t*>(obj), v);
 	});
 	lv_anim_set_values(&a_old, 12, next ? -yOffset : yOffset);
-	lv_anim_set_time(&a_old, 300);
+	lv_anim_set_time(&a_old, 400);
 	lv_anim_set_path_cb(&a_old, lv_anim_path_ease_in);
 	lv_anim_set_deleted_cb(&a_old, lv_obj_delete_anim_completed_cb);
 	lv_anim_start(&a_old);
