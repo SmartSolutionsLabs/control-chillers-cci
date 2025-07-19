@@ -21,6 +21,11 @@ enum Screen {
 	SCREEN_ABOUT       // Información sobre el sistema
 };
 
+struct MenuOption {
+	const char* name;
+	const char* icon;
+};
+
 /**
  * Via to draw and control display.
  */
@@ -49,6 +54,8 @@ class GraphicLCD {
 		lv_obj_t* titleLabel;
 
 		lv_obj_t* contentBox;
+
+		static MenuOption menuOptions[];
 
 	public:
 		static uint8_t bitReverseTable[256]; // but must be precomputed to make it constant

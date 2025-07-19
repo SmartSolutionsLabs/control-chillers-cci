@@ -3,6 +3,14 @@
 
 LV_IMAGE_DECLARE(imageLogo);
 
+MenuOption GraphicLCD::menuOptions[5] = {
+	{"DASHBOARD", LV_SYMBOL_HOME},
+	{"SETUP", LV_SYMBOL_SETTINGS},
+	{"HAND-OPERATED", LV_SYMBOL_PLAY},
+	{"LOGS", LV_SYMBOL_SD_CARD},
+	{"ABOUT", LV_SYMBOL_EYE_OPEN}
+};
+
 uint8_t GraphicLCD::bitReverseTable[256] = {};
 
 GraphicLCD::~GraphicLCD() {
@@ -92,7 +100,7 @@ void GraphicLCD::createMenuBox() {
 	lv_obj_add_flag(this->menuBox, LV_OBJ_FLAG_SCROLL_ONE);  // passing each one
 	lv_obj_set_flex_flow(this->menuBox, LV_FLEX_FLOW_COLUMN);         // apilado vertical
 
-	for (uint32_t i = 0; i < 8; i++) {  // puedes variar la cantidad según el tamaño del botón
+	for (unsigned int i = 0; i < 5 /*length of menu options*/; ++i) {
 		lv_obj_t * btn = lv_button_create(this->menuBox);
 		lv_obj_set_size(btn, lv_pct(100), 20);  // ancho = 100% del panel (20px), alto = 20px
 
@@ -100,7 +108,8 @@ void GraphicLCD::createMenuBox() {
 		lv_obj_set_style_pad_all(btn, 0, 0);  // sin relleno
 
 		lv_obj_t * label = lv_label_create(btn);
-		lv_label_set_text_fmt(label, "%" LV_PRIu32, i + 1);
+		lv_label_set_text(label, GraphicLCD::menuOptions[i].icon);
+		lv_obj_set_style_text_font(label, &lv_font_montserrat_12, 0);
 		lv_obj_center(label);
 	}
 
@@ -218,7 +227,7 @@ void GraphicLCD::keyboardEventHandler(lv_event_t *e) {
 			}
 			break;
 		case LV_KEY_DOWN:
-			if (cursorIndex < 7) {  // suponiendo que hay 8 botones
+			if (cursorIndex < 4) {  // suponiendo que hay 5 botones
 				++cursorIndex;
 				lv_obj_scroll_to_view(lv_obj_get_child(lcd->menuBox, cursorIndex), LV_ANIM_ON);
 			}
