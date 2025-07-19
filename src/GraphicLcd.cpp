@@ -145,7 +145,7 @@ void GraphicLCD::createTitleBox() {
 
 	// Etiqueta centrada vertical y alineada izquierda
 	this->titleLabel = lv_label_create(this->titleBox);
-	lv_label_set_text(this->titleLabel, "General");
+	lv_label_set_text(this->titleLabel, GraphicLCD::menuOptions[0].name);
 	lv_obj_set_style_text_font(this->titleLabel, &lv_font_montserrat_8, 0);
 	lv_obj_align(this->titleLabel, LV_ALIGN_CENTER, 0, 0);
 }
