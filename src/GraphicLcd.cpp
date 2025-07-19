@@ -132,8 +132,8 @@ void GraphicLCD::createTitleBox() {
 	lv_obj_set_style_border_width(this->titleBox, 0, 0);
 	lv_obj_set_style_pad_all(this->titleBox, 0, 0);
 
-	// Fondo opaco (puedes usar TRANSP si solo quieres la línea)
-	lv_obj_set_style_bg_opa(this->titleBox, LV_OPA_TRANSP, 0);
+	// Fondo opaco
+	lv_obj_set_style_bg_opa(this->titleBox, LV_OPA_COVER, 0);
 
 	// Dibujar una línea inferior de 1 px (borde inferior)
 	lv_obj_set_style_border_side(this->titleBox, LV_BORDER_SIDE_BOTTOM, 0);
