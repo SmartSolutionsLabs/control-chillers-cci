@@ -75,7 +75,6 @@ void Control::run(void *data) {
     this->flag_process[1] = true;
     //~ this->lcd->getProgressBar(0).setCounter(0);
     //~ this->lcd->getProgressBar(1).setCounter(0);
-    this->lcd->setScreen(HOME);
     WiFi.disconnect();
 
     WiFi.scanNetworks(true);
@@ -387,7 +386,7 @@ void Control::nextScreen() {
             this->currentScreen = HOME;
             break;
     }
-    this->lcd->setScreen(this->currentScreen);
+    //this->lcd->setScreen(this->currentScreen);
     Serial.printf("CurrentScreen: %d\n", this->currentScreen);
 }
 
@@ -406,7 +405,7 @@ void Control::previousScreen() {
             this->currentScreen = MANUAL;
             break;
     }
-    this->lcd->setScreen(this->currentScreen);
+    //this->lcd->setScreen(this->currentScreen);
     Serial.printf("CurrentScreen: %d\n", this->currentScreen);
 }
 
@@ -437,7 +436,7 @@ void Control::manualControlDevice() {
             this->currentOption = 1;
             this->currentScreen = HOME;
             this->flag_process[0] = false;
-            this->lcd->setScreen(this->currentScreen);
+            //~ this->lcd->setScreen(this->currentScreen);
             //~ this->lcd->selectMotor(0,false);
             //~ this->lcd->selectMotor(1,false);
             //~ this->lcd->selectChiller(0,false);
@@ -467,7 +466,7 @@ void Control::manualControlDevice() {
                 this->ScreenSelected = false;
                 this->currentScreen = HOME;
                 this->flag_process[0] = false;
-                this->lcd->setScreen(this->currentScreen);
+                //~ this->lcd->setScreen(this->currentScreen);
                 //~ this->lcd->selectMotor(0,false);
                 //~ this->lcd->selectMotor(1,false);
                 //~ this->lcd->selectChiller(0,false);
@@ -488,7 +487,7 @@ void Control::manualControlDevice() {
             this->currentScreen = HOME;
             this->ScreenSelected = false;
             this->flag_process[0] = false;
-            this->lcd->setScreen(this->currentScreen);
+            //~ this->lcd->setScreen(this->currentScreen);
             //~ this->lcd->selectMotor(0,false);
             //~ this->lcd->selectMotor(1,false);
             //~ this->lcd->selectChiller(0,false);
