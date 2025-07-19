@@ -263,15 +263,6 @@ void GraphicLCD::createAboutPage() {
 	lv_obj_center(label);
 }
 
-void GraphicLCD::setScreen(Screen newScreen){
-	this->currentScreen = newScreen;
-	this->setNewScreen();
-}
-
-void GraphicLCD::setNewScreen(){
-	this->newScreen = true;
-}
-
 void GraphicLCD::moveNextContent(bool next) {
 	// flag to decide creation of new content
 	bool notMoved = true;

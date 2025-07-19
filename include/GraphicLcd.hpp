@@ -44,8 +44,6 @@ class GraphicLCD {
 
 		Screen currentScreen = HOME;
 
-		bool newScreen;
-
 		// all widgets for manipulation in real time. Don't forget allocate and free.
 		lv_obj_t * logo;
 		lv_obj_t * menuBox;
@@ -83,10 +81,6 @@ class GraphicLCD {
 		void createTitleBox();
 
 		void createContentBox(int yOffset);
-
-		void setScreen(Screen newScreen);
-
-		void setNewScreen();
 
 		/**
 		 * Performs sequence to go up or down.
