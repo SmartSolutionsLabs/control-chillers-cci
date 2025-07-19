@@ -166,7 +166,7 @@ void GraphicLCD::createMainScreen() {
 
 	this->createContentBox(0); // craeting without offset, I mean centered
 
-	this->logo = lv_img_create(lv_screen_active());
+	this->logo = lv_img_create(screen_active);
 	lv_image_set_src(this->logo, &imageLogo);
 	lv_obj_set_pos(this->logo, 0, 0);
 
