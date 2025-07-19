@@ -3,7 +3,7 @@
 
 LV_IMAGE_DECLARE(imageLogo);
 
-MenuOption GraphicLCD::menuOptions[5] = {
+MenuOption GraphicLCD::menuOptions[SCREEN_ABOUT + 1] = {
 	{"DASHBOARD", LV_SYMBOL_HOME},
 	{"SETUP", LV_SYMBOL_SETTINGS},
 	{"HAND-OPERATED", LV_SYMBOL_PLAY},
