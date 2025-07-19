@@ -151,6 +151,15 @@ void GraphicLCD::createTitleBox() {
 }
 
 void GraphicLCD::createMainScreen() {
+	lv_obj_t* screen_active = lv_screen_active();
+	// Disabling scroll because we will be creating elements out of borders
+	lv_obj_clear_flag(screen_active, LV_OBJ_FLAG_SCROLLABLE);
+	lv_obj_clear_flag(screen_active, LV_OBJ_FLAG_SCROLL_ELASTIC);
+	lv_obj_clear_flag(screen_active, LV_OBJ_FLAG_SCROLL_MOMENTUM);
+	lv_obj_clear_flag(screen_active, LV_OBJ_FLAG_SCROLL_CHAIN_HOR);
+	lv_obj_clear_flag(screen_active, LV_OBJ_FLAG_SCROLL_CHAIN_VER);
+	lv_obj_set_scrollbar_mode(screen_active, LV_SCROLLBAR_MODE_OFF);
+
 	this->createMenuBox();
 
 	this->createTitleBox();
