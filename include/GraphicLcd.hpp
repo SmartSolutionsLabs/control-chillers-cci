@@ -93,6 +93,12 @@ class GraphicLCD {
 
 		void setNewScreen();
 
+		/**
+		 * Performs sequence to go up or down.
+		 * @param next bool true for down.
+		 */
+		void moveNextContent(bool next);
+
 		#ifdef USING_EMULATOR
 			static void keyboardEventHandler(lv_event_t *e);
 		#else

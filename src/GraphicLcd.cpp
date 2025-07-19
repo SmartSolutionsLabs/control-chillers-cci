@@ -213,27 +213,38 @@ void GraphicLCD::setNewScreen(){
 	this->newScreen = true;
 }
 
+void GraphicLCD::moveNextContent(bool next) {
+	static uint8_t cursorIndex = 0;
+
+	if (next) {
+		if (cursorIndex < 4) {  // suponiendo que hay 5 botones
+			++cursorIndex;
+			lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, cursorIndex), LV_ANIM_ON);
+			lv_label_set_text(titleLabel, GraphicLCD::menuOptions[cursorIndex].name);
+		}
+	}
+	else {
+		if (cursorIndex > 0) {
+			--cursorIndex;
+			lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, cursorIndex), LV_ANIM_ON);
+			lv_label_set_text(titleLabel, GraphicLCD::menuOptions[cursorIndex].name);
+		}
+	}
+}
+
 #ifdef USING_EMULATOR
 void GraphicLCD::keyboardEventHandler(lv_event_t *e) {
-	static uint8_t cursorIndex = 0;
 	uint32_t key = lv_event_get_key(e);
 	GraphicLCD* lcd = static_cast<GraphicLCD*>(lv_event_get_user_data(e));
 
 	switch (key) {
 		case LV_KEY_UP:
-			if (cursorIndex > 0) {
-				--cursorIndex;
-				lv_obj_scroll_to_view(lv_obj_get_child(lcd->menuBox, cursorIndex), LV_ANIM_ON);
-			}
+			lcd->moveNextContent(false);
 			break;
 		case LV_KEY_DOWN:
-			if (cursorIndex < 4) {  // suponiendo que hay 5 botones
-				++cursorIndex;
-				lv_obj_scroll_to_view(lv_obj_get_child(lcd->menuBox, cursorIndex), LV_ANIM_ON);
-			}
+			lcd->moveNextContent(true);
 			break;
 		case LV_KEY_ENTER:
-			lv_label_set_text(lcd->titleLabel, "About");
 			break;
 		default:
 			break;
