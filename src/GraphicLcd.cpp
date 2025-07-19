@@ -299,6 +299,9 @@ void GraphicLCD::moveNextContent(bool next) {
 	// Crear el nuevo contentBox ya desplazado fuera de vista
 	this->createContentBox(next ? yOffset : -yOffset);
 
+	// Asegurarse que la barra de título quede por encima
+	lv_obj_move_foreground(this->titleBox);
+
 	// Animar el nuevo contentBox para deslizarlo a su posición
 	lv_anim_t a_new;
 	lv_anim_init(&a_new);
