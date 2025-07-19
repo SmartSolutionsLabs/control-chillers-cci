@@ -57,6 +57,13 @@ class GraphicLCD {
 
 		static MenuOption menuOptions[];
 
+		// Creation of contents
+		void createHomePage();
+		void createConfigPage();
+		void createManualPage();
+		void createLogPage();
+		void createAboutPage();
+
 	public:
 		static uint8_t bitReverseTable[256]; // but must be precomputed to make it constant
 
@@ -76,18 +83,6 @@ class GraphicLCD {
 		void createTitleBox();
 
 		void createContentBox();
-
-		void initHomePage();
-		void clearHomePage();
-
-		void initConfigPage();
-		void clearConfigPage();
-
-		void initManualPage();
-		void clearManualPage();
-
-		void initLogPage();
-		void clearLogPage();
 
 		void setScreen(Screen newScreen);
 
