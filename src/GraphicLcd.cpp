@@ -101,13 +101,19 @@ void GraphicLCD::createMenuBox() {
 	lv_obj_set_flex_flow(this->menuBox, LV_FLEX_FLOW_COLUMN);         // apilado vertical
 
 	for (unsigned int i = 0; i < (ABOUT + 1); ++i) {
-		lv_obj_t* label = lv_label_create(this->menuBox);
-		lv_obj_set_size(label, lv_pct(100), 20); // ancho = 100% del panel (20px), alto = 20px
+		// Crear contenedor individual por ítem del menú
+		lv_obj_t* itemBox = lv_obj_create(this->menuBox);
+		lv_obj_set_size(itemBox, lv_pct(100), 20); // ancho = 100% del panel (20px), alto = 20px
+		lv_obj_set_style_bg_opa(itemBox, LV_OPA_TRANSP, 0);
+		lv_obj_set_style_border_width(itemBox, 0, 0);
+		lv_obj_set_style_pad_all(itemBox, 0, 0);
+		lv_obj_clear_flag(itemBox, LV_OBJ_FLAG_SCROLLABLE); // no scroll interno
+
+		// Crear la etiqueta del ícono dentro del contenedor
+		lv_obj_t* label = lv_label_create(itemBox);
 		lv_label_set_text(label, GraphicLCD::menuOptions[i].icon);
 		lv_obj_set_style_text_font(label, &lv_font_montserrat_12, 0);
 		lv_obj_set_style_text_color(label, lv_color_black(), 0);
-		lv_obj_set_style_pad_all(label, 0, 0);
-		lv_obj_set_style_bg_opa(label, LV_OPA_TRANSP, 0); // por si acaso
 		lv_obj_center(label);
 	}
 
