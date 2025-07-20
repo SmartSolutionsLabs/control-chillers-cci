@@ -209,9 +209,6 @@ void GraphicLCD::createContentBox(int yOffset) {
 	lv_obj_set_style_shadow_width(this->contentBox, 0, 0);
 	lv_obj_set_style_pad_all(this->contentBox, 0, 0);
 
-	// Eliminar el scroll si no es necesario aún
-	lv_obj_clear_flag(this->contentBox, LV_OBJ_FLAG_SCROLLABLE);
-
 	// Crear contenido según pantalla actual
 	switch (this->currentScreen) {
 		case HOME:
@@ -233,6 +230,9 @@ void GraphicLCD::createContentBox(int yOffset) {
 }
 
 void GraphicLCD::createHomePage() {
+	// Eliminar el scroll si no es necesario aún
+	lv_obj_clear_flag(this->contentBox, LV_OBJ_FLAG_SCROLLABLE);
+
 	// Crear una etiqueta centrada en el contenedor
 	lv_obj_t * label = lv_label_create(this->contentBox);
 	lv_label_set_text(label, "Home Content");
@@ -261,10 +261,31 @@ void GraphicLCD::createLogPage() {
 }
 
 void GraphicLCD::createAboutPage() {
-	// Crear una etiqueta centrada en el contenedor
-	lv_obj_t * label = lv_label_create(this->contentBox);
-	lv_label_set_text(label, "About Content");
-	lv_obj_center(label);
+	// Hacer que contentBox sea scrollable verticalmente
+	lv_obj_set_scroll_dir(this->contentBox, LV_DIR_VER);
+	lv_obj_set_scrollbar_mode(this->contentBox, LV_SCROLLBAR_MODE_AUTO);
+	lv_obj_set_style_pad_all(this->contentBox, 1, 0);  // padding interno opcional
+
+	// Crear etiqueta directamente en contentBox
+	lv_obj_t* label = lv_label_create(this->contentBox);
+	lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+	lv_label_set_text(label,
+		"(c) Smart Solutions Labs.\n"
+		"Creator/Designer:\n"
+		"    Miguel Quispe\n"
+		"Additional Engineering:\n"
+		"    George Garro\n\n"
+		"Sigue en contacto para recibir mejoras de este dispositivo.\n\n"
+		"Este texto adicional asegura que el contenido supere la altura de la pantalla y active el scroll automático.\n"
+		"Gracias por tu interés."
+	);
+
+	// Ajustes de estilo
+	//~ lv_obj_set_width(label, lv_obj_get_width(this->contentBox) - 8);
+	lv_obj_set_style_text_font(label, &lv_font_montserrat_8, 0);
+	lv_obj_set_style_text_color(label, lv_color_black(), 0);
+	lv_obj_set_style_pad_all(label, 0, 0);
+	lv_obj_align(label, LV_ALIGN_TOP_LEFT, 0, 0);
 }
 
 void GraphicLCD::moveNextContent(bool next) {
