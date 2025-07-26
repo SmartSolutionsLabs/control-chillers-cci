@@ -86,6 +86,35 @@ void GraphicLCD::init() {
 #endif
 }
 
+void GraphicLCD::toggleNavigationMode() {
+	this->isMenuActive = !this->isMenuActive; // toggling
+
+	if (this->isMenuActive) {
+		// Traer menú al frente
+		lv_obj_set_x(this->menuBox, 0);
+
+		// Escalar contenido al 95%
+		lv_obj_set_style_transform_scale(this->contentBox, 243, 0); // escala 95%
+	}
+	else {
+		// Retraer menú
+		lv_obj_set_x(this->menuBox, -10); // retroceder 7 px
+
+		// Escalar contenido al 100%
+		lv_obj_set_style_transform_scale(this->contentBox, 255, 0); // escala 100%
+	}
+
+	lv_anim_t a;
+	lv_anim_init(&a);
+	lv_anim_set_var(&a, this->menuBox);
+	lv_anim_set_values(&a, this->isMenuActive ? -10 : 0, this->isMenuActive ? 0: -10);
+	lv_anim_set_time(&a, 200); // duración en ms
+	lv_anim_set_exec_cb(&a, [](void* var, int32_t value) {
+		lv_obj_set_x(static_cast<lv_obj_t*>(var), value);
+	});
+	lv_anim_start(&a);
+}
+
 void GraphicLCD::createMenuBox() {
 	this->menuBox = lv_obj_create(lv_screen_active());
 	lv_obj_set_style_radius(this->menuBox, 0, 0); // Sin esquinas redondeadas
@@ -95,6 +124,7 @@ void GraphicLCD::createMenuBox() {
 	lv_obj_set_style_pad_all(this->menuBox, 0, 0);
 	lv_obj_set_size(this->menuBox, 20, DSP_VER_RES);  // 20px de ancho, 64px de alto
 	lv_obj_align(this->menuBox, LV_ALIGN_TOP_LEFT, 0, 0);  // pegado a la izquierda
+	lv_obj_set_x(this->menuBox, -10); // retroceder 7 px
 	lv_obj_set_scrollbar_mode(this->menuBox, LV_SCROLLBAR_MODE_OFF); // hide scroll bar
 	lv_obj_set_scroll_snap_y(this->menuBox, LV_SCROLL_SNAP_CENTER);  // snap en Y
 	lv_obj_add_flag(this->menuBox, LV_OBJ_FLAG_SCROLL_ONE);  // passing each one
@@ -193,15 +223,15 @@ void GraphicLCD::createContentBox(int yOffset) {
 	// Crear el contenedor principal del contenido
 	this->contentBox = lv_obj_create(lv_screen_active());
 
-	// Tamaño: ocupar el resto del área (ancho - 20px, alto - 12px)
-	lv_coord_t contentWidth = DSP_HOR_RES - 20;
+	// Tamaño: ocupar el resto del área (ancho - 10px, alto - 12px)
+	lv_coord_t contentWidth = DSP_HOR_RES - 10; // -10 pixels because menu of 20 px is half hidden
 	lv_coord_t contentHeight = DSP_VER_RES - 12;
 
 	lv_obj_set_size(this->contentBox, contentWidth, contentHeight);
 
 	// Posicionar considerando desplazamiento vertical
-	// x fijo en 20, y es 12 + yOffset
-	lv_obj_set_pos(this->contentBox, 20, 12 + yOffset);
+	// x fijo en 10, y es 12 + yOffset
+	lv_obj_set_pos(this->contentBox, 10, 12 + yOffset);
 
 	// Estilo: sin borde, sin sombra, sin radio
 	lv_obj_set_style_radius(this->contentBox, 0, 0);
@@ -366,6 +396,10 @@ void GraphicLCD::keyboardEventHandler(lv_event_t *e) {
 			lcd->moveNextContent(true);
 			break;
 		case LV_KEY_ENTER:
+			lcd->toggleNavigationMode();
+			break;
+		case LV_KEY_ESC:
+			lcd->toggleNavigationMode();
 			break;
 		default:
 			break;

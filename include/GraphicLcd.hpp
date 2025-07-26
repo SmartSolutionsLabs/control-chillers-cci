@@ -44,6 +44,8 @@ class GraphicLCD {
 
 		Screen currentScreen = HOME;
 
+		bool isMenuActive = false;
+
 		// all widgets for manipulation in real time. Don't forget allocate and free.
 		lv_obj_t * logo;
 		lv_obj_t * menuBox;
@@ -70,6 +72,8 @@ class GraphicLCD {
 		~GraphicLCD();
 
 		void init();
+
+		void toggleNavigationMode();
 
 		/**
 		 * Create widgets for everything including splash.
