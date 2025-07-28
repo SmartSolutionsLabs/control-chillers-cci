@@ -186,6 +186,12 @@ void GraphicLCD::createMenuBox() {
 		lv_obj_set_style_text_font(label, &lv_font_montserrat_12, 0);
 		lv_obj_set_style_text_color(label, lv_color_black(), 0);
 		lv_obj_center(label);
+
+		// Establecer el punto de transformación al centro del objeto
+		lv_coord_t w = lv_obj_get_width(itemBox);
+		lv_coord_t h = lv_obj_get_height(itemBox);
+		lv_obj_set_style_transform_pivot_x(itemBox, 10, LV_PART_MAIN);
+		lv_obj_set_style_transform_pivot_y(itemBox, 10, LV_PART_MAIN);
 	}
 
 	lv_obj_update_snap(this->menuBox, LV_ANIM_ON);
