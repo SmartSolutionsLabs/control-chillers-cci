@@ -101,7 +101,7 @@ void GraphicLCD::animateMenuItem(bool alreadyAnimated) {
 	lv_anim_t a_pulse;
 	lv_anim_init(&a_pulse);
 	lv_anim_set_var(&a_pulse, lv_obj_get_child(this->menuBox, this->currentScreen));
-	lv_anim_set_values(&a_pulse, 255, 294); // 100% a ~115%
+	lv_anim_set_values(&a_pulse, 255, 326); // 100% a ~118%
 	lv_anim_set_time(&a_pulse, 300);
 	lv_anim_set_playback_time(&a_pulse, 300); // efecto rebote
 	lv_anim_set_repeat_count(&a_pulse, LV_ANIM_REPEAT_INFINITE);
