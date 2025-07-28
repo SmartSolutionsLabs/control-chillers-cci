@@ -87,30 +87,46 @@ void GraphicLCD::init() {
 }
 
 void GraphicLCD::toggleNavigationMode() {
-	if (this->isMenuActive = !this->isMenuActive) { // toggling and evaluating new value
-		// Traer menú al frente
-		lv_obj_set_x(this->menuBox, 0);
+	this->isMenuActive = !this->isMenuActive;
 
-		// Escalar contenido al 95%
-		lv_obj_set_style_transform_scale(this->contentBox, 243, 0); // escala 95%
-	}
-	else {
-		// Retraer menú
-		lv_obj_set_x(this->menuBox, -10); // retroceder 7 px
-
-		// Escalar contenido al 100%
-		lv_obj_set_style_transform_scale(this->contentBox, 255, 0); // escala 100%
-	}
-
-	lv_anim_t a;
-	lv_anim_init(&a);
-	lv_anim_set_var(&a, this->menuBox);
-	lv_anim_set_values(&a, this->isMenuActive ? -10 : 0, this->isMenuActive ? 0: -10);
-	lv_anim_set_time(&a, 200); // duración en ms
-	lv_anim_set_exec_cb(&a, [](void* var, int32_t value) {
+	// ---- Animar desplazamiento X del menú ----
+	lv_anim_t a_menu;
+	lv_anim_init(&a_menu);
+	lv_anim_set_var(&a_menu, this->menuBox);
+	lv_anim_set_values(&a_menu,
+					   this->isMenuActive ? -10 : 0,
+					   this->isMenuActive ? 0 : -10);
+	lv_anim_set_time(&a_menu, 200);
+	lv_anim_set_exec_cb(&a_menu, [](void* var, int32_t value) {
 		lv_obj_set_x(static_cast<lv_obj_t*>(var), value);
 	});
-	lv_anim_start(&a);
+	lv_anim_start(&a_menu);
+
+	// ---- Animar escala del contenido ----
+	lv_anim_t a_scale;
+	lv_anim_init(&a_scale);
+	lv_anim_set_var(&a_scale, this->contentBox);
+	lv_anim_set_values(&a_scale,
+					   this->isMenuActive ? 255 : 230,  // de
+					   this->isMenuActive ? 230 : 255); // a
+	lv_anim_set_time(&a_scale, 200);
+	lv_anim_set_exec_cb(&a_scale, [](void* var, int32_t value) {
+		lv_obj_set_style_transform_scale(static_cast<lv_obj_t*>(var), value, 0);
+	});
+	lv_anim_start(&a_scale);
+
+	// ---- Ajustar posición del contenido ----
+	lv_anim_t a_content_x;
+	lv_anim_init(&a_content_x);
+	lv_anim_set_var(&a_content_x, this->contentBox);
+	lv_anim_set_values(&a_content_x,
+					   this->isMenuActive ? 10 : 20,  // de
+					   this->isMenuActive ? 20 : 10); // a
+	lv_anim_set_time(&a_content_x, 200);
+	lv_anim_set_exec_cb(&a_content_x, [](void* var, int32_t value) {
+		lv_obj_set_x(static_cast<lv_obj_t*>(var), value);
+	});
+	lv_anim_start(&a_content_x);
 }
 
 void GraphicLCD::createMenuBox() {
@@ -228,8 +244,17 @@ void GraphicLCD::createContentBox(int yOffset) {
 	lv_obj_set_size(this->contentBox, contentWidth, contentHeight);
 
 	// Posicionar considerando desplazamiento vertical
-	// x fijo en 10, y es 12 + yOffset
-	lv_obj_set_pos(this->contentBox, 10, 12 + yOffset);
+	// x 20 or 10, y always 12 + yOffset
+	if (this->isMenuActive) {
+		lv_obj_set_pos(this->contentBox,
+						20,
+						12 + yOffset);
+		// Escalar contenido al 90%
+		lv_obj_set_style_transform_scale(this->contentBox, 230 , 0); // escala 255 * 90%
+	}
+	else {
+		lv_obj_set_pos(this->contentBox, 10, 12 + yOffset);
+	}
 
 	// Estilo: sin borde, sin sombra, sin radio
 	lv_obj_set_style_radius(this->contentBox, 0, 0);
