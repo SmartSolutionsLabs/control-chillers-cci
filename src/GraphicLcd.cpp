@@ -342,6 +342,11 @@ void GraphicLCD::createAboutPage() {
 }
 
 void GraphicLCD::moveNextContent(bool next) {
+	if (!this->isMenuActive) {
+		// don't change content if we are not navigating through menu
+		return;
+	}
+
 	// flag to decide creation of new content
 	bool notMoved = true;
 
