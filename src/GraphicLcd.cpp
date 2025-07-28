@@ -328,9 +328,9 @@ void GraphicLCD::createAboutPage() {
 		"    Miguel Quispe\n"
 		"Additional Engineering:\n"
 		"    George Garro\n\n"
-		"Sigue en contacto para recibir mejoras de este dispositivo.\n\n"
-		"Este texto adicional asegura que el contenido supere la altura de la pantalla y active el scroll automático.\n"
-		"Gracias por tu interés."
+		"Keep in touch for further\n"
+		"updates, improvements or\n"
+		"new devices."
 	);
 
 	// Ajustes de estilo
