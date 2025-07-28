@@ -184,9 +184,9 @@ void GraphicLCD::createTitleBox() {
 	lv_obj_set_style_bg_opa(this->titleBox, LV_OPA_COVER, 0);
 
 	// Dibujar una línea inferior de 1 px (borde inferior)
-	lv_obj_set_style_border_side(this->titleBox, LV_BORDER_SIDE_BOTTOM, 0);
-	lv_obj_set_style_border_width(this->titleBox, 1, 0);
-	lv_obj_set_style_border_color(this->titleBox, lv_color_black(), 0);
+	//~ lv_obj_set_style_border_side(this->titleBox, LV_BORDER_SIDE_BOTTOM, 0);
+	//~ lv_obj_set_style_border_width(this->titleBox, 1, 0);
+	//~ lv_obj_set_style_border_color(this->titleBox, lv_color_black(), 0);
 
 	// No scroll
 	lv_obj_clear_flag(this->titleBox, LV_OBJ_FLAG_SCROLLABLE);
