@@ -169,7 +169,7 @@ void GraphicLCD::createTitleBox() {
 	this->titleBox = lv_obj_create(lv_screen_active());
 
 	// Ancho: lo que sobra después del menú lateral (20 px)
-	lv_obj_set_size(this->titleBox, LV_HOR_RES - 20, 12);
+	lv_obj_set_size(this->titleBox, LV_HOR_RES - 18, 12);
 
 	// Alinear al tope derecho
 	lv_obj_align(this->titleBox, LV_ALIGN_TOP_RIGHT, 0, 0);
