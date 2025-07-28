@@ -87,9 +87,7 @@ void GraphicLCD::init() {
 }
 
 void GraphicLCD::toggleNavigationMode() {
-	this->isMenuActive = !this->isMenuActive; // toggling
-
-	if (this->isMenuActive) {
+	if (this->isMenuActive = !this->isMenuActive) { // toggling and evaluating new value
 		// Traer menú al frente
 		lv_obj_set_x(this->menuBox, 0);
 
