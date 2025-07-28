@@ -99,6 +99,10 @@
 		smartboard = new SmartBoard();
 		//smartboard->beginSerialPort(Serial2);
 		smartboard->initializeModulesPointerArray(7);
+
+		GraphicLCD lcd;
+		lcd.init();
+		lcd.createMainScreen();
 	}
 
 	void loop() {
@@ -110,7 +114,6 @@
 	int main() {
 	#endif
 		GraphicLCD lcd;
-
 		lcd.init();
 		lcd.createMainScreen();
 
