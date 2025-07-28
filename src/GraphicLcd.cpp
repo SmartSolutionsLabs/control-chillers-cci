@@ -86,8 +86,35 @@ void GraphicLCD::init() {
 #endif
 }
 
+void GraphicLCD::animateMenuItem(bool alreadyAnimated) {
+	// Forcing deletion because we know that there is still an animation
+	if (alreadyAnimated) {
+		lv_anim_delete(this->menuItemPulse->var, this->menuItemPulse->exec_cb);
+	}
+
+	if (!this->isMenuActive) {
+		lv_anim_delete(this->menuItemPulse->var, this->menuItemPulse->exec_cb);
+		return;
+	}
+
+	// Animation of pulsing current menu item
+	lv_anim_t a_pulse;
+	lv_anim_init(&a_pulse);
+	lv_anim_set_var(&a_pulse, lv_obj_get_child(this->menuBox, this->currentScreen));
+	lv_anim_set_values(&a_pulse, 255, 294); // 100% a ~115%
+	lv_anim_set_time(&a_pulse, 300);
+	lv_anim_set_playback_time(&a_pulse, 300); // efecto rebote
+	lv_anim_set_repeat_count(&a_pulse, LV_ANIM_REPEAT_INFINITE);
+	lv_anim_set_exec_cb(&a_pulse, [](void* var, int32_t value) {
+		lv_obj_set_style_transform_scale(static_cast<lv_obj_t*>(var), value, 0);
+	});
+	this->menuItemPulse = lv_anim_start(&a_pulse);
+}
+
 void GraphicLCD::toggleNavigationMode() {
 	this->isMenuActive = !this->isMenuActive;
+
+	this->animateMenuItem();
 
 	// ---- Animar desplazamiento X del menú ----
 	lv_anim_t a_menu;
@@ -372,6 +399,8 @@ void GraphicLCD::moveNextContent(bool next) {
 	// Update title and position of menu item
 	lv_obj_scroll_to_view(lv_obj_get_child(this->menuBox, this->currentScreen), LV_ANIM_ON);
 	lv_label_set_text(this->titleLabel, GraphicLCD::menuOptions[this->currentScreen].name);
+
+	this->animateMenuItem(true);
 
 	// Guardar contentBox anterior
 	lv_obj_t* oldContent = this->contentBox;

@@ -55,6 +55,8 @@ class GraphicLCD {
 
 		lv_obj_t* contentBox;
 
+		lv_anim_t* menuItemPulse;
+
 		static MenuOption menuOptions[];
 
 		// Creation of contents
@@ -63,6 +65,11 @@ class GraphicLCD {
 		void createManualPage();
 		void createLogPage();
 		void createAboutPage();
+
+		/**
+		 * Starting or deleting animation checking if menu is active.
+		 */
+		void inline animateMenuItem(bool alreadyAnimated = false);
 
 	public:
 		static uint8_t bitReverseTable[256]; // but must be precomputed to make it constant
