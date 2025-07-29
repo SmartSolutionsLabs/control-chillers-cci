@@ -361,6 +361,7 @@ void GraphicLCD::createAboutPage() const {
 
 	// Crear etiqueta directamente en contentBox
 	lv_obj_t* label = lv_label_create(this->contentBox);
+	lv_obj_set_width(label, DSP_HOR_RES - 10); // important to keep text wrapped
 	lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
 	lv_label_set_text(label,
 		"(c) Smart Solutions Labs.\n"
@@ -368,9 +369,7 @@ void GraphicLCD::createAboutPage() const {
 		"    Miguel Quispe\n"
 		"Additional Engineering:\n"
 		"    George Garro\n\n"
-		"Keep in touch for further\n"
-		"updates, improvements or\n"
-		"new devices."
+		"Keep in touch for further updates, improvements or new devices."
 	);
 
 	// Ajustes de estilo
