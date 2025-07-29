@@ -72,11 +72,11 @@ void GraphicLCD::init() {
 	// Listener of keyboard
 
 	// Crear un grupo y asignar la pantalla activa
-	lv_group_t* group = lv_group_create();
-	lv_group_add_obj(group, lv_scr_act());
+	this->lvWidgetsGroup = lv_group_create();
+	lv_group_add_obj(this->lvWidgetsGroup, lv_scr_act());
 
 	// Asignar grupo al input device (teclado)
-	lv_indev_set_group(this->lvKeyboard, group);
+	lv_indev_set_group(this->lvKeyboard, this->lvWidgetsGroup);
 
 	// Enfocar pantalla principal
 	lv_group_focus_obj(lv_scr_act());
