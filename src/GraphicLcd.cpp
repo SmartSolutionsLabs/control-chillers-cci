@@ -315,7 +315,7 @@ void GraphicLCD::createContentBox(int yOffset) {
 	}
 }
 
-void GraphicLCD::createHomePage() {
+void GraphicLCD::createHomePage() const {
 	// Eliminar el scroll si no es necesario aún
 	lv_obj_clear_flag(this->contentBox, LV_OBJ_FLAG_SCROLLABLE);
 
@@ -325,28 +325,28 @@ void GraphicLCD::createHomePage() {
 	lv_obj_center(label);
 }
 
-void GraphicLCD::createConfigPage() {
+void GraphicLCD::createConfigPage() const {
 	// Crear una etiqueta centrada en el contenedor
 	lv_obj_t * label = lv_label_create(this->contentBox);
 	lv_label_set_text(label, "Config Content");
 	lv_obj_center(label);
 }
 
-void GraphicLCD::createManualPage() {
+void GraphicLCD::createManualPage() const {
 	// Crear una etiqueta centrada en el contenedor
 	lv_obj_t * label = lv_label_create(this->contentBox);
 	lv_label_set_text(label, "Manual Content");
 	lv_obj_center(label);
 }
 
-void GraphicLCD::createLogPage() {
+void GraphicLCD::createLogPage() const {
 	// Crear una etiqueta centrada en el contenedor
 	lv_obj_t * label = lv_label_create(this->contentBox);
 	lv_label_set_text(label, "Log Content");
 	lv_obj_center(label);
 }
 
-void GraphicLCD::createAboutPage() {
+void GraphicLCD::createAboutPage() const {
 	// Hacer que contentBox sea scrollable verticalmente
 	lv_obj_set_scroll_dir(this->contentBox, LV_DIR_VER);
 	lv_obj_set_scrollbar_mode(this->contentBox, LV_SCROLLBAR_MODE_AUTO);

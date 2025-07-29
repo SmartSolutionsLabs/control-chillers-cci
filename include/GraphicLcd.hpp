@@ -60,11 +60,11 @@ class GraphicLCD {
 		static MenuOption menuOptions[];
 
 		// Creation of contents
-		void createHomePage();
-		void createConfigPage();
-		void createManualPage();
-		void createLogPage();
-		void createAboutPage();
+		void createHomePage() const;
+		void createConfigPage() const;
+		void createManualPage() const;
+		void createLogPage() const;
+		void createAboutPage() const;
 
 		/**
 		 * Starting or deleting animation checking if menu is active.
