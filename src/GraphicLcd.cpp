@@ -57,6 +57,11 @@ void GraphicLCD::init() {
 
 	// Guardar puntero u8g2 como user_data
 	lv_display_set_user_data(this->lvDisplay, this->u8g2);
+
+	// Listener of Keypad
+	this->lvKeypad = lv_indev_create();
+	lv_indev_set_type(this->lvKeypad, LV_INDEV_TYPE_KEYPAD);
+	lv_indev_set_read_cb(this->lvKeypad, GraphicLCD::keypadRead);
 #else
 	#ifndef WIN32
 		setenv("DBUS_FATAL_WARNINGS", "0", 1);
@@ -493,6 +498,10 @@ void GraphicLCD::displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t
 	u8g2->sendBuffer();
 
 	lv_display_flush_ready(disp);
+}
+
+void GraphicLCD::keypadRead(lv_indev_t* indev_drv, lv_indev_data_t* data) {
+	// Read keypad
 }
 
 uint32_t GraphicLCD::getTickCount() {

@@ -41,6 +41,7 @@ class GraphicLCD {
 			lv_indev_t* lvKeyboard;
 		#else
 			U8G2_ST7920_128X64_F_SW_SPI* u8g2; //(U8G2_R0, 27, 26, 25, 14);
+			lv_indev_t* lvKeypad;
 		#endif
 
 		Screen currentScreen = HOME;
@@ -104,6 +105,7 @@ class GraphicLCD {
 		#else
 			static uint32_t getTickCount(void);
 			static void displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
+			static void keypadRead(lv_indev_t* indev_drv, lv_indev_data_t* data);
 		#endif
 	};
 
