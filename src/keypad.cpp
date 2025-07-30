@@ -78,7 +78,7 @@ void Keypad::run(void* data) {
                     char releasedKey = key + ('J' - 'A');  // A→G, B→H, etc.
                     Serial.print("RELEASED: ");
                     Serial.println(releasedKey);
-                    if (control) control->handleKey(releasedKey);
+                    //if (control) control->handleKey(releasedKey);
                 }
             }
             lastGPIOB = currentGPIOB;  // Actualizar estado anterior
