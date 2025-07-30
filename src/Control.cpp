@@ -90,7 +90,7 @@ void Control::run(void *data) {
             processChiller();
         }
 
-        this->scanNetwork();
+        //~ this->scanNetwork();
 
         // Si ha pasado el intervalo de tiempo, inicia un nuevo escaneo
         /*if (!this->scanningActive && (millis() - this->lastScanAttempt > scanInterval)) {
