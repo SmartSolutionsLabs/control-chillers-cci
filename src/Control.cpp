@@ -85,6 +85,8 @@ void Control::run(void *data) {
     while (1) {
         vTaskDelay(this->iterationDelay);
 
+        lv_timer_handler(); // Procesa eventos de LVGL
+
         // Lógica para el modo automático
         if (this->currentMode == AUTOMATIC_MODE) {
             processChiller();

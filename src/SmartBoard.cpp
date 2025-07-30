@@ -109,8 +109,6 @@
 	}
 
 	void loop() {
-		lv_timer_handler(); // Procesa eventos de LVGL
-		vTaskDelay(48 / portTICK_PERIOD_MS); // Pequeño retardo
 	}
 #else
 	#ifdef USING_WINDOWS_EMULATOR
