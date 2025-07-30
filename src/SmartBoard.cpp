@@ -9,6 +9,8 @@
 	String ssid = "SmartLabs";
 	String password = "20120415H";
 
+	GraphicLCD lcd;
+
 	Control * globalControl; // to use in lambdas
 
 	void SmartBoard::processMessage(unsigned char * message, size_t length, bool printable) { // se define que hayq ue procesar
@@ -23,6 +25,7 @@
 		this->modulesPointer[0] = new Control("ctl");
 		globalControl = static_cast<Control*>(this->modulesPointer[0]);
 		this->modulesPointer[0]->connect(nullptr);
+		static_cast<Control*>(this->modulesPointer[0])->setGraphicLCD(&lcd);
 
 
 		this->modulesPointer[1] = new Keypad("keypad");
@@ -91,6 +94,10 @@
 
 	void setup() {
 		Serial.begin(115200);
+
+		lcd.init();
+		lcd.createMainScreen();
+
 		Network::SSID = ssid;
 		Network::PASSWORD = password;
 		Network::getInstance()->begin("SC-RAIDI8_CCI_CHILLERS",true);
@@ -99,10 +106,6 @@
 		smartboard = new SmartBoard();
 		//smartboard->beginSerialPort(Serial2);
 		smartboard->initializeModulesPointerArray(7);
-
-		GraphicLCD lcd;
-		lcd.init();
-		lcd.createMainScreen();
 	}
 
 	void loop() {
