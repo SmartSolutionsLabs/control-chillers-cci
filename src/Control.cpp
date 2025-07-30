@@ -108,16 +108,16 @@ void Control::handleKey(char key) {
     Serial.printf("Key pressed: %c\n", key);
     switch (key) {
         case 'A':  // Enter
-            proccessEnterKey();
+            this->lcd->toggleNavigationMode();
             break;
         case 'B':  // Back
             proccessBackKey();
             break;
         case 'C':  // Navegar hacia arriba o aumentar valor
-            proccessUpKey();
+            this->lcd->moveNextContent(false);
             break;
         case 'D':  // Navegar hacia abajo o disminuir valor
-            proccessDownKey();
+            this->lcd->moveNextContent(true);
             break;
         case 'E':  // Navegar hacia abajo o disminuir valor
             setProcessChiller(1);
