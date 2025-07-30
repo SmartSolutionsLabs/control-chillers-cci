@@ -98,13 +98,12 @@
 		lcd.init();
 		lcd.createMainScreen();
 
-		Network::SSID = ssid;
-		Network::PASSWORD = password;
-		Network::getInstance()->begin("SC-RAIDI8_CCI_CHILLERS",true);
-		Network::getInstance()->connect();
+		//~ Network::SSID = ssid;
+		//~ Network::PASSWORD = password;
+		//~ Network::getInstance()->begin("SC-RAIDI8_CCI_CHILLERS",true);
+		//~ Network::getInstance()->connect();
 		Wire.begin(5,4);
 		smartboard = new SmartBoard();
-		//smartboard->beginSerialPort(Serial2);
 		smartboard->initializeModulesPointerArray(7);
 	}
 
