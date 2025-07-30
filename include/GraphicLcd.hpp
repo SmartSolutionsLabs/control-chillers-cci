@@ -103,7 +103,7 @@ class GraphicLCD {
 		#ifdef LV_USE_LOG
 			static void logCallback(lv_log_level_t level, const char * buf);
 		#endif
-		
+
 		#ifdef USING_EMULATOR
 			static void keyboardEventHandler(lv_event_t *e);
 		#else
