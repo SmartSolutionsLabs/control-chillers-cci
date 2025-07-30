@@ -44,6 +44,10 @@ void GraphicLCD::init() {
 
 	lv_tick_set_cb(GraphicLCD::getTickCount);
 
+#ifdef LV_USE_LOG
+	lv_log_register_print_cb(GraphicLCD::logCallback);
+#endif
+
 	// Crear framebuffer de 1 bit para 128x64
 	static lv_color_t buf[DSP_HOR_RES * DSP_VER_RES >> 3];
 
@@ -451,6 +455,12 @@ void GraphicLCD::moveNextContent(bool next) {
 	lv_anim_set_deleted_cb(&a_old, lv_obj_delete_anim_completed_cb);
 	lv_anim_start(&a_old);
 }
+
+#ifdef LV_USE_LOG
+void GraphicLCD::logCallback(lv_log_level_t level, const char * buf) {
+	Serial.print(buf);
+}
+#endif
 
 #ifdef USING_EMULATOR
 void GraphicLCD::keyboardEventHandler(lv_event_t *e) {
