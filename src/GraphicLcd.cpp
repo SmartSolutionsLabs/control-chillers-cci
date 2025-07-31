@@ -17,7 +17,11 @@ GraphicLCD::~GraphicLCD() {
 	// Cleanup resources if necessary
 }
 
-GraphicLCD::GraphicLCD() {
+GraphicLCD::GraphicLCD()
+#ifndef USING_EMULATOR
+: Thread("lcd", 1)
+#endif
+{
 	for (unsigned int i = 255; i > 0; --i) {
 		uint8_t b = static_cast<uint8_t>(i);
 		b = (b & 0xF0) >> 4 | (b & 0x0F) << 4; // intercambia mitades
@@ -28,6 +32,14 @@ GraphicLCD::GraphicLCD() {
 	}
 
 	GraphicLCD::bitReverseTable[0] = 0; // Zero = Zero outside loop
+}
+
+void GraphicLCD::run(void* data) {
+	this->createMainScreen();
+
+	while (1) {
+		lv_timer_handler(); // Procesa eventos de LVGL
+	}
 }
 
 void GraphicLCD::init() {
@@ -456,10 +468,12 @@ void GraphicLCD::moveNextContent(bool next) {
 	lv_anim_start(&a_old);
 }
 
-#ifdef LV_USE_LOG
+#ifndef USING_EMULATOR
+	#ifdef LV_USE_LOG
 void GraphicLCD::logCallback(lv_log_level_t level, const char * buf) {
 	Serial.print(buf);
 }
+	#endif
 #endif
 
 #ifdef USING_EMULATOR

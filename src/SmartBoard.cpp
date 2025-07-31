@@ -96,7 +96,7 @@
 		Serial.begin(115200);
 
 		lcd.init();
-		lcd.createMainScreen();
+		lcd.start();
 
 		//~ Network::SSID = ssid;
 		//~ Network::PASSWORD = password;

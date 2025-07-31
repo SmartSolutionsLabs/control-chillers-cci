@@ -10,6 +10,7 @@
 	#include "drivers/sdl/lv_sdl_mousewheel.h"
 	#include "drivers/sdl/lv_sdl_keyboard.h"
 #else // real hardware
+	#include <Thread.hpp>
 	#include <U8g2lib.h>
 #endif
 
@@ -29,7 +30,11 @@ struct MenuOption {
 /**
  * Via to draw and control display.
  */
-class GraphicLCD {
+class GraphicLCD
+#ifndef USING_EMULATOR
+	: public Thread
+#endif
+{
 	private:
 		lv_display_t* lvDisplay;
 		lv_group_t* lvWidgetsGroup;
@@ -79,6 +84,8 @@ class GraphicLCD {
 
 		~GraphicLCD();
 
+		void run(void* data);
+
 		void init();
 
 		void toggleNavigationMode();
@@ -100,16 +107,16 @@ class GraphicLCD {
 		 */
 		void moveNextContent(bool next);
 
-		#ifdef LV_USE_LOG
-			static void logCallback(lv_log_level_t level, const char * buf);
-		#endif
-
 		#ifdef USING_EMULATOR
 			static void keyboardEventHandler(lv_event_t *e);
 		#else
 			static uint32_t getTickCount(void);
 			static void displayFlush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map);
 			static void keypadRead(lv_indev_t* indev_drv, lv_indev_data_t* data);
+
+			#ifdef LV_USE_LOG
+				static void logCallback(lv_log_level_t level, const char * buf);
+			#endif
 		#endif
 	};
 
