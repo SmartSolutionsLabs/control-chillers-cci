@@ -3,8 +3,6 @@
 
 #ifndef USING_EMULATOR
 
-#include <Module.hpp>
-#include "Control.hpp"
 #include <Wire.h>
 
 #define MCP23017_ADDR 0x27  // Dirección I2C del MCP23017
@@ -19,9 +17,8 @@
 
 #define INTFBB 0x0F
 
-class Keypad : public Module {
+class Keypad {
 private:
-    Control * control;
     uint8_t buttonPins[4] = {8, 9, 10, 11};  // Pines de los 4 botones en el MCP23017 (banco B)
     unsigned long lastInterruptTime = 0;     // Variable para el control de tiempo
     const unsigned long debounceDelay = 50;  // Tiempo de debounce en milisegundos
@@ -35,14 +32,10 @@ private:
      const unsigned long repeatInterval = 100;  // Intervalo de repetición (100 ms)
 
      bool lastKeyStates[8] = {true, true, true, true, true, true, true, true};
-     uint32_t timerAutomatic;
 public:
     Keypad(const char * name, int taskCore = 1);
-    void connect(void* data);
-    void run(void* data);
-    void setControl(Control * newControl) {
-        control = newControl;
-    };
+    void init();
+    void update();
 
     void handleInterruptA();  // Método para manejar interrupciones del bloque A
     void handleInterruptB();  // Método para manejar interrupciones del bloque B

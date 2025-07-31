@@ -30,9 +30,7 @@ uint8_t Keypad::readRegister(uint8_t reg) {
     return Wire.available() ? Wire.read() : 0;
 }
 
-void Keypad::connect(void * data) {
-    this->timerAutomatic = millis();
-
+void Keypad::init() {
     // Habilitar el MCP23017 (pines 15 y 41 como salida)
     pinMode(15, OUTPUT);
     pinMode(41, OUTPUT);
@@ -43,10 +41,7 @@ void Keypad::connect(void * data) {
     writeRegister(GPPUB, 0xFF);    // Habilitar resistencias pull-up
 }
 
-void Keypad::run(void* data) {
-    this->iterationDelay = 10 / portTICK_PERIOD_MS;  // Polling cada 10ms
-
-    Serial.println("Keypad task started (Polling mode)...");
+void Keypad::update() {
     uint8_t lastGPIOB = readRegister(GPIOB);  // Estado inicial
 
     while (1) {
