@@ -10,7 +10,6 @@ static Keypad* keypadInstance = nullptr;
 volatile bool interruptFlag = false;  // Bandera de interrupción
 
 Keypad::Keypad() : lastState(0xFF), currentState(0xFF) {
-	Serial.println("Keypad constructor");
 	keypadInstance = this;  // Asignar la instancia actual a la variable estática
 }
 
@@ -40,46 +39,35 @@ void Keypad::init() {
 	writeRegister(GPPUB, 0xFF);    // Habilitar resistencias pull-up
 }
 
-void Keypad::update() {
-	uint8_t lastGPIOB = readRegister(GPIOB);  // Estado inicial
-
-	while (1) {
-		uint8_t currentGPIOB = readRegister(GPIOB);  // Leer estado actual
-
-		// Debug: Mostrar estado binario de los pines (opcional)
-		// Serial.print("GPIOB: 0b");
-		// Serial.println(currentGPIOB, BIN);  // Muestra 6 bits (0-5)
-
-		// Solo procesar si hay cambios
-		if (currentGPIOB != lastGPIOB) {
-			for (int i = 0; i < 8; i++) {  // Procesar 6 botones (bits 0-5)
-				bool lastState = (lastGPIOB >> i) & 1;  // Estado anterior
-				bool currentState = (currentGPIOB >> i) & 1;  // Estado actual
-
-				// Determinar qué tecla corresponde a este bit
-				char key;
-				key = 'A' + i;  // Bits 0-3: A, B, C, D
-
-				// Detectar FALLING (botón presionado)
-				if (lastState && !currentState) {
-					Serial.print("PRESSED: ");
-					Serial.println(key);
-					if (control) control->handleKey(key);
-				}
-
-				// Detectar RISING (botón liberado)
-				else if (!lastState && currentState) {
-					char releasedKey = key + ('J' - 'A');  // A→G, B→H, etc.
-					Serial.print("RELEASED: ");
-					Serial.println(releasedKey);
-					//if (control) control->handleKey(releasedKey);
-				}
-			}
-			lastGPIOB = currentGPIOB;  // Actualizar estado anterior
-		}
-		vTaskDelay(this->iterationDelay);
+bool Keypad::isPressed(uint8_t i) {
+	if (i < 8) {
+		return this->debouncedStates[i];
 	}
+
+	return false;
 }
+
+void Keypad::update() {
+	this->currentState = this->readRegister(GPIOB);
+
+	unsigned long now = millis();
+
+	for (int i = 0; i < 8; ++i) {
+		bool pinNow = (this->currentState >> i) & 1;
+		bool pinLast = (this->lastState >> i) & 1;
+
+		if (pinNow != pinLast) {
+			this->lastDebounceTimes[i] = now;
+		}
+
+		if ((now - this->lastDebounceTimes[i]) > this->debounceDelay) {
+			this->debouncedStates[i] = (pinNow == 0);  // Pulled LOW cuando se presiona
+		}
+	}
+
+	this->lastState = this->currentState;
+}
+
 // ISR para el bloque A
 void IRAM_ATTR Keypad::handleInterruptA() {
 	// Este método maneja las interrupciones del bloque A (pines 0-7)

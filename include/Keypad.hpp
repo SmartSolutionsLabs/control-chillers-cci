@@ -33,12 +33,15 @@ class Keypad {
 
 		uint8_t lastState; //lastGPIOB
 		uint8_t currentState; //currentGPIOB
+		bool debouncedStates[8];
+		unsigned long lastDebounceTimes[8];
 
 		 bool lastKeyStates[8] = {true, true, true, true, true, true, true, true};
 	public:
 		Keypad();
 		void init();
 		void update();
+		bool isPressed(uint8_t i);
 
 		void handleInterruptA();  // Método para manejar interrupciones del bloque A
 		void handleInterruptB();  // Método para manejar interrupciones del bloque B
