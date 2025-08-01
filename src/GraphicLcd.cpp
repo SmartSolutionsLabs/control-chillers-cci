@@ -247,15 +247,17 @@ void GraphicLCD::createMainScreen() {
 
 	this->createContentBox(0); // craeting without offset, I mean centered
 
-	this->logo = lv_img_create(screen_active);
-	lv_image_set_src(this->logo, &imageLogo);
-	lv_obj_set_pos(this->logo, 0, 0);
+	// local logotype because is not used anymore after splash screen
+	lv_obj_t* logo;
+	logo = lv_img_create(screen_active);
+	lv_image_set_src(logo, &imageLogo);
+	lv_obj_set_pos(logo, 0, 0);
 
 	/*Animate in the content after the intro time*/
 	lv_anim_t a;
 	lv_anim_init(&a);
 	lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
-	lv_anim_set_var(&a, this->logo);
+	lv_anim_set_var(&a, logo);
 	lv_anim_set_duration(&a, 2000);
 	lv_anim_set_delay(&a, 1000);
 	lv_anim_set_values(&a, LV_SCALE_NONE, 10);
