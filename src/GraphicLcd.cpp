@@ -48,26 +48,26 @@ void GraphicLCD::init() {
 	static lv_color_t buf[DSP_HOR_RES * DSP_VER_RES >> 3];
 
 	// Crear display LVGL y asignar callbacks
-	this->display = lv_display_create(DSP_HOR_RES, DSP_VER_RES);
-	lv_display_set_color_format(this->display, LV_COLOR_FORMAT_I1);
-	lv_display_set_flush_cb(this->display, GraphicLCD::displayFlush);
+	this->lvDisplay = lv_display_create(DSP_HOR_RES, DSP_VER_RES);
+	lv_display_set_color_format(this->lvDisplay, LV_COLOR_FORMAT_I1);
+	lv_display_set_flush_cb(this->lvDisplay, GraphicLCD::displayFlush);
 
 	// Asignar framebuffer y backend (modo directo)
-	lv_display_set_buffers(this->display, buf, nullptr, sizeof(buf), LV_DISPLAY_RENDER_MODE_FULL);
+	lv_display_set_buffers(this->lvDisplay, buf, nullptr, sizeof(buf), LV_DISPLAY_RENDER_MODE_FULL);
 
 	// Guardar puntero u8g2 como user_data
-	lv_display_set_user_data(this->display, this->u8g2);
+	lv_display_set_user_data(this->lvDisplay, this->u8g2);
 #else
 	#ifndef WIN32
 		setenv("DBUS_FATAL_WARNINGS", "0", 1);
 	#endif
 
-	this->display = lv_sdl_window_create(DSP_HOR_RES, DSP_VER_RES);
+	this->lvDisplay = lv_sdl_window_create(DSP_HOR_RES, DSP_VER_RES);
 	this->lvMouse = lv_sdl_mouse_create();
 	this->lvMouseWheel = lv_sdl_mousewheel_create();
 	this->lvKeyboard = lv_sdl_keyboard_create();
 
-	lv_sdl_window_set_title(this->display, "SSL chiller emulator");
+	lv_sdl_window_set_title(this->lvDisplay, "SSL chiller emulator");
 
 	// Listener of keyboard
 

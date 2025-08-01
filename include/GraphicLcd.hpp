@@ -31,7 +31,7 @@ struct MenuOption {
  */
 class GraphicLCD {
 	private:
-		lv_display_t *display;
+		lv_display_t* lvDisplay;
 
 		#ifdef USING_EMULATOR
 			lv_indev_t* lvTouch;
