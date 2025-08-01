@@ -18,32 +18,32 @@
 #define INTFBB 0x0F
 
 class Keypad {
-private:
-    uint8_t buttonPins[4] = {8, 9, 10, 11};  // Pines de los 4 botones en el MCP23017 (banco B)
-    unsigned long lastInterruptTime = 0;     // Variable para el control de tiempo
-    const unsigned long debounceDelay = 50;  // Tiempo de debounce en milisegundos
+	private:
+		uint8_t buttonPins[4] = {8, 9, 10, 11};  // Pines de los 4 botones en el MCP23017 (banco B)
+		unsigned long lastInterruptTime = 0;     // Variable para el control de tiempo
+		const unsigned long debounceDelay = 50;  // Tiempo de debounce en milisegundos
 
-     // Variables para el control de pulsaciones repetidas
-     bool interruptFlag = false;  // Bandera de interrupción
-     bool keyPressed = false;     // Indica si un pulsador está actualmente presionado
-     char lastKeyPressed = '\0';  // Última tecla presionada
-     unsigned long lastKeyPressTime = 0;  // Tiempo de la última pulsación
-     const unsigned long initialDelay = 750;  // Retardo inicial antes de repetir (750 ms)
-     const unsigned long repeatInterval = 100;  // Intervalo de repetición (100 ms)
+		// Variables para el control de pulsaciones repetidas
+		bool interruptFlag = false;  // Bandera de interrupción
+		bool keyPressed = false;     // Indica si un pulsador está actualmente presionado
+		char lastKeyPressed = '\0';  // Última tecla presionada
+		unsigned long lastKeyPressTime = 0;  // Tiempo de la última pulsación
+		const unsigned long initialDelay = 750;  // Retardo inicial antes de repetir (750 ms)
+		const unsigned long repeatInterval = 100;  // Intervalo de repetición (100 ms)
 
-	uint8_t lastState; //lastGPIOB
-	uint8_t currentState; //currentGPIOB
+		uint8_t lastState; //lastGPIOB
+		uint8_t currentState; //currentGPIOB
 
-     bool lastKeyStates[8] = {true, true, true, true, true, true, true, true};
-public:
-    Keypad();
-    void init();
-    void update();
+		 bool lastKeyStates[8] = {true, true, true, true, true, true, true, true};
+	public:
+		Keypad();
+		void init();
+		void update();
 
-    void handleInterruptA();  // Método para manejar interrupciones del bloque A
-    void handleInterruptB();  // Método para manejar interrupciones del bloque B
-    void writeRegister(uint8_t reg, uint8_t value);
-    uint8_t readRegister(uint8_t reg);
+		void handleInterruptA();  // Método para manejar interrupciones del bloque A
+		void handleInterruptB();  // Método para manejar interrupciones del bloque B
+		void writeRegister(uint8_t reg, uint8_t value);
+		uint8_t readRegister(uint8_t reg);
 };
 
 #endif
