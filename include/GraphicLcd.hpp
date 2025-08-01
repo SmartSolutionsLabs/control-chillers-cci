@@ -10,6 +10,7 @@
 	#include "drivers/sdl/lv_sdl_mousewheel.h"
 	#include "drivers/sdl/lv_sdl_keyboard.h"
 #else // real hardware
+	#include "Keypad.hpp"
 	#include <Thread.hpp>
 	#include <U8g2lib.h>
 #endif
@@ -47,6 +48,8 @@ class GraphicLCD
 		#else
 			U8G2_ST7920_128X64_F_SW_SPI* u8g2; //(U8G2_R0, 27, 26, 25, 14);
 			lv_indev_t* lvKeypad;
+
+			static Keypad keypad;
 		#endif
 
 		Screen currentScreen = HOME;

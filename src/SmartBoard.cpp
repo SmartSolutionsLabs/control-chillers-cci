@@ -25,13 +25,8 @@
 		this->modulesPointer[0] = new Control("ctl");
 		globalControl = static_cast<Control*>(this->modulesPointer[0]);
 		this->modulesPointer[0]->connect(nullptr);
-		static_cast<Control*>(this->modulesPointer[0])->setGraphicLCD(&lcd);
 
-
-		this->modulesPointer[1] = new Keypad("keypad");
-		this->modulesPointer[1]->connect(&Wire);
-		static_cast<Keypad*>(this->modulesPointer[1])->setControl(static_cast<Control*>(this->modulesPointer[0])); //cochina zoo
-		this->modulesPointer[1]->start();
+		// Pointer 1 was Keypad and now is an empty slot
 
 		// Pointer 2 was Graphic LCD and now is an empty slot
 
