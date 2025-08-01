@@ -67,11 +67,6 @@ public:
 
     void connect(void *data) override;
     void run(void *data) override;
-    void handleKey(char key);
-
-    void setGraphicLCD(GraphicLCD *newlcd) {
-        this->lcd = newlcd;
-    }
 
 	void setChiller(uint8_t index, Chiller *newChiller);
 	void setPump(uint8_t index, Pump *newPump);

@@ -102,42 +102,6 @@ void Control::run(void *data) {
     }
 }
 
-void Control::handleKey(char key) {
-    Serial.printf("Key pressed: %c\n", key);
-    switch (key) {
-        case 'A':  // Enter
-            this->lcd->toggleNavigationMode();
-            break;
-        case 'B':  // Back
-            proccessBackKey();
-            break;
-        case 'C':  // Navegar hacia arriba o aumentar valor
-            this->lcd->moveNextContent(false);
-            break;
-        case 'D':  // Navegar hacia abajo o disminuir valor
-            this->lcd->moveNextContent(true);
-            break;
-        case 'E':  // Navegar hacia abajo o disminuir valor
-            setProcessChiller(1);
-            break;
-        case 'F':  // Navegar hacia abajo o disminuir valor
-            setProcessChiller(2);
-            break;
-        //case 'G':  // Navegar hacia abajo o disminuir valor
-        //    setProcessChiller(2);
-        //    break;
-
-        case 'N':  // Navegar hacia abajo o disminuir valor
-            setProcessChiller(0);
-            break;
-        case 'O':  // Navegar hacia abajo o disminuir valor
-            setProcessChiller(0);
-            break;
-    }
-    Serial.printf("currentScreen : %d, ScreenSelected: %d, currentOption: %d, optionSelected: %d\n",
-                  this->currentScreen, this->ScreenSelected, this->currentOption, this->optionSelected);
-}
-
 void Control::proccessEnterKey(){
     if(!this->ScreenSelected && !this->optionSelected && this->currentScreen != HOME){
         this->ScreenSelected = true;
