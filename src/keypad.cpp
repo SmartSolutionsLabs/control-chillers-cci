@@ -9,7 +9,7 @@ static Keypad* keypadInstance = nullptr;
 // Variable para almacenar el estado del pulsador
 volatile bool interruptFlag = false;  // Bandera de interrupción
 
-Keypad::Keypad(const char * name, int taskCore) : Module(name, taskCore) {
+Keypad::Keypad() : lastState(0xFF), currentState(0xFF) {
 	Serial.println("Keypad constructor");
 	keypadInstance = this;  // Asignar la instancia actual a la variable estática
 }

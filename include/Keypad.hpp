@@ -31,9 +31,12 @@ private:
      const unsigned long initialDelay = 750;  // Retardo inicial antes de repetir (750 ms)
      const unsigned long repeatInterval = 100;  // Intervalo de repetición (100 ms)
 
+	uint8_t lastState; //lastGPIOB
+	uint8_t currentState; //currentGPIOB
+
      bool lastKeyStates[8] = {true, true, true, true, true, true, true, true};
 public:
-    Keypad(const char * name, int taskCore = 1);
+    Keypad();
     void init();
     void update();
 
