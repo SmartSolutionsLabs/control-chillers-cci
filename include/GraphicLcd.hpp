@@ -81,6 +81,16 @@ class GraphicLCD
 		void inline animateMenuItem(bool alreadyAnimated = false);
 
 	public:
+		/**
+		 * Explicit map of hardware.
+		 */
+		static constexpr lv_key_t keyMap[KEYPAD_KEYS_QUANTITY] = {
+			LV_KEY_ENTER, // tecla física 0
+			LV_KEY_ESC,   // tecla física 1
+			LV_KEY_PREV,  // tecla física 2
+			LV_KEY_NEXT   // tecla física 3
+		};
+
 		static uint8_t bitReverseTable[256]; // but must be precomputed to make it constant
 
 		GraphicLCD();

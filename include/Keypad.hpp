@@ -17,9 +17,11 @@
 
 #define INTFBB 0x0F
 
+#define KEYPAD_KEYS_QUANTITY 4
+
 class Keypad {
 	private:
-		uint8_t buttonPins[4] = {8, 9, 10, 11};  // Pines de los 4 botones en el MCP23017 (banco B)
+		uint8_t buttonPins[KEYPAD_KEYS_QUANTITY] = {8, 9, 10, 11};  // Pines de los 4 botones en el MCP23017 (banco B)
 		unsigned long lastInterruptTime = 0;     // Variable para el control de tiempo
 		const unsigned long debounceDelay = 50;  // Tiempo de debounce en milisegundos
 

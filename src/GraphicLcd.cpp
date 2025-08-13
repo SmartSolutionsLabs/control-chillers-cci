@@ -13,6 +13,7 @@ MenuOption GraphicLCD::menuOptions[ABOUT + 1] = {
 
 uint8_t GraphicLCD::bitReverseTable[256] = {};
 Keypad GraphicLCD::keypad;
+lv_key_t GraphicLCD::keyMap;
 
 GraphicLCD::~GraphicLCD() {
 	// Cleanup resources if necessary
@@ -531,10 +532,10 @@ void GraphicLCD::keypadRead(lv_indev_t* indev_drv, lv_indev_data_t* data) {
 
 	static uint8_t lastPressedKey = 0xFF;
 
-	for (uint8_t i = 0; i < 6; ++i) {  // Supongamos botones 0-5 activos
-		if (keypad.isPressed(i)) {
+	for (uint8_t i = 0; i < KEYPAD_KEYS_QUANTITY; ++i) {  // Supongamos botones 0-5 activos
+		if (GraphicLCD::keypad.isPressed(i)) {
 			data->state = LV_INDEV_STATE_PR;
-			data->key = LV_KEY_NEXT + i;  // puedes mapear según tu lógica
+			data->key = GraphicLCD::keyMap[i];  // puedes mapear según tu lógica
 			lastPressedKey = i;
 			return;
 		}
@@ -542,7 +543,7 @@ void GraphicLCD::keypadRead(lv_indev_t* indev_drv, lv_indev_data_t* data) {
 
 	// Ningún botón presionado
 	data->state = LV_INDEV_STATE_REL;
-	data->key = LV_KEY_NEXT + lastPressedKey;
+	data->key = lastPressedKey;
 }
 
 uint32_t GraphicLCD::getTickCount() {
